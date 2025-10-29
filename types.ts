@@ -3,6 +3,7 @@ export interface Brand {
   id: string;
   name: string;
   color: string;
+  logoUrl?: string; // URL to brand logo image
   guidelines: {
     toneOfVoice: string;
     keyMessaging: string;

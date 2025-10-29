@@ -220,7 +220,7 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
                       type="text"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      placeholder="e.g., Q1 2024 competitor research"
+                      placeholder="e.g., Q1 2024 social media campaign"
                       className="w-full bg-gray-900 text-white border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-primary"
                     />
                   </div>

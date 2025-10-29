@@ -156,7 +156,16 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
               </svg>
               Back to Brands
             </button>
-            <h1 className="text-3xl font-bold text-white">{brand.name} Asset Library</h1>
+            <div className="flex items-center gap-3">
+              {brand.logoUrl && (
+                <img
+                  src={brand.logoUrl}
+                  alt={`${brand.name} logo`}
+                  className="h-10 w-10 object-contain rounded"
+                />
+              )}
+              <h1 className="text-3xl font-bold text-white">{brand.name} Asset Library</h1>
+            </div>
           </div>
         </div>
 

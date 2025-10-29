@@ -195,7 +195,7 @@ const BrandAssetManager: React.FC<BrandAssetManagerProps> = ({ onBack }) => {
                     )}
                     {stats.assetsByCategory['competitor-ads'] > 0 && (
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-400">🎯 Competitor Ads</span>
+                        <span className="text-gray-400">🎯 Ad Examples</span>
                         <span className="text-white font-semibold">
                           {stats.assetsByCategory['competitor-ads']}
                         </span>
