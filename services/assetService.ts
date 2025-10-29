@@ -107,10 +107,14 @@ export const createAsset = async (
   };
 
   const docRef = doc(db, COLLECTION_NAME, assetId);
-  await setDoc(docRef, {
+  const firestoreData = {
     ...asset,
     uploadedAt: Timestamp.now(),
-  });
+  };
+
+  console.log('Creating asset in Firestore:', assetId, firestoreData);
+  await setDoc(docRef, firestoreData);
+  console.log('Asset created successfully:', assetId);
 
   return asset;
 };
@@ -190,6 +194,7 @@ export const getAssetsByCategory = async (
   category: AssetCategory
 ): Promise<BrandAsset[]> => {
   try {
+    console.log(`Fetching assets for ${brandId}/${category}...`);
     const q = query(
       collection(db, COLLECTION_NAME),
       where('brandId', '==', brandId),
@@ -198,13 +203,16 @@ export const getAssetsByCategory = async (
     );
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => {
+    const assets = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,
         uploadedAt: data.uploadedAt?.toDate(),
       } as BrandAsset;
     });
+
+    console.log(`Found ${assets.length} assets for ${brandId}/${category}`);
+    return assets;
   } catch (error) {
     console.error(`Error fetching assets for ${brandId}/${category}:`, error);
     return [];

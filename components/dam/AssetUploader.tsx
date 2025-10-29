@@ -80,10 +80,16 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
   const handleUpload = async () => {
     if (selectedFiles.length === 0) return;
 
-    const metadata: AssetMetadata = {
-      description: description.trim() || undefined,
-      tags: tags ? tags.split(',').map((t) => t.trim()).filter(Boolean) : undefined,
-    };
+    // Build metadata without undefined values
+    const metadata: AssetMetadata = {};
+
+    if (description.trim()) {
+      metadata.description = description.trim();
+    }
+
+    if (tags.trim()) {
+      metadata.tags = tags.split(',').map((t) => t.trim()).filter(Boolean);
+    }
 
     try {
       await uploadAssets(brandId, category, selectedFiles, metadata);
@@ -93,6 +99,7 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
       }, 1500);
     } catch (error) {
       console.error('Upload failed:', error);
+      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
