@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import type { Brand } from '../types';
+import type { Brand, BrandAssetStats } from '../types';
 import { hasBrandGuideline } from '../services/firebaseService';
+import { getBrandAssetStats } from '../services/assetService';
 
 interface BrandSelectorProps {
   brands: Brand[];
@@ -9,21 +10,31 @@ interface BrandSelectorProps {
 
 const BrandSelector: React.FC<BrandSelectorProps> = ({ brands, onSelectBrand }) => {
   const [guidelinesStatus, setGuidelinesStatus] = useState<Record<string, boolean>>({});
+  const [assetStats, setAssetStats] = useState<Record<string, BrandAssetStats>>({});
 
   useEffect(() => {
-    const checkGuidelines = async () => {
+    const loadBrandData = async () => {
       const statusMap: Record<string, boolean> = {};
+      const statsMap: Record<string, BrandAssetStats> = {};
+
       for (const brand of brands) {
         try {
+          // Check old guidelines
           statusMap[brand.id] = await hasBrandGuideline(brand.id);
+
+          // Load asset stats
+          const stats = await getBrandAssetStats(brand.id);
+          statsMap[brand.id] = stats;
         } catch (error) {
           statusMap[brand.id] = false;
         }
       }
+
       setGuidelinesStatus(statusMap);
+      setAssetStats(statsMap);
     };
 
-    checkGuidelines();
+    loadBrandData();
   }, [brands]);
 
   return (
@@ -32,6 +43,9 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({ brands, onSelectBrand }) 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {brands.map((brand) => {
           const hasGuidelines = guidelinesStatus[brand.id] || false;
+          const stats = assetStats[brand.id];
+          const hasAssets = stats && stats.totalAssets > 0;
+
           return (
             <button
               key={brand.id}
@@ -39,9 +53,29 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({ brands, onSelectBrand }) 
               className="group relative p-6 text-left bg-gray-800 rounded-lg border border-gray-700 hover:border-brand-primary transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-brand-primary"
               aria-label={`Select brand: ${brand.name}`}
             >
-              {/* PDF Status Indicator */}
-              <div className="absolute top-3 right-3">
-                {hasGuidelines ? (
+              {/* Status Indicators */}
+              <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                {/* Asset Count */}
+                {hasAssets && (
+                  <span className="flex items-center gap-1 text-xs text-blue-400" title="Brand assets">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m9 12 2 2 4-4"></path>
+                    </svg>
+                    {stats.totalAssets} assets
+                  </span>
+                )}
+                {/* Old PDF Guidelines */}
+                {hasGuidelines && (
                   <span className="flex items-center gap-1 text-xs text-green-400" title="PDF guidelines loaded">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -56,11 +90,7 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({ brands, onSelectBrand }) 
                     >
                       <path d="m9 12 2 2 4-4"></path>
                     </svg>
-                    PDF
-                  </span>
-                ) : (
-                  <span className="text-xs text-gray-600" title="No PDF guidelines">
-                    No PDF
+                    Old PDF
                   </span>
                 )}
               </div>
