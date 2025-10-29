@@ -176,6 +176,106 @@ export const uploadAsset = async (
 };
 
 /**
+ * Create text-based copy asset (no file upload)
+ */
+export const createTextCopyAsset = async (
+  brandId: string,
+  title: string,
+  content: string,
+  metadata: AssetMetadata,
+  uploadedBy: string = 'admin'
+): Promise<BrandAsset> => {
+  try {
+    const assetId = generateAssetId();
+    const sanitizedMetadata = sanitizeMetadata({
+      ...metadata,
+      description: content, // Store the full text in description
+    });
+
+    console.log('📝 Creating text copy asset:', title);
+    console.log('   Asset ID:', assetId);
+    console.log('   Brand ID:', brandId);
+    console.log('   Content length:', content.length);
+
+    const asset: BrandAsset = {
+      id: assetId,
+      brandId,
+      category: 'reference-copy',
+      fileName: title,
+      fileUrl: '', // No file URL for text assets
+      fileType: 'text/plain',
+      fileSize: new Blob([content]).size, // Calculate size from text
+      uploadedBy,
+      uploadedAt: new Date(),
+      metadata: sanitizedMetadata,
+    };
+
+    const docRef = doc(db, COLLECTION_NAME, assetId);
+    const firestoreData = {
+      id: asset.id,
+      brandId: asset.brandId,
+      category: asset.category,
+      fileName: asset.fileName,
+      fileUrl: asset.fileUrl,
+      fileType: asset.fileType,
+      fileSize: asset.fileSize,
+      uploadedBy: asset.uploadedBy,
+      uploadedAt: Timestamp.now(),
+      metadata: sanitizedMetadata,
+      isTextAsset: true, // Flag to identify text-based assets
+    };
+
+    console.log('💾 Saving text copy to Firestore...');
+    await setDoc(docRef, firestoreData);
+    console.log('✅ Text copy asset created successfully!');
+
+    return asset;
+  } catch (error) {
+    console.error('❌ Error creating text copy asset:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update text copy content
+ */
+export const updateTextCopyContent = async (
+  assetId: string,
+  title: string,
+  content: string,
+  metadata: Partial<AssetMetadata>
+): Promise<void> => {
+  try {
+    const docRef = doc(db, COLLECTION_NAME, assetId);
+    const asset = await getAsset(assetId);
+
+    if (!asset) {
+      throw new Error('Asset not found');
+    }
+
+    const updatedMetadata = sanitizeMetadata({
+      ...asset.metadata,
+      ...metadata,
+      description: content, // Update content
+    });
+
+    await setDoc(docRef, {
+      ...asset,
+      fileName: title,
+      fileSize: new Blob([content]).size,
+      metadata: updatedMetadata,
+      uploadedAt: Timestamp.fromDate(asset.uploadedAt),
+      isTextAsset: true,
+    });
+
+    console.log('✅ Text copy updated:', assetId);
+  } catch (error) {
+    console.error(`Error updating text copy ${assetId}:`, error);
+    throw error;
+  }
+};
+
+/**
  * Get asset by ID
  */
 export const getAsset = async (assetId: string): Promise<BrandAsset | null> => {
