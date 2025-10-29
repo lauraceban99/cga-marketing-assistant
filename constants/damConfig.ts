@@ -9,12 +9,12 @@ export const ASSET_CATEGORY_CONFIG: Record<AssetCategory, AssetCategoryConfig> =
     icon: '📋',
     description: 'Brand books, style guides, voice & tone documents',
     acceptedTypes: ['application/pdf', 'text/plain'],
-    maxSize: 10 * 1024 * 1024, // 10MB
+    maxSize: 20 * 1024 * 1024, // 20MB
   },
   'competitor-ads': {
-    label: 'Competitor Ad Examples',
+    label: 'Ad Examples / Creatives',
     icon: '🎯',
-    description: 'Competitor ads for reference and inspiration',
+    description: 'Ad examples and creatives for reference and inspiration',
     acceptedTypes: ['image/*', 'application/pdf', 'video/mp4', 'video/quicktime'],
     maxSize: 20 * 1024 * 1024, // 20MB
   },

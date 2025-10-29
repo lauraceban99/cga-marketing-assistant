@@ -5,12 +5,11 @@ import BrandSelector from './components/BrandSelector';
 import TaskSelector from './components/TaskSelector';
 import Generator from './components/Generator';
 import ResultsViewer from './components/AdCreativeViewer';
-import BrandGuidelinesManager from './components/admin/BrandGuidelinesManager';
 import BrandAssetManager from './components/dam/BrandAssetManager';
 import { BRANDS } from './constants';
 import type { Brand, TaskType, GeneratedCreative } from './types';
 
-type AppState = 'brand_selection' | 'task_selection' | 'generator' | 'results' | 'admin' | 'dam';
+type AppState = 'brand_selection' | 'task_selection' | 'generator' | 'results' | 'dam';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('brand_selection');
@@ -65,8 +64,6 @@ const App: React.FC = () => {
                   initialPrompt={lastPrompt}
                   onRegenerate={handleAssetGenerated}
                 />;
-      case 'admin':
-        return <BrandGuidelinesManager onBack={() => handleBackTo('brand_selection')} />;
       case 'dam':
         return <BrandAssetManager onBack={() => handleBackTo('brand_selection')} />;
       case 'brand_selection':
@@ -79,20 +76,14 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-900 text-white font-sans px-4 pb-10">
       <Header />
 
-      {/* Admin Access Buttons (only on brand selection page) */}
+      {/* Admin Access Button (only on brand selection page) */}
       {appState === 'brand_selection' && (
-        <div className="max-w-4xl mx-auto mb-4 flex gap-3">
+        <div className="max-w-4xl mx-auto mb-4">
           <button
             onClick={() => setAppState('dam')}
             className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg border border-gray-700 hover:border-brand-primary hover:text-white transition-colors text-sm"
           >
             📁 Manage Brand Assets
-          </button>
-          <button
-            onClick={() => setAppState('admin')}
-            className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg border border-gray-700 hover:border-brand-primary hover:text-white transition-colors text-sm"
-          >
-            ⚙️ Brand Guidelines (Old)
           </button>
         </div>
       )}

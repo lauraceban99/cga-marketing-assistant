@@ -55,6 +55,31 @@ export const uploadAssetFile = (
 };
 
 /**
+ * Remove undefined values from metadata
+ */
+function sanitizeMetadata(metadata: AssetMetadata): AssetMetadata {
+  const sanitized: AssetMetadata = {};
+
+  if (metadata.description !== undefined && metadata.description !== '') {
+    sanitized.description = metadata.description;
+  }
+  if (metadata.tags !== undefined && metadata.tags.length > 0) {
+    sanitized.tags = metadata.tags;
+  }
+  if (metadata.sourceUrl !== undefined && metadata.sourceUrl !== '') {
+    sanitized.sourceUrl = metadata.sourceUrl;
+  }
+  if (metadata.campaignName !== undefined && metadata.campaignName !== '') {
+    sanitized.campaignName = metadata.campaignName;
+  }
+  if (metadata.usageRights !== undefined && metadata.usageRights !== '') {
+    sanitized.usageRights = metadata.usageRights;
+  }
+
+  return sanitized;
+}
+
+/**
  * Create asset document in Firestore
  */
 export const createAsset = async (
@@ -66,6 +91,8 @@ export const createAsset = async (
   uploadedBy: string = 'admin'
 ): Promise<BrandAsset> => {
   const assetId = generateAssetId();
+  const sanitizedMetadata = sanitizeMetadata(metadata);
+
   const asset: BrandAsset = {
     id: assetId,
     brandId,
@@ -76,7 +103,7 @@ export const createAsset = async (
     fileSize: file.size,
     uploadedBy,
     uploadedAt: new Date(),
-    metadata,
+    metadata: sanitizedMetadata,
   };
 
   const docRef = doc(db, COLLECTION_NAME, assetId);
@@ -223,12 +250,14 @@ export const updateAssetMetadata = async (
       throw new Error('Asset not found');
     }
 
+    const updatedMetadata = sanitizeMetadata({
+      ...asset.metadata,
+      ...metadata,
+    });
+
     await setDoc(docRef, {
       ...asset,
-      metadata: {
-        ...asset.metadata,
-        ...metadata,
-      },
+      metadata: updatedMetadata,
       uploadedAt: Timestamp.fromDate(asset.uploadedAt),
     });
   } catch (error) {

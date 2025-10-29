@@ -4,10 +4,11 @@ import type { BrandAsset } from '../../types';
 interface AssetCardProps {
   asset: BrandAsset;
   onDelete: (assetId: string) => void;
+  onClick?: (asset: BrandAsset) => void;
   mode?: 'grid' | 'list';
 }
 
-const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, mode = 'grid' }) => {
+const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, onClick, mode = 'grid' }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -55,23 +56,29 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, mode = 'grid' })
       <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">
         <div className="flex items-center gap-4">
           {/* Icon/Thumbnail */}
-          <div className="flex-shrink-0">
+          <div
+            className="flex-shrink-0 cursor-pointer"
+            onClick={() => onClick?.(asset)}
+          >
             {isImage && asset.thumbnailUrl ? (
               <img
                 src={asset.thumbnailUrl || asset.fileUrl}
                 alt={asset.fileName}
-                className="w-12 h-12 object-cover rounded"
+                className="w-12 h-12 object-cover rounded hover:opacity-80 transition-opacity"
               />
             ) : (
-              <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center text-2xl">
+              <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center text-2xl hover:bg-gray-600 transition-colors">
                 {getFileIcon()}
               </div>
             )}
           </div>
 
           {/* Info */}
-          <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium text-white truncate">{asset.fileName}</h4>
+          <div
+            className="flex-1 min-w-0 cursor-pointer"
+            onClick={() => onClick?.(asset)}
+          >
+            <h4 className="text-sm font-medium text-white truncate hover:text-brand-primary transition-colors">{asset.fileName}</h4>
             <p className="text-xs text-gray-400 mt-1">
               {formatFileSize(asset.fileSize)} • {formatDate(asset.uploadedAt)}
             </p>
@@ -136,7 +143,10 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, mode = 'grid' })
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 transition-all overflow-hidden">
       {/* Preview */}
-      <div className="aspect-square bg-gray-900 flex items-center justify-center overflow-hidden">
+      <div
+        className="aspect-square bg-gray-900 flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+        onClick={() => onClick?.(asset)}
+      >
         {isImage ? (
           <img
             src={asset.thumbnailUrl || asset.fileUrl}
@@ -150,7 +160,11 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, mode = 'grid' })
 
       {/* Info */}
       <div className="p-3">
-        <h4 className="text-sm font-medium text-white truncate" title={asset.fileName}>
+        <h4
+          className="text-sm font-medium text-white truncate cursor-pointer hover:text-brand-primary transition-colors"
+          title={asset.fileName}
+          onClick={() => onClick?.(asset)}
+        >
           {asset.fileName}
         </h4>
         <p className="text-xs text-gray-400 mt-1">
