@@ -86,10 +86,17 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
     }
   };
 
-  const handleUploadSuccess = () => {
+  const handleUploadSuccess = async () => {
+    console.log('🔄 Upload success - refreshing assets...');
     setShowUploader(false);
-    refresh();
-    refreshStats();
+
+    // Force refresh assets after a short delay to ensure Firestore has propagated
+    setTimeout(async () => {
+      console.log('🔄 Calling refresh()...');
+      await refresh();
+      await refreshStats();
+      console.log('✅ Refresh complete');
+    }, 1000);
   };
 
   const handleEditMetadata = async (assetId: string, metadata: AssetMetadata) => {

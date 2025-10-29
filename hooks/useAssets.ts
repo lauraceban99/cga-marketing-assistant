@@ -54,7 +54,10 @@ export const useAssetsByCategory = (
   const [error, setError] = useState<string | null>(null);
 
   const refresh = async () => {
+    console.log('🔄 useAssetsByCategory refresh called:', { brandId, category });
+
     if (!brandId || !category) {
+      console.log('⚠️ No brandId or category, clearing assets');
       setAssets([]);
       return;
     }
@@ -62,9 +65,13 @@ export const useAssetsByCategory = (
     setLoading(true);
     setError(null);
     try {
+      console.log('📡 Fetching assets from Firestore...');
       const data = await getAssetsByCategory(brandId, category);
+      console.log('✅ Received', data.length, 'assets from Firestore');
+      console.log('   Assets:', data.map(a => a.fileName));
       setAssets(data);
     } catch (err) {
+      console.error('❌ Error fetching assets:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch assets');
     } finally {
       setLoading(false);
@@ -72,7 +79,9 @@ export const useAssetsByCategory = (
   };
 
   useEffect(() => {
+    console.log('🎯 useAssetsByCategory effect triggered');
     refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brandId, category]);
 
   return { assets, loading, error, refresh };

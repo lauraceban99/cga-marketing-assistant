@@ -230,27 +230,39 @@ export const getAssetsByCategory = async (
   category: AssetCategory
 ): Promise<BrandAsset[]> => {
   try {
-    console.log(`Fetching assets for ${brandId}/${category}...`);
+    console.log(`📡 Querying Firestore for assets:`);
+    console.log(`   Collection: ${COLLECTION_NAME}`);
+    console.log(`   brandId: ${brandId}`);
+    console.log(`   category: ${category}`);
+
     const q = query(
       collection(db, COLLECTION_NAME),
       where('brandId', '==', brandId),
       where('category', '==', category),
       orderBy('uploadedAt', 'desc')
     );
+
+    console.log('🔍 Executing query...');
     const querySnapshot = await getDocs(q);
+    console.log(`📊 Query returned ${querySnapshot.docs.length} documents`);
 
     const assets = querySnapshot.docs.map((doc) => {
       const data = doc.data();
+      console.log(`   - Document ${doc.id}:`, data.fileName);
       return {
         ...data,
         uploadedAt: data.uploadedAt?.toDate(),
       } as BrandAsset;
     });
 
-    console.log(`Found ${assets.length} assets for ${brandId}/${category}`);
+    console.log(`✅ Returning ${assets.length} assets for ${brandId}/${category}`);
     return assets;
   } catch (error) {
-    console.error(`Error fetching assets for ${brandId}/${category}:`, error);
+    console.error(`❌ Error querying Firestore:`, error);
+    if (error instanceof Error) {
+      console.error('   Error message:', error.message);
+      console.error('   Error name:', error.name);
+    }
     return [];
   }
 };
