@@ -25,6 +25,10 @@ const generateText = async (prompt: string): Promise<string> => {
 
 const generateImages = async (prompt: string, count: number): Promise<string[]> => {
     try {
+        console.log('🖼️ Generating images with Imagen...');
+        console.log('   Prompt:', prompt.substring(0, 200) + '...');
+        console.log('   Count:', count);
+
         const response = await ai.models.generateImages({
             model: 'imagen-4.0-generate-001',
             prompt: prompt,
@@ -34,10 +38,21 @@ const generateImages = async (prompt: string, count: number): Promise<string[]> 
                 aspectRatio: '1:1',
             },
         });
+
+        console.log('✅ Image generation successful!');
+        console.log('   Generated:', response.generatedImages.length, 'images');
+
         return response.generatedImages.map(img => img.image.imageBytes);
-    } catch (error) {
-        console.error("Error generating images:", error);
-        throw new Error("Failed to generate images.");
+    } catch (error: any) {
+        console.error("❌ Error generating images:", error);
+        console.error("   Error name:", error?.name);
+        console.error("   Error message:", error?.message);
+        console.error("   Error stack:", error?.stack);
+        console.error("   Full error object:", JSON.stringify(error, null, 2));
+
+        // Return detailed error message
+        const errorMessage = error?.message || error?.toString() || "Unknown error";
+        throw new Error(`Image generation failed: ${errorMessage}. Check console for details.`);
     }
 }
 
@@ -55,20 +70,41 @@ const buildAssetPrompt = (brand: Brand, taskType: TaskType, userPrompt: string):
     switch (taskType) {
         case 'ad':
             taskInstructions = `
-                **Task:** Generate a complete ad creative.
+                **Task:** Generate Facebook/Meta ad copy that STRICTLY follows platform specifications.
                 **User Request:** "${userPrompt}"
-                **Instructions:**
-                1. Analyze the user request to understand the goal, audience, and any specific details.
-                2. Adhering strictly to the brand guidelines, write compelling ad copy.
-                3. Format the copy into three distinct parts:
-                   - **Headline:** A short, punchy headline.
-                   - **Primary Text:** The main body of the ad.
-                   - **Call to Action:** A clear and concise call to action.
-                4. Use Markdown for formatting, like this:
-                   **Headline:** [Your Headline Here]
-                   **Primary Text:** [Your Primary Text Here]
-                   **Call to Action:** [Your CTA Here]
-                5. Provide ONLY the formatted ad copy.
+
+                **CRITICAL REQUIREMENTS - DO NOT EXCEED THESE LIMITS:**
+                1. **Headline:** MAXIMUM 40 characters (including spaces)
+                   - Emotional hook, NOT literal description
+                   - Examples: "Is Your Child Ready for Tomorrow?", "Education That Adapts to Them"
+                   - NO exclamation marks or hashtags
+
+                2. **Primary Text:** STRICT 90-160 word limit
+                   - Start with an engaging hook: "What if...", "Imagine...", "Is your child..."
+                   - Focus on parent emotions: confidence, belonging, future readiness
+                   - Conversational, warm, human tone
+                   - NO corporate jargon like "innovative", "world-class", "cutting-edge"
+                   - NO exclamation marks or hashtags
+                   - Talk TO parents, not AT them
+                   - Use natural language, like speaking to a friend
+
+                3. **Call to Action:** 3-5 words maximum
+                   - Examples: "Join Our Open Day", "Register Today", "Learn More Now"
+
+                **TONE REQUIREMENTS:**
+                - Warm, conversational, parent-to-parent
+                - Focus on transformation and belonging
+                - Use "you" and "your child"
+                - NO marketing speak or buzzwords
+
+                **FORMAT (use exactly this structure):**
+                **Headline:** [Max 40 chars]
+
+                **Primary Text:** [90-160 words]
+
+                **Call to Action:** [3-5 words]
+
+                **VALIDATION:** After writing, COUNT your characters and words. If headline exceeds 40 characters or primary text exceeds 160 words, REWRITE to fit limits. This is NON-NEGOTIABLE.
             `;
             break;
         case 'copy':
@@ -92,9 +128,91 @@ const buildAssetPrompt = (brand: Brand, taskType: TaskType, userPrompt: string):
     return `You are an expert marketing assistant for Crimson Academies. Your task is to generate on-brand marketing assets. Here are the details:\n\n${brandGuidelines}\n\n${taskInstructions}`;
 };
 
+/**
+ * Validate and parse ad copy to ensure it meets Facebook specs
+ */
+const validateAndParseAdCopy = (text: string): { isValid: boolean; parsed: any; errors: string[] } => {
+    const errors: string[] = [];
+
+    // Extract sections using regex
+    const headlineMatch = text.match(/\*\*Headline:\*\*\s*(.+?)(?:\n|$)/i);
+    const primaryMatch = text.match(/\*\*Primary Text:\*\*\s*([\s\S]+?)(?:\n\*\*Call to Action:\*\*|\*\*CTA:\*\*|$)/i);
+    const ctaMatch = text.match(/\*\*(?:Call to Action|CTA):\*\*\s*(.+?)(?:\n|$)/i);
+
+    const headline = headlineMatch ? headlineMatch[1].trim() : '';
+    const primaryText = primaryMatch ? primaryMatch[1].trim() : '';
+    const cta = ctaMatch ? ctaMatch[1].trim() : '';
+
+    // Validate headline (max 40 chars)
+    if (headline.length > 40) {
+        errors.push(`Headline too long: ${headline.length} chars (max 40). Headline: "${headline}"`);
+    }
+    if (headline.length === 0) {
+        errors.push('Headline is missing');
+    }
+
+    // Validate primary text (90-160 words)
+    const wordCount = primaryText.split(/\s+/).filter(w => w.length > 0).length;
+    if (wordCount < 90) {
+        errors.push(`Primary text too short: ${wordCount} words (min 90)`);
+    }
+    if (wordCount > 160) {
+        errors.push(`Primary text too long: ${wordCount} words (max 160)`);
+    }
+    if (primaryText.length === 0) {
+        errors.push('Primary text is missing');
+    }
+
+    // Validate CTA (3-5 words)
+    const ctaWordCount = cta.split(/\s+/).filter(w => w.length > 0).length;
+    if (ctaWordCount < 3 || ctaWordCount > 5) {
+        errors.push(`CTA word count invalid: ${ctaWordCount} words (should be 3-5)`);
+    }
+    if (cta.length === 0) {
+        errors.push('CTA is missing');
+    }
+
+    console.log('📊 Ad Copy Validation:');
+    console.log(`   Headline: "${headline}" (${headline.length} chars)`);
+    console.log(`   Primary Text: ${wordCount} words`);
+    console.log(`   CTA: "${cta}" (${ctaWordCount} words)`);
+    console.log(`   Errors: ${errors.length > 0 ? errors.join(', ') : 'None'}`);
+
+    return {
+        isValid: errors.length === 0,
+        parsed: { headline, primaryText, cta, headlineLength: headline.length, wordCount, ctaWordCount },
+        errors
+    };
+};
+
 export const generateAsset = async (brand: Brand, taskType: TaskType, userPrompt: string): Promise<{ text: string; images: string[] }> => {
     const prompt = buildAssetPrompt(brand, taskType, userPrompt);
-    const text = await generateText(prompt);
+    let text = await generateText(prompt);
+
+    // Validate ad copy for Facebook specs
+    if (taskType === 'ad') {
+        console.log('🔍 Validating ad copy against Facebook specs...');
+        const validation = validateAndParseAdCopy(text);
+
+        if (!validation.isValid) {
+            console.warn('⚠️ Generated ad copy does not meet specs. Errors:', validation.errors);
+            console.log('🔄 Attempting to regenerate with stricter constraints...');
+
+            // Try one more time with even stricter instructions
+            const retryPrompt = prompt + `\n\n**CRITICAL:** The previous attempt failed validation. ${validation.errors.join('. ')}. You MUST fix these issues. Generate again with STRICT adherence to limits.`;
+            text = await generateText(retryPrompt);
+
+            const retryValidation = validateAndParseAdCopy(text);
+            if (!retryValidation.isValid) {
+                console.error('❌ Second attempt still failed:', retryValidation.errors);
+                // Continue anyway but log the issue
+            } else {
+                console.log('✅ Retry successful! Ad copy now meets specs.');
+            }
+        } else {
+            console.log('✅ Ad copy meets Facebook specs!');
+        }
+    }
 
     if (taskType === 'ad') {
         const imagePrompt = `
