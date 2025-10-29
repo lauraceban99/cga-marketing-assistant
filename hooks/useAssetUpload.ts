@@ -16,6 +16,11 @@ export const useAssetUpload = () => {
     sharedMetadata: AssetMetadata,
     uploadedBy: string = 'admin'
   ): Promise<BrandAsset[]> => {
+    console.log('🎯 useAssetUpload: Starting upload');
+    console.log('   Files:', files.map(f => f.name));
+    console.log('   Brand:', brandId);
+    console.log('   Category:', category);
+
     setIsUploading(true);
 
     // Initialize queue
@@ -27,6 +32,7 @@ export const useAssetUpload = () => {
     setUploadQueue(initialQueue);
 
     try {
+      console.log('🔄 Calling batchUploadAssets...');
       const uploadedAssets = await batchUploadAssets(
         brandId,
         category,
@@ -44,6 +50,8 @@ export const useAssetUpload = () => {
         }
       );
 
+      console.log('✅ batchUploadAssets complete. Assets:', uploadedAssets.length);
+
       // Mark all as complete
       setUploadQueue((prev) =>
         prev.map((item) => ({ ...item, status: 'complete', progress: 100 }))
@@ -52,7 +60,7 @@ export const useAssetUpload = () => {
       setIsUploading(false);
       return uploadedAssets;
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('❌ useAssetUpload error:', error);
       setUploadQueue((prev) =>
         prev.map((item) => ({
           ...item,

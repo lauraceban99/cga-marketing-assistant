@@ -90,33 +90,61 @@ export const createAsset = async (
   metadata: AssetMetadata,
   uploadedBy: string = 'admin'
 ): Promise<BrandAsset> => {
-  const assetId = generateAssetId();
-  const sanitizedMetadata = sanitizeMetadata(metadata);
+  try {
+    const assetId = generateAssetId();
+    const sanitizedMetadata = sanitizeMetadata(metadata);
 
-  const asset: BrandAsset = {
-    id: assetId,
-    brandId,
-    category,
-    fileName: file.name,
-    fileUrl,
-    fileType: file.type,
-    fileSize: file.size,
-    uploadedBy,
-    uploadedAt: new Date(),
-    metadata: sanitizedMetadata,
-  };
+    console.log('📝 Creating asset document for:', file.name);
+    console.log('   Asset ID:', assetId);
+    console.log('   Brand ID:', brandId);
+    console.log('   Category:', category);
+    console.log('   Metadata:', sanitizedMetadata);
 
-  const docRef = doc(db, COLLECTION_NAME, assetId);
-  const firestoreData = {
-    ...asset,
-    uploadedAt: Timestamp.now(),
-  };
+    const asset: BrandAsset = {
+      id: assetId,
+      brandId,
+      category,
+      fileName: file.name,
+      fileUrl,
+      fileType: file.type,
+      fileSize: file.size,
+      uploadedBy,
+      uploadedAt: new Date(),
+      metadata: sanitizedMetadata,
+    };
 
-  console.log('Creating asset in Firestore:', assetId, firestoreData);
-  await setDoc(docRef, firestoreData);
-  console.log('Asset created successfully:', assetId);
+    const docRef = doc(db, COLLECTION_NAME, assetId);
+    const firestoreData = {
+      id: asset.id,
+      brandId: asset.brandId,
+      category: asset.category,
+      fileName: asset.fileName,
+      fileUrl: asset.fileUrl,
+      fileType: asset.fileType,
+      fileSize: asset.fileSize,
+      uploadedBy: asset.uploadedBy,
+      uploadedAt: Timestamp.now(),
+      metadata: sanitizedMetadata,
+    };
 
-  return asset;
+    console.log('💾 Saving to Firestore collection:', COLLECTION_NAME);
+    console.log('   Document ID:', assetId);
+    console.log('   Data:', firestoreData);
+
+    await setDoc(docRef, firestoreData);
+
+    console.log('✅ Firestore document created successfully!');
+    console.log('   Collection:', COLLECTION_NAME);
+    console.log('   Document ID:', assetId);
+
+    return asset;
+  } catch (error) {
+    console.error('❌ Error creating Firestore document:', error);
+    console.error('   Brand ID:', brandId);
+    console.error('   Category:', category);
+    console.error('   File:', file.name);
+    throw error;
+  }
 };
 
 /**
@@ -130,13 +158,21 @@ export const uploadAsset = async (
   uploadedBy: string = 'admin',
   onProgress?: (progress: number) => void
 ): Promise<BrandAsset> => {
-  // Upload file
+  console.log('🚀 Starting upload for:', file.name, { brandId, category, metadata });
+
+  // Upload file to Storage
+  console.log('📤 Uploading to Storage...');
   const uploadTask = uploadAssetFile(brandId, category, file, onProgress);
   const snapshot = await uploadTask;
   const fileUrl = await getDownloadURL(snapshot.ref);
+  console.log('✅ Storage upload complete. URL:', fileUrl);
 
   // Create Firestore document
-  return await createAsset(brandId, category, file, fileUrl, metadata, uploadedBy);
+  console.log('💾 Creating Firestore document...');
+  const asset = await createAsset(brandId, category, file, fileUrl, metadata, uploadedBy);
+  console.log('✅ Upload complete for:', file.name, 'Asset ID:', asset.id);
+
+  return asset;
 };
 
 /**
@@ -339,22 +375,34 @@ export const batchUploadAssets = async (
   uploadedBy: string = 'admin',
   onFileProgress?: (fileName: string, progress: number) => void
 ): Promise<BrandAsset[]> => {
-  const uploadPromises = files.map((file) =>
-    uploadAsset(
-      brandId,
-      category,
-      file,
-      sharedMetadata,
-      uploadedBy,
-      (progress) => {
-        if (onFileProgress) {
-          onFileProgress(file.name, progress);
-        }
-      }
-    )
-  );
+  console.log('📦 Batch upload starting:', files.length, 'files');
+  console.log('   Brand:', brandId);
+  console.log('   Category:', category);
+  console.log('   Metadata:', sharedMetadata);
 
-  return Promise.all(uploadPromises);
+  const uploadPromises = files.map(async (file) => {
+    try {
+      return await uploadAsset(
+        brandId,
+        category,
+        file,
+        sharedMetadata,
+        uploadedBy,
+        (progress) => {
+          if (onFileProgress) {
+            onFileProgress(file.name, progress);
+          }
+        }
+      );
+    } catch (error) {
+      console.error('❌ Upload failed for:', file.name, error);
+      throw error;
+    }
+  });
+
+  const results = await Promise.all(uploadPromises);
+  console.log('✅ Batch upload complete:', results.length, 'assets created');
+  return results;
 };
 
 /**

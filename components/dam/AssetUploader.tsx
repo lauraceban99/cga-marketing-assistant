@@ -93,10 +93,11 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
 
     try {
       await uploadAssets(brandId, category, selectedFiles, metadata);
+      // Reduced timeout for faster UI response
       setTimeout(() => {
         resetQueue();
         onSuccess();
-      }, 1500);
+      }, 500);
     } catch (error) {
       console.error('Upload failed:', error);
       alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
