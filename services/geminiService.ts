@@ -24,35 +24,60 @@ const generateText = async (prompt: string): Promise<string> => {
 }
 
 const generateImages = async (prompt: string, count: number): Promise<string[]> => {
+    // Check if image generation is disabled via env var
+    const imageGenDisabled = import.meta.env.VITE_DISABLE_IMAGE_GENERATION === 'true';
+
+    if (imageGenDisabled) {
+        console.log('ℹ️ Image generation is disabled via VITE_DISABLE_IMAGE_GENERATION env var');
+        return [];
+    }
+
     try {
-        console.log('🖼️ Generating images with Imagen...');
+        console.log('🖼️ Attempting image generation...');
         console.log('   Prompt:', prompt.substring(0, 200) + '...');
         console.log('   Count:', count);
 
-        const response = await ai.models.generateImages({
-            model: 'imagen-4.0-generate-001',
-            prompt: prompt,
-            config: {
-                numberOfImages: count,
-                outputMimeType: 'image/jpeg',
-                aspectRatio: '1:1',
-            },
-        });
+        // Try Imagen first (requires Vertex AI / specific API access)
+        try {
+            const response = await ai.models.generateImages({
+                model: 'imagen-3.0-generate-001', // Try imagen-3 instead of 4
+                prompt: prompt,
+                config: {
+                    numberOfImages: count,
+                    outputMimeType: 'image/jpeg',
+                    aspectRatio: '1:1',
+                },
+            });
 
-        console.log('✅ Image generation successful!');
-        console.log('   Generated:', response.generatedImages.length, 'images');
+            console.log('✅ Image generation successful with Imagen!');
+            console.log('   Generated:', response.generatedImages.length, 'images');
 
-        return response.generatedImages.map(img => img.image.imageBytes);
+            return response.generatedImages.map(img => img.image.imageBytes);
+        } catch (imagenError: any) {
+            console.warn('⚠️ Imagen not available:', imagenError?.message);
+
+            // Check if error indicates Imagen is not enabled
+            if (imagenError?.message?.includes('not found') ||
+                imagenError?.message?.includes('not enabled') ||
+                imagenError?.message?.includes('permission')) {
+                console.log('💡 Imagen requires Vertex AI setup. Instructions:');
+                console.log('   1. Go to https://console.cloud.google.com/vertex-ai');
+                console.log('   2. Enable Vertex AI API');
+                console.log('   3. Enable Imagen API');
+                console.log('   OR set VITE_DISABLE_IMAGE_GENERATION=true to skip images');
+            }
+
+            throw imagenError;
+        }
     } catch (error: any) {
-        console.error("❌ Error generating images:", error);
+        console.error("❌ Image generation failed:", error);
         console.error("   Error name:", error?.name);
         console.error("   Error message:", error?.message);
-        console.error("   Error stack:", error?.stack);
         console.error("   Full error object:", JSON.stringify(error, null, 2));
 
-        // Return detailed error message
+        // Return helpful error message
         const errorMessage = error?.message || error?.toString() || "Unknown error";
-        throw new Error(`Image generation failed: ${errorMessage}. Check console for details.`);
+        throw new Error(`Image generation not available. ${errorMessage}. To disable images, set VITE_DISABLE_IMAGE_GENERATION=true in your .env file.`);
     }
 }
 
