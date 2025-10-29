@@ -1,6 +1,8 @@
 
 import { GoogleGenAI } from "@google/genai";
-import type { Brand, TaskType } from '../types';
+import type { Brand, TaskType, ParsedGuidelines } from '../types';
+import { getBrandGuideline } from './firebaseService';
+import { parseGuidelinesFromText } from './guidelinesExtractor';
 
 if (!import.meta.env.VITE_GEMINI_API_KEY) {
   console.warn("VITE_GEMINI_API_KEY environment variable not set. Please set it to use the Gemini API.");
@@ -150,8 +152,170 @@ export const regenerateImages = async (
     - Imagery Style: ${brand.guidelines.imageryStyle}
     ${brand.guidelines.palette ? `- Color Palette: The brand uses these colors: ${brand.guidelines.palette}` : ''}
     ${brand.guidelines.dosAndDonts ? `- Adherence: ${brand.guidelines.dosAndDonts}` : ''}
-    
+
     Based on the original brief and the new feedback, generate ${count} new, high-quality, photorealistic image variations. Do not include any text or logos in the image.
   `;
   return generateImages(imagePrompt, count);
 }
+
+
+/**
+ * Extract text from a PDF using Gemini API
+ */
+export const extractTextFromPDF = async (pdfFile: File): Promise<string> => {
+  try {
+    // Upload file to Gemini
+    const uploadedFile = await ai.files.upload({
+      file: pdfFile,
+      config: {
+        mimeType: 'application/pdf',
+      },
+    });
+
+    // Wait for file to be processed
+    let file = await ai.files.get({ name: uploadedFile.name });
+    while (file.state === 'PROCESSING') {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      file = await ai.files.get({ name: uploadedFile.name });
+    }
+
+    if (file.state === 'FAILED') {
+      throw new Error('PDF processing failed');
+    }
+
+    // Extract text using Gemini
+    const result = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              fileData: {
+                mimeType: uploadedFile.mimeType,
+                fileUri: uploadedFile.uri,
+              },
+            },
+            {
+              text: 'Extract all text from this PDF document. Return the complete text content, preserving structure and formatting as much as possible.',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Clean up uploaded file
+    await ai.files.delete({ name: uploadedFile.name });
+
+    return result.text;
+  } catch (error) {
+    console.error('Error extracting text from PDF:', error);
+    throw new Error('Failed to extract text from PDF.');
+  }
+};
+
+
+/**
+ * Parse brand guidelines from extracted PDF text using Gemini
+ */
+export const parseGuidelinesWithAI = async (
+  extractedText: string,
+  brandName: string
+): Promise<ParsedGuidelines> => {
+  const prompt = `
+You are a brand guidelines parser. Analyze the following text extracted from a brand guidelines PDF for "${brandName}" and extract structured information.
+
+**Extracted Text:**
+---
+${extractedText}
+---
+
+**Your Task:**
+Parse and return the following information in JSON format:
+
+{
+  "guidelines": {
+    "toneOfVoice": "string or null",
+    "keyMessaging": "string or null",
+    "targetAudience": "string or null",
+    "values": "string or null",
+    "imageryStyle": "string or null",
+    "dosAndDonts": "string or null"
+  },
+  "colors": {
+    "primary": ["#HEX1", "#HEX2"],
+    "secondary": ["#HEX3", "#HEX4"],
+    "accent": ["#HEX5", "#HEX6"],
+    "all": ["all unique hex codes found"]
+  },
+  "typography": {
+    "primary": "Primary font name",
+    "secondary": "Secondary font name",
+    "details": "Full typography description"
+  },
+  "logoRules": "Logo usage rules and guidelines"
+}
+
+**Instructions:**
+1. Extract all hex color codes (e.g., #98151C) and categorize them
+2. Identify typography/font information
+3. Extract tone of voice, messaging, audience, values, imagery style
+4. Find any dos and don'ts or brand rules
+5. Extract logo usage rules if present
+6. Return ONLY valid JSON, no additional text or markdown
+7. Use null for any fields not found in the text
+
+Return the JSON now:
+`;
+
+  try {
+    const result = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+    });
+
+    const responseText = result.text.trim();
+
+    // Try to extract JSON from response (in case it's wrapped in markdown)
+    let jsonText = responseText;
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    }
+
+    const parsed = JSON.parse(jsonText);
+
+    // Fallback to regex-based extraction if AI parsing fails
+    if (!parsed.colors || !parsed.colors.all || parsed.colors.all.length === 0) {
+      const fallbackParsed = parseGuidelinesFromText(extractedText);
+      return {
+        guidelines: parsed.guidelines || fallbackParsed.guidelines || {},
+        colors: fallbackParsed.colors || { primary: [], secondary: [], accent: [], all: [] },
+        typography: parsed.typography || fallbackParsed.typography,
+        logoRules: parsed.logoRules || fallbackParsed.logoRules,
+      };
+    }
+
+    return parsed;
+  } catch (error) {
+    console.error('Error parsing guidelines with AI, falling back to regex:', error);
+    // Fallback to regex-based parsing
+    return parseGuidelinesFromText(extractedText);
+  }
+};
+
+
+/**
+ * Load brand guidelines from Firestore (used in generation)
+ */
+export const loadBrandGuidelinesFromFirestore = async (
+  brandId: string
+) => {
+  try {
+    const guideline = await getBrandGuideline(brandId);
+    return guideline;
+  } catch (error) {
+    console.error(`Error loading guidelines for ${brandId}:`, error);
+    return null;
+  }
+};

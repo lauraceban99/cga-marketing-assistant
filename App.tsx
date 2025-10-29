@@ -5,10 +5,11 @@ import BrandSelector from './components/BrandSelector';
 import TaskSelector from './components/TaskSelector';
 import Generator from './components/Generator';
 import ResultsViewer from './components/AdCreativeViewer';
+import BrandGuidelinesManager from './components/admin/BrandGuidelinesManager';
 import { BRANDS } from './constants';
 import type { Brand, TaskType, GeneratedCreative } from './types';
 
-type AppState = 'brand_selection' | 'task_selection' | 'generator' | 'results';
+type AppState = 'brand_selection' | 'task_selection' | 'generator' | 'results' | 'admin';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('brand_selection');
@@ -55,14 +56,16 @@ const App: React.FC = () => {
       case 'generator':
         return <Generator brand={selectedBrand!} taskType={selectedTask!} onAssetGenerated={handleAssetGenerated} onBack={() => handleBackTo('task_selection')} />;
       case 'results':
-        return <ResultsViewer 
-                  brand={selectedBrand!} 
-                  initialCreative={generatedCreative!} 
-                  onBack={() => handleBackTo('task_selection')} 
+        return <ResultsViewer
+                  brand={selectedBrand!}
+                  initialCreative={generatedCreative!}
+                  onBack={() => handleBackTo('task_selection')}
                   taskType={selectedTask!}
                   initialPrompt={lastPrompt}
                   onRegenerate={handleAssetGenerated}
                 />;
+      case 'admin':
+        return <BrandGuidelinesManager onBack={() => handleBackTo('brand_selection')} />;
       case 'brand_selection':
       default:
         return <BrandSelector brands={BRANDS} onSelectBrand={handleSelectBrand} />;
@@ -72,6 +75,19 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans px-4 pb-10">
       <Header />
+
+      {/* Admin Access Button (only on brand selection page) */}
+      {appState === 'brand_selection' && (
+        <div className="max-w-4xl mx-auto mb-4">
+          <button
+            onClick={() => setAppState('admin')}
+            className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg border border-gray-700 hover:border-brand-primary hover:text-white transition-colors text-sm"
+          >
+            ⚙️ Manage Brand Guidelines
+          </button>
+        </div>
+      )}
+
       <main>
         {renderContent()}
       </main>
