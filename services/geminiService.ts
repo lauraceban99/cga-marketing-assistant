@@ -2,11 +2,11 @@
 import { GoogleGenAI } from "@google/genai";
 import type { Brand, TaskType } from '../types';
 
-if (!process.env.API_KEY) {
-  console.warn("API_KEY environment variable not set. Please set it to use the Gemini API.");
+if (!import.meta.env.VITE_GEMINI_API_KEY) {
+  console.warn("VITE_GEMINI_API_KEY environment variable not set. Please set it to use the Gemini API.");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY as string });
 
 const generateText = async (prompt: string): Promise<string> => {
     try {
