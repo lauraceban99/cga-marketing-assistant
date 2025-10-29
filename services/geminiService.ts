@@ -33,51 +33,66 @@ const generateImages = async (prompt: string, count: number): Promise<string[]> 
     }
 
     try {
-        console.log('🖼️ Attempting image generation...');
+        console.log('🖼️ Generating images with Gemini native image generation...');
         console.log('   Prompt:', prompt.substring(0, 200) + '...');
-        console.log('   Count:', count);
+        console.log('   Requested count:', count);
 
-        // Try Imagen first (requires Vertex AI / specific API access)
-        try {
-            const response = await ai.models.generateImages({
-                model: 'imagen-3.0-generate-001', // Try imagen-3 instead of 4
-                prompt: prompt,
-                config: {
-                    numberOfImages: count,
-                    outputMimeType: 'image/jpeg',
-                    aspectRatio: '1:1',
-                },
-            });
+        // Use Gemini's native image generation with responseModalities
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash-exp', // Gemini 2.0 with image generation
+            contents: prompt,
+            config: {
+                responseModalities: ["TEXT", "IMAGE"], // Request both text and images
+            },
+        });
 
-            console.log('✅ Image generation successful with Imagen!');
-            console.log('   Generated:', response.generatedImages.length, 'images');
+        console.log('✅ Gemini response received');
+        console.log('   Response candidates:', response.candidates?.length);
 
-            return response.generatedImages.map(img => img.image.imageBytes);
-        } catch (imagenError: any) {
-            console.warn('⚠️ Imagen not available:', imagenError?.message);
+        // Extract images from response
+        const images: string[] = [];
 
-            // Check if error indicates Imagen is not enabled
-            if (imagenError?.message?.includes('not found') ||
-                imagenError?.message?.includes('not enabled') ||
-                imagenError?.message?.includes('permission')) {
-                console.log('💡 Imagen requires Vertex AI setup. Instructions:');
-                console.log('   1. Go to https://console.cloud.google.com/vertex-ai');
-                console.log('   2. Enable Vertex AI API');
-                console.log('   3. Enable Imagen API');
-                console.log('   OR set VITE_DISABLE_IMAGE_GENERATION=true to skip images');
+        if (response.candidates && response.candidates.length > 0) {
+            const candidate = response.candidates[0];
+
+            if (candidate.content && candidate.content.parts) {
+                console.log('   Response parts:', candidate.content.parts.length);
+
+                for (const part of candidate.content.parts) {
+                    // Check for inline image data
+                    if (part.inline_data && part.inline_data.data) {
+                        console.log('   Found image data (base64)');
+                        images.push(part.inline_data.data);
+                    }
+
+                    // Log text parts for debugging
+                    if (part.text) {
+                        console.log('   Found text part:', part.text.substring(0, 100));
+                    }
+                }
             }
-
-            throw imagenError;
         }
+
+        console.log(`✅ Image generation complete! Generated ${images.length} image(s)`);
+
+        // If no images were generated, log helpful info
+        if (images.length === 0) {
+            console.warn('⚠️ No images found in Gemini response');
+            console.warn('   This may mean the model did not generate images');
+            console.warn('   Try adjusting the prompt or model');
+        }
+
+        return images;
+
     } catch (error: any) {
         console.error("❌ Image generation failed:", error);
         console.error("   Error name:", error?.name);
         console.error("   Error message:", error?.message);
-        console.error("   Full error object:", JSON.stringify(error, null, 2));
+        console.error("   Error stack:", error?.stack);
 
         // Return helpful error message
         const errorMessage = error?.message || error?.toString() || "Unknown error";
-        throw new Error(`Image generation not available. ${errorMessage}. To disable images, set VITE_DISABLE_IMAGE_GENERATION=true in your .env file.`);
+        throw new Error(`Gemini image generation failed: ${errorMessage}. You can disable images by setting VITE_DISABLE_IMAGE_GENERATION=true in your .env file.`);
     }
 }
 
