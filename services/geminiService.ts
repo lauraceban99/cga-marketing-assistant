@@ -113,38 +113,61 @@ const buildAssetPrompt = (brand: Brand, taskType: TaskType, userPrompt: string):
                 **Task:** Generate Facebook/Meta ad copy that STRICTLY follows platform specifications.
                 **User Request:** "${userPrompt}"
 
-                **CRITICAL REQUIREMENTS - DO NOT EXCEED THESE LIMITS:**
+                ⚠️ **YOU WILL BE PENALIZED IF YOU EXCEED CHARACTER/WORD LIMITS** ⚠️
+
+                **BEFORE YOU RESPOND:**
+                1. Count characters in your headline (must be ≤40)
+                2. Count words in your primary text (must be 90-160)
+                3. Count words in your CTA (must be 3-5)
+                4. If ANY limit is exceeded, REWRITE IMMEDIATELY before submitting
+
+                **CRITICAL REQUIREMENTS - ABSOLUTE LIMITS:**
                 1. **Headline:** MAXIMUM 40 characters (including spaces)
+                   - COUNT before submitting: [Character count: __/40]
                    - Emotional hook, NOT literal description
-                   - Examples: "Is Your Child Ready for Tomorrow?", "Education That Adapts to Them"
-                   - NO exclamation marks or hashtags
+                   - Examples: "Is Your Child Ready?" (24 chars), "Education That Adapts" (23 chars)
+                   - ABSOLUTELY NO exclamation marks, hashtags, or emoji
+                   - If first attempt exceeds 40 chars → REWRITE SHORTER
 
                 2. **Primary Text:** STRICT 90-160 word limit
+                   - COUNT before submitting: [Word count: __/160]
                    - Start with an engaging hook: "What if...", "Imagine...", "Is your child..."
                    - Focus on parent emotions: confidence, belonging, future readiness
-                   - Conversational, warm, human tone
-                   - NO corporate jargon like "innovative", "world-class", "cutting-edge"
-                   - NO exclamation marks or hashtags
+                   - Conversational, warm, human tone (parent-to-parent)
+                   - ABSOLUTELY NO corporate jargon: "innovative", "world-class", "cutting-edge", "revolutionary"
+                   - ABSOLUTELY NO exclamation marks, hashtags, or emoji
                    - Talk TO parents, not AT them
                    - Use natural language, like speaking to a friend
+                   - If first attempt exceeds 160 words → CUT unnecessary words immediately
 
-                3. **Call to Action:** 3-5 words maximum
-                   - Examples: "Join Our Open Day", "Register Today", "Learn More Now"
+                3. **Call to Action:** 3-5 words ONLY
+                   - COUNT before submitting: [Word count: __/5]
+                   - Examples: "Join Our Open Day" (4 words), "Register Today" (2 words - make it 3-5!)
+                   - ABSOLUTELY NO exclamation marks or emoji
 
                 **TONE REQUIREMENTS:**
                 - Warm, conversational, parent-to-parent
                 - Focus on transformation and belonging
                 - Use "you" and "your child"
                 - NO marketing speak or buzzwords
+                - NO superlatives or hype
 
-                **FORMAT (use exactly this structure):**
-                **Headline:** [Max 40 chars]
+                **FORMAT (use EXACTLY this structure):**
+                **Headline:** [Max 40 chars - COUNT FIRST]
 
-                **Primary Text:** [90-160 words]
+                **Primary Text:** [90-160 words - COUNT FIRST]
 
-                **Call to Action:** [3-5 words]
+                **Call to Action:** [3-5 words - COUNT FIRST]
 
-                **VALIDATION:** After writing, COUNT your characters and words. If headline exceeds 40 characters or primary text exceeds 160 words, REWRITE to fit limits. This is NON-NEGOTIABLE.
+                **FINAL CHECK BEFORE SUBMITTING:**
+                ✓ Headline ≤ 40 characters?
+                ✓ Primary text 90-160 words?
+                ✓ CTA 3-5 words?
+                ✓ NO exclamation marks anywhere?
+                ✓ NO hashtags anywhere?
+                ✓ NO emoji anywhere?
+
+                If ANY answer is NO → REWRITE NOW before submitting.
             `;
             break;
         case 'copy':
@@ -166,6 +189,63 @@ const buildAssetPrompt = (brand: Brand, taskType: TaskType, userPrompt: string):
     }
 
     return `You are an expert marketing assistant for Crimson Academies. Your task is to generate on-brand marketing assets. Here are the details:\n\n${brandGuidelines}\n\n${taskInstructions}`;
+};
+
+/**
+ * Post-generation cleanup: Remove all forbidden characters
+ */
+const cleanupAdCopy = (text: string): string => {
+    let cleaned = text;
+
+    // Remove ALL exclamation marks
+    cleaned = cleaned.replace(/!/g, '');
+
+    // Remove ALL hashtags
+    cleaned = cleaned.replace(/#[\w]+/g, '');
+
+    // Remove emoji (basic emoji ranges)
+    cleaned = cleaned.replace(/[\u{1F600}-\u{1F64F}]/gu, ''); // Emoticons
+    cleaned = cleaned.replace(/[\u{1F300}-\u{1F5FF}]/gu, ''); // Misc Symbols and Pictographs
+    cleaned = cleaned.replace(/[\u{1F680}-\u{1F6FF}]/gu, ''); // Transport and Map
+    cleaned = cleaned.replace(/[\u{1F1E0}-\u{1F1FF}]/gu, ''); // Flags
+    cleaned = cleaned.replace(/[\u{2600}-\u{26FF}]/gu, '');   // Misc symbols
+    cleaned = cleaned.replace(/[\u{2700}-\u{27BF}]/gu, '');   // Dingbats
+
+    // Clean up any double spaces created by removals
+    cleaned = cleaned.replace(/\s+/g, ' ').trim();
+
+    return cleaned;
+};
+
+/**
+ * Truncate text to fit within limits
+ */
+const truncateAdCopy = (headline: string, primaryText: string, cta: string): { headline: string; primaryText: string; cta: string } => {
+    let truncatedHeadline = headline;
+    let truncatedPrimaryText = primaryText;
+    let truncatedCta = cta;
+
+    // Truncate headline to 40 chars
+    if (truncatedHeadline.length > 40) {
+        truncatedHeadline = truncatedHeadline.substring(0, 37) + '...';
+        console.log(`⚠️ Headline truncated to: "${truncatedHeadline}"`);
+    }
+
+    // Truncate primary text to 160 words
+    const words = truncatedPrimaryText.split(/\s+/);
+    if (words.length > 160) {
+        truncatedPrimaryText = words.slice(0, 160).join(' ') + '...';
+        console.log(`⚠️ Primary text truncated to 160 words`);
+    }
+
+    // Truncate CTA to 5 words
+    const ctaWords = truncatedCta.split(/\s+/);
+    if (ctaWords.length > 5) {
+        truncatedCta = ctaWords.slice(0, 5).join(' ');
+        console.log(`⚠️ CTA truncated to: "${truncatedCta}"`);
+    }
+
+    return { headline: truncatedHeadline, primaryText: truncatedPrimaryText, cta: truncatedCta };
 };
 
 /**
@@ -232,41 +312,95 @@ export const generateAsset = async (brand: Brand, taskType: TaskType, userPrompt
     // Validate ad copy for Facebook specs
     if (taskType === 'ad') {
         console.log('🔍 Validating ad copy against Facebook specs...');
-        const validation = validateAndParseAdCopy(text);
 
-        if (!validation.isValid) {
-            console.warn('⚠️ Generated ad copy does not meet specs. Errors:', validation.errors);
-            console.log('🔄 Attempting to regenerate with stricter constraints...');
+        // Apply post-generation cleanup first
+        text = cleanupAdCopy(text);
+        console.log('🧹 Applied cleanup (removed !, #, emoji)');
 
-            // Try one more time with even stricter instructions
-            const retryPrompt = prompt + `\n\n**CRITICAL:** The previous attempt failed validation. ${validation.errors.join('. ')}. You MUST fix these issues. Generate again with STRICT adherence to limits.`;
+        let validation = validateAndParseAdCopy(text);
+        let retryCount = 0;
+        const maxRetries = 3;
+
+        // Retry up to 3 times if validation fails
+        while (!validation.isValid && retryCount < maxRetries) {
+            retryCount++;
+            console.warn(`⚠️ Validation failed (Attempt ${retryCount}/${maxRetries}). Errors:`, validation.errors);
+            console.log('🔄 Regenerating with stricter constraints...');
+
+            // Build increasingly strict retry prompt
+            const retryPrompt = prompt + `\n\n**CRITICAL VALIDATION FAILURE (Attempt ${retryCount}/${maxRetries}):**
+The previous attempt failed with these errors: ${validation.errors.join('. ')}.
+
+YOU ARE BEING PENALIZED FOR EXCEEDING LIMITS.
+
+Count each character and word BEFORE responding:
+- Headline: Must be ≤40 characters
+- Primary Text: Must be 90-160 words
+- CTA: Must be 3-5 words
+
+If you write a headline longer than 40 characters, you have FAILED.
+If you write primary text outside 90-160 words, you have FAILED.
+
+Generate again NOW with ABSOLUTE adherence to these limits.`;
+
             text = await generateText(retryPrompt);
+            text = cleanupAdCopy(text); // Clean up again
+            validation = validateAndParseAdCopy(text);
 
-            const retryValidation = validateAndParseAdCopy(text);
-            if (!retryValidation.isValid) {
-                console.error('❌ Second attempt still failed:', retryValidation.errors);
-                // Continue anyway but log the issue
-            } else {
-                console.log('✅ Retry successful! Ad copy now meets specs.');
+            if (!validation.isValid && retryCount === maxRetries) {
+                console.error(`❌ All ${maxRetries} retry attempts failed. Applying automatic truncation...`);
+
+                // Last resort: Force truncate to fit limits
+                const { headline, primaryText, cta } = validation.parsed;
+                const truncated = truncateAdCopy(headline, primaryText, cta);
+
+                // Reconstruct the ad copy with truncated values
+                text = `**Headline:** ${truncated.headline}\n\n**Primary Text:** ${truncated.primaryText}\n\n**Call to Action:** ${truncated.cta}`;
+                console.log('✂️ Ad copy forcibly truncated to meet specs');
+            } else if (validation.isValid) {
+                console.log(`✅ Retry #${retryCount} successful! Ad copy now meets specs.`);
             }
-        } else {
-            console.log('✅ Ad copy meets Facebook specs!');
+        }
+
+        if (validation.isValid && retryCount === 0) {
+            console.log('✅ Ad copy meets Facebook specs on first attempt!');
         }
     }
 
     if (taskType === 'ad') {
-        const imagePrompt = `
-            Create a professional, photorealistic ad image for the brand ${brand.name}. The ad should visually represent this copy: "${text}".
+        // Extract headline for overlay text
+        const headlineMatch = text.match(/\*\*Headline:\*\*\s*(.+?)(?:\n|$)/i);
+        const headline = headlineMatch ? headlineMatch[1].trim() : '';
 
-            **CRITICAL VISUAL GUIDELINES:**
-            - **Imagery Style:** ${brand.guidelines.imageryStyle}.
-            ${brand.guidelines.palette ? `- **Color Palette:** The brand's primary colors are ${brand.guidelines.palette}. Use these colors prominently and tastefully.` : ''}
-            - **Atmosphere:** The image should feel aspirational, empowering, and professional.
-            - **Content:** Feature authentic-looking students. Avoid generic stock photos.
-            - **Adherence:** ${brand.guidelines.dosAndDonts || 'Ensure high quality and brand consistency.'}
+        // Build Gemini-friendly image prompt (NOT Midjourney format)
+        const imagePrompt = `Generate a square 1024x1024 photorealistic advertisement image.
 
-            **DO NOT include any text, words, or logos in the image itself.** Generate a clean, powerful visual.
-        `;
+**Visual Requirements:**
+- Modern, clean composition with bold focal point
+- High contrast and clutter-free background
+- Professional photography style
+- 1:1 square aspect ratio
+
+**Content:**
+${brand.guidelines.imageryStyle ? `- Style: ${brand.guidelines.imageryStyle}` : '- Feature authentic-looking students aged 10-18'}
+- Show diverse teenagers engaged in learning or collaborative activities
+- Aspirational and empowering atmosphere
+${brand.guidelines.palette ? `- Color palette: Use ${brand.guidelines.palette} prominently` : '- Use modern, professional color tones'}
+
+**Text Overlay:**
+${headline ? `- Include brief text overlay (≤6 words): "${headline.substring(0, 50)}"` : '- No text overlay needed'}
+- If text is included, use modern bold typography
+- Text should be clearly readable and well-positioned
+
+**Important:**
+- DO NOT reference Facebook, Meta, or specific platforms
+- Avoid generic stock photo aesthetics
+- Modern, authentic, professional quality
+${brand.guidelines.dosAndDonts ? `- Brand adherence: ${brand.guidelines.dosAndDonts}` : ''}
+
+Generate one high-quality square advertisement image that matches these specifications.`;
+
+        console.log('🎨 Generating image with Gemini-optimized prompt...');
         const images = await generateImages(imagePrompt, 1);
         return { text, images };
     }
@@ -302,17 +436,46 @@ export const regenerateImages = async (
   refinement: string,
   count: number,
 ): Promise<string[]> => {
-    const imagePrompt = `
-    An ad creative for ${brand.name} uses the copy: "${text}".
-    The initial image needs refinement based on this feedback: "${refinement}".
+    // Extract headline for overlay text
+    const headlineMatch = text.match(/\*\*Headline:\*\*\s*(.+?)(?:\n|$)/i);
+    const headline = headlineMatch ? headlineMatch[1].trim() : '';
 
-    **Visual Style Guidelines from ${brand.name}:**
-    - Imagery Style: ${brand.guidelines.imageryStyle}
-    ${brand.guidelines.palette ? `- Color Palette: The brand uses these colors: ${brand.guidelines.palette}` : ''}
-    ${brand.guidelines.dosAndDonts ? `- Adherence: ${brand.guidelines.dosAndDonts}` : ''}
+    // Build Gemini-friendly refinement prompt
+    const imagePrompt = `Generate ${count} square 1024x1024 photorealistic advertisement image${count > 1 ? 's' : ''} for ${brand.name}.
 
-    Based on the original brief and the new feedback, generate ${count} new, high-quality, photorealistic image variations. Do not include any text or logos in the image.
-  `;
+**Original Ad Copy:**
+${text.substring(0, 300)}...
+
+**Refinement Requested:**
+${refinement}
+
+**Visual Requirements:**
+- Modern, clean composition with bold focal point
+- High contrast and clutter-free background
+- Professional photography style
+- 1:1 square aspect ratio
+
+**Content:**
+${brand.guidelines.imageryStyle ? `- Style: ${brand.guidelines.imageryStyle}` : '- Feature authentic-looking students aged 10-18'}
+- Show diverse teenagers engaged in learning or collaborative activities
+- Aspirational and empowering atmosphere
+${brand.guidelines.palette ? `- Color palette: Use ${brand.guidelines.palette} prominently` : '- Use modern, professional color tones'}
+
+**Text Overlay:**
+${headline ? `- Include brief text overlay: "${headline.substring(0, 50)}"` : '- No text overlay needed'}
+- Modern bold typography
+- Clearly readable and well-positioned
+
+**Important:**
+- Apply the refinement feedback above
+- DO NOT reference Facebook, Meta, or specific platforms
+- Avoid generic stock photo aesthetics
+- Modern, authentic, professional quality
+${brand.guidelines.dosAndDonts ? `- Brand adherence: ${brand.guidelines.dosAndDonts}` : ''}
+
+Generate ${count} diverse, high-quality variations incorporating the feedback.`;
+
+  console.log(`🎨 Regenerating ${count} image(s) with refinement...`);
   return generateImages(imagePrompt, count);
 }
 
