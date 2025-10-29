@@ -87,3 +87,93 @@ export interface ParsedGuidelines {
   };
   logoRules?: string;
 }
+
+// Digital Asset Management (DAM) Types
+export type AssetCategory =
+  | 'brand-guidelines'
+  | 'competitor-ads'
+  | 'reference-copy'
+  | 'logos'
+  | 'other';
+
+export interface AssetCategoryConfig {
+  label: string;
+  icon: string;
+  description: string;
+  acceptedTypes: string[];
+  maxSize: number;
+}
+
+export interface BrandAsset {
+  id: string;
+  brandId: string;
+  category: AssetCategory;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  thumbnailUrl?: string;
+  uploadedBy: string;
+  uploadedAt: Date;
+  metadata: AssetMetadata;
+}
+
+export interface AssetMetadata {
+  description?: string;
+  tags?: string[];
+  sourceUrl?: string;
+  campaignName?: string;
+  usageRights?: string;
+}
+
+export interface AssetUploadProgress {
+  fileName: string;
+  progress: number;
+  status: 'queued' | 'uploading' | 'processing' | 'complete' | 'error';
+  error?: string;
+  assetId?: string;
+}
+
+export interface BrandAssetStats {
+  brandId: string;
+  totalAssets: number;
+  assetsByCategory: Record<AssetCategory, number>;
+  totalSize: number;
+  lastUpdated: Date;
+}
+
+// Generation Instructions Types
+export interface BrandInstructions {
+  brandId: string;
+
+  // Copy Generation
+  copySystemPrompt: string;
+  copyUserPromptTemplate: string;
+  toneRules: string;
+
+  // Image Generation
+  imageGenerationInstructions: string;
+  imageStyleGuidelines: string;
+
+  // Metadata
+  lastUpdatedBy: string;
+  lastUpdated: Date;
+  version: number;
+}
+
+export interface GenerationContext {
+  brand: Brand;
+  instructions: BrandInstructions;
+  assets: {
+    guidelines: BrandAsset[];
+    competitorAds: BrandAsset[];
+    referenceCopy: BrandAsset[];
+    logos: BrandAsset[];
+  };
+  userInput: {
+    theme?: string;
+    location?: string;
+    audience?: string;
+    customPrompt?: string;
+  };
+}
