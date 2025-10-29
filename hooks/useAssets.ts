@@ -138,7 +138,10 @@ export const useBrandAssetStats = (brandId: string | null) => {
   const [error, setError] = useState<string | null>(null);
 
   const refresh = async () => {
+    console.log('🔄 useBrandAssetStats refresh called:', { brandId });
+
     if (!brandId) {
+      console.log('⚠️ No brandId, clearing stats');
       setStats(null);
       return;
     }
@@ -146,9 +149,12 @@ export const useBrandAssetStats = (brandId: string | null) => {
     setLoading(true);
     setError(null);
     try {
+      console.log('📡 Fetching brand stats...');
       const data = await getBrandAssetStats(brandId);
+      console.log('✅ Received stats:', data);
       setStats(data);
     } catch (err) {
+      console.error('❌ Error fetching stats:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch stats');
     } finally {
       setLoading(false);
@@ -156,7 +162,9 @@ export const useBrandAssetStats = (brandId: string | null) => {
   };
 
   useEffect(() => {
+    console.log('🎯 useBrandAssetStats effect triggered');
     refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brandId]);
 
   return { stats, loading, error, refresh };

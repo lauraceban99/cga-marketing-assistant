@@ -202,12 +202,14 @@ export const getAsset = async (assetId: string): Promise<BrandAsset | null> => {
  */
 export const getAssetsByBrand = async (brandId: string): Promise<BrandAsset[]> => {
   try {
+    console.log(`📡 Querying all assets for brand: ${brandId}`);
     const q = query(
       collection(db, COLLECTION_NAME),
       where('brandId', '==', brandId),
       orderBy('uploadedAt', 'desc')
     );
     const querySnapshot = await getDocs(q);
+    console.log(`✅ getAssetsByBrand returned ${querySnapshot.docs.length} assets`);
 
     return querySnapshot.docs.map((doc) => {
       const data = doc.data();
@@ -217,7 +219,10 @@ export const getAssetsByBrand = async (brandId: string): Promise<BrandAsset[]> =
       } as BrandAsset;
     });
   } catch (error) {
-    console.error(`Error fetching assets for brand ${brandId}:`, error);
+    console.error(`❌ Error fetching assets for brand ${brandId}:`, error);
+    if (error instanceof Error) {
+      console.error('   Error message:', error.message);
+    }
     return [];
   }
 };
@@ -431,7 +436,9 @@ export const batchDeleteAssets = async (assetIds: string[]): Promise<void> => {
 export const getBrandAssetStats = async (
   brandId: string
 ): Promise<BrandAssetStats> => {
+  console.log('📊 Getting brand asset stats for:', brandId);
   const assets = await getAssetsByBrand(brandId);
+  console.log('📊 Stats calculation received', assets.length, 'assets');
 
   const assetsByCategory = assets.reduce((acc, asset) => {
     acc[asset.category] = (acc[asset.category] || 0) + 1;
@@ -444,7 +451,7 @@ export const getBrandAssetStats = async (
     ? new Date(Math.max(...assets.map(a => a.uploadedAt.getTime())))
     : new Date();
 
-  return {
+  const stats = {
     brandId,
     totalAssets: assets.length,
     assetsByCategory: {
@@ -457,6 +464,9 @@ export const getBrandAssetStats = async (
     totalSize,
     lastUpdated,
   };
+
+  console.log('📊 Computed stats:', stats);
+  return stats;
 };
 
 /**
