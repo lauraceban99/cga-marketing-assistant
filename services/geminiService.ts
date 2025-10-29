@@ -33,13 +33,13 @@ const generateImages = async (prompt: string, count: number): Promise<string[]> 
     }
 
     try {
-        console.log('🖼️ Generating images with Gemini native image generation...');
+        console.log('🖼️ Generating images with Gemini 2.5 Flash Image (production model)...');
         console.log('   Prompt:', prompt.substring(0, 200) + '...');
         console.log('   Requested count:', count);
 
-        // Use Gemini's native image generation with responseModalities
+        // Use Gemini 2.5 Flash Image (production-ready model with better availability)
         const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash-exp', // Gemini 2.0 with image generation
+            model: 'gemini-2.5-flash-image', // Production-ready image generation model
             contents: prompt,
             config: {
                 responseModalities: ["TEXT", "IMAGE"], // Request both text and images
@@ -152,22 +152,32 @@ const buildAssetPrompt = (brand: Brand, taskType: TaskType, userPrompt: string):
                 - NO marketing speak or buzzwords
                 - NO superlatives or hype
 
-                **FORMAT (use EXACTLY this structure):**
-                **Headline:** [Max 40 chars - COUNT FIRST]
+                **OUTPUT FORMAT:**
+                You must output EXACTLY this structure with NO additional text, NO character counts, NO word counts, NO brackets, NO instructional text:
 
-                **Primary Text:** [90-160 words - COUNT FIRST]
+                **Headline:** <your headline text here>
 
-                **Call to Action:** [3-5 words - COUNT FIRST]
+                **Primary Text:** <your primary text here>
+
+                **Call to Action:** <your CTA text here>
+
+                **CRITICAL INSTRUCTIONS:**
+                - DO NOT include "[Character count: XX/40]" or any similar notation in your output
+                - DO NOT include "[Word count: XX/160]" or any similar notation in your output
+                - DO NOT include any brackets, parentheses, or instructional text
+                - ONLY include the actual ad copy text
+                - Remove any meta-commentary or self-referential text
 
                 **FINAL CHECK BEFORE SUBMITTING:**
-                ✓ Headline ≤ 40 characters?
-                ✓ Primary text 90-160 words?
-                ✓ CTA 3-5 words?
-                ✓ NO exclamation marks anywhere?
-                ✓ NO hashtags anywhere?
-                ✓ NO emoji anywhere?
+                1. Count headline characters (must be ≤40)
+                2. Count primary text words (must be 90-160)
+                3. Count CTA words (must be 3-5)
+                4. Remove ALL exclamation marks
+                5. Remove ALL hashtags
+                6. Remove ALL emoji
+                7. Remove ALL bracketed instructions or character/word counts
 
-                If ANY answer is NO → REWRITE NOW before submitting.
+                If ANY limit is exceeded or forbidden characters exist → REWRITE NOW before submitting.
             `;
             break;
         case 'copy':
