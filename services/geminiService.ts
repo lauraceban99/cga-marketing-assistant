@@ -123,14 +123,12 @@ const buildAssetPrompt = (brand: Brand, taskType: TaskType, userPrompt: string):
 
                 **CRITICAL REQUIREMENTS - ABSOLUTE LIMITS:**
                 1. **Headline:** MAXIMUM 40 characters (including spaces)
-                   - COUNT before submitting: [Character count: __/40]
                    - Emotional hook, NOT literal description
                    - Examples: "Is Your Child Ready?" (24 chars), "Education That Adapts" (23 chars)
                    - ABSOLUTELY NO exclamation marks, hashtags, or emoji
                    - If first attempt exceeds 40 chars → REWRITE SHORTER
 
                 2. **Primary Text:** STRICT 90-160 word limit
-                   - COUNT before submitting: [Word count: __/160]
                    - Start with an engaging hook: "What if...", "Imagine...", "Is your child..."
                    - Focus on parent emotions: confidence, belonging, future readiness
                    - Conversational, warm, human tone (parent-to-parent)
@@ -141,8 +139,7 @@ const buildAssetPrompt = (brand: Brand, taskType: TaskType, userPrompt: string):
                    - If first attempt exceeds 160 words → CUT unnecessary words immediately
 
                 3. **Call to Action:** 3-5 words ONLY
-                   - COUNT before submitting: [Word count: __/5]
-                   - Examples: "Join Our Open Day" (4 words), "Register Today" (2 words - make it 3-5!)
+                   - Examples: "Join Our Open Day" (4 words), "Register Your Interest" (3 words)
                    - ABSOLUTELY NO exclamation marks or emoji
 
                 **TONE REQUIREMENTS:**
@@ -152,21 +149,24 @@ const buildAssetPrompt = (brand: Brand, taskType: TaskType, userPrompt: string):
                 - NO marketing speak or buzzwords
                 - NO superlatives or hype
 
-                **OUTPUT FORMAT:**
-                You must output EXACTLY this structure with NO additional text, NO character counts, NO word counts, NO brackets, NO instructional text:
+                **OUTPUT FORMAT - JSON ONLY:**
+                You MUST respond with ONLY valid JSON in this exact format:
 
-                **Headline:** <your headline text here>
-
-                **Primary Text:** <your primary text here>
-
-                **Call to Action:** <your CTA text here>
+                {
+                  "headline": "your headline text here",
+                  "primaryText": "your primary text here",
+                  "cta": "your CTA text here"
+                }
 
                 **CRITICAL INSTRUCTIONS:**
-                - DO NOT include "[Character count: XX/40]" or any similar notation in your output
-                - DO NOT include "[Word count: XX/160]" or any similar notation in your output
-                - DO NOT include any brackets, parentheses, or instructional text
-                - ONLY include the actual ad copy text
-                - Remove any meta-commentary or self-referential text
+                - Return ONLY the JSON object, nothing else
+                - DO NOT include markdown code fences like \`\`\`json
+                - DO NOT include any explanatory text before or after the JSON
+                - DO NOT include character counts, word counts, or any metadata
+                - Ensure the JSON is valid and parseable
+                - The headline value must be ≤40 characters
+                - The primaryText value must be 90-160 words
+                - The cta value must be 3-5 words
 
                 **FINAL CHECK BEFORE SUBMITTING:**
                 1. Count headline characters (must be ≤40)
@@ -175,7 +175,7 @@ const buildAssetPrompt = (brand: Brand, taskType: TaskType, userPrompt: string):
                 4. Remove ALL exclamation marks
                 5. Remove ALL hashtags
                 6. Remove ALL emoji
-                7. Remove ALL bracketed instructions or character/word counts
+                7. Ensure output is ONLY valid JSON
 
                 If ANY limit is exceeded or forbidden characters exist → REWRITE NOW before submitting.
             `;
@@ -260,18 +260,50 @@ const truncateAdCopy = (headline: string, primaryText: string, cta: string): { h
 
 /**
  * Validate and parse ad copy to ensure it meets Facebook specs
+ * Now expects JSON format from Gemini
  */
 const validateAndParseAdCopy = (text: string): { isValid: boolean; parsed: any; errors: string[] } => {
     const errors: string[] = [];
+    let headline = '';
+    let primaryText = '';
+    let cta = '';
 
-    // Extract sections using regex
-    const headlineMatch = text.match(/\*\*Headline:\*\*\s*(.+?)(?:\n|$)/i);
-    const primaryMatch = text.match(/\*\*Primary Text:\*\*\s*([\s\S]+?)(?:\n\*\*Call to Action:\*\*|\*\*CTA:\*\*|$)/i);
-    const ctaMatch = text.match(/\*\*(?:Call to Action|CTA):\*\*\s*(.+?)(?:\n|$)/i);
+    try {
+        // Try to extract JSON from response (in case it's wrapped in markdown code fences)
+        let jsonText = text.trim();
 
-    const headline = headlineMatch ? headlineMatch[1].trim() : '';
-    const primaryText = primaryMatch ? primaryMatch[1].trim() : '';
-    const cta = ctaMatch ? ctaMatch[1].trim() : '';
+        // Remove markdown code fences if present
+        const codeBlockMatch = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+        if (codeBlockMatch) {
+            jsonText = codeBlockMatch[1];
+        } else {
+            // Try to find raw JSON object
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                jsonText = jsonMatch[0];
+            }
+        }
+
+        // Parse JSON
+        const parsed = JSON.parse(jsonText);
+
+        // Extract fields
+        headline = (parsed.headline || '').trim();
+        primaryText = (parsed.primaryText || '').trim();
+        cta = (parsed.cta || '').trim();
+
+    } catch (parseError) {
+        console.error('❌ JSON parsing failed, attempting fallback to markdown format');
+
+        // Fallback to old markdown parsing if JSON fails
+        const headlineMatch = text.match(/\*\*Headline:\*\*\s*(.+?)(?:\n|$)/i);
+        const primaryMatch = text.match(/\*\*Primary Text:\*\*\s*([\s\S]+?)(?:\n\*\*Call to Action:\*\*|\*\*CTA:\*\*|$)/i);
+        const ctaMatch = text.match(/\*\*(?:Call to Action|CTA):\*\*\s*(.+?)(?:\n|$)/i);
+
+        headline = headlineMatch ? headlineMatch[1].trim() : '';
+        primaryText = primaryMatch ? primaryMatch[1].trim() : '';
+        cta = ctaMatch ? ctaMatch[1].trim() : '';
+    }
 
     // Validate headline (max 40 chars)
     if (headline.length > 40) {
@@ -351,7 +383,14 @@ Count each character and word BEFORE responding:
 If you write a headline longer than 40 characters, you have FAILED.
 If you write primary text outside 90-160 words, you have FAILED.
 
-Generate again NOW with ABSOLUTE adherence to these limits.`;
+**REMINDER - Return ONLY valid JSON:**
+{
+  "headline": "your headline text here",
+  "primaryText": "your primary text here",
+  "cta": "your CTA text here"
+}
+
+Generate again NOW with ABSOLUTE adherence to these limits in JSON format.`;
 
             text = await generateText(retryPrompt);
             text = cleanupAdCopy(text); // Clean up again
@@ -375,12 +414,16 @@ Generate again NOW with ABSOLUTE adherence to these limits.`;
         if (validation.isValid && retryCount === 0) {
             console.log('✅ Ad copy meets Facebook specs on first attempt!');
         }
+
+        // Convert JSON to markdown format for display
+        const { headline, primaryText, cta } = validation.parsed;
+        text = `**Headline:** ${headline}\n\n**Primary Text:** ${primaryText}\n\n**Call to Action:** ${cta}`;
     }
 
     if (taskType === 'ad') {
-        // Extract headline for overlay text
-        const headlineMatch = text.match(/\*\*Headline:\*\*\s*(.+?)(?:\n|$)/i);
-        const headline = headlineMatch ? headlineMatch[1].trim() : '';
+        // Extract headline from validated ad copy
+        const validation = validateAndParseAdCopy(text);
+        const headline = validation.parsed.headline || '';
 
         // Build Gemini-friendly image prompt (NOT Midjourney format)
         const imagePrompt = `Generate a square 1024x1024 photorealistic advertisement image.
@@ -419,6 +462,9 @@ Generate one high-quality square advertisement image that matches these specific
 };
 
 export const refineCreativeText = async (brand: Brand, originalText: string, refinementPrompt: string): Promise<string> => {
+    // Check if this is an ad (has the structured format)
+    const isAd = originalText.includes('**Headline:**') && originalText.includes('**Primary Text:**');
+
     const prompt = `
         You are a marketing copy editor for the brand '${brand.name}'.
         Your task is to revise a piece of marketing copy based on user feedback.
@@ -433,8 +479,16 @@ export const refineCreativeText = async (brand: Brand, originalText: string, ref
 
         **Instructions:**
         Rewrite the original copy to incorporate the user's feedback while strictly maintaining the brand's tone of voice.
-        If the original was a structured ad (Headline, Primary Text, CTA), maintain that structure.
-        Provide only the revised copy, with no extra commentary.
+        ${isAd ? `
+        This is a Facebook/Meta ad. You MUST return ONLY valid JSON in this format:
+        {
+          "headline": "your headline text here (max 40 chars)",
+          "primaryText": "your primary text here (90-160 words)",
+          "cta": "your CTA text here (3-5 words)"
+        }
+
+        Do NOT include markdown code fences, explanatory text, or anything besides the JSON object.
+        ` : 'Maintain the original format and structure. Provide only the revised copy, with no extra commentary.'}
     `;
     return generateText(prompt);
 };
