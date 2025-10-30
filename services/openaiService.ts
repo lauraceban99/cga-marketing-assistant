@@ -122,7 +122,24 @@ function buildOpenAIPrompt(
   if (brandInstructions?.copySystemPrompt && brandInstructions?.copyUserPromptTemplate) {
     console.log('✨ Using custom brand instructions from Firestore');
 
-    const systemPrompt = brandInstructions.copySystemPrompt;
+    // Add JSON format requirement to system prompt
+    const systemPrompt = brandInstructions.copySystemPrompt + `
+
+CRITICAL OUTPUT FORMAT:
+You MUST return ONLY valid JSON in this exact format:
+
+{
+  "variations": [
+    {
+      "headline": "headline text",
+      "primaryText": "primary text content",
+      "cta": "call to action",
+      "keywords": ["keyword1", "keyword2", "keyword3"]
+    }
+  ]
+}
+
+Return EXACTLY ${count} variations in this JSON structure. No markdown, no explanations, only JSON.`;
 
     // Replace template variables in user prompt template
     const userPromptWithVariables = brandInstructions.copyUserPromptTemplate
@@ -142,7 +159,7 @@ ${brand.guidelines.dosAndDonts || ''}
 
     return {
       system: systemPrompt,
-      user: userPromptWithVariables
+      user: userPromptWithVariables + `\n\nRemember: Return ONLY valid JSON with exactly ${count} ad variations. No other text.`
     };
   }
 
