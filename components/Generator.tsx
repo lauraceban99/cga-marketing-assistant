@@ -19,7 +19,7 @@ const getTaskDetails = (taskType: TaskType) => {
             return {
                 title: 'Describe Your Ad Creative',
                 placeholder: "e.g., Create ads for our Auckland open day on Sept 18. Target parents looking for flexible online high school options.",
-                loadingMessage: "Generating 5 ad variations with OpenAI..."
+                loadingMessage: "Generating 5 ad variations..."
             };
         case 'copy':
             return {

@@ -57,8 +57,7 @@ export const generateImages = async (prompt: string, count: number): Promise<str
                     }],
                     generationConfig: {
                         temperature: 0.7,
-                        responseModalities: ['IMAGE'], // Only request IMAGE, not TEXT
-                        imageMimeType: 'image/png'
+                        responseModalities: ['IMAGE'] // Only request IMAGE, not TEXT
                     }
                 })
             }
