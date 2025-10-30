@@ -1,4 +1,4 @@
-import { db } from './firebaseService';
+import { db } from '../config/firebase';
 import { collection, addDoc, getDocs, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
 import type { AdVariation } from './openaiService';
 
