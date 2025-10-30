@@ -117,12 +117,16 @@ function buildOpenAIPrompt(
 
   const { type, specs, format, count } = contentConfig;
 
-  const systemPrompt = `You are an expert marketing copywriter specializing in ${type.replace('_', ' ')}.
+  const systemPrompt = `You are an expert marketing copywriter for ${brand.name}.
 
-BRAND GUIDELINES - ${brand.name}:
+🎯 YOUR PRIMARY MISSION:
+Write ad copy that is UNMISTAKABLY branded for ${brand.name}. Every ad MUST clearly represent this specific brand - readers should immediately know which organization this is for.
+
+📋 BRAND IDENTITY - ${brand.name}:
+Brand Name: ${brand.name} (MUST be mentioned or clearly referenced in the primary text)
 Core Values: ${brand.guidelines.values}
 Tone of Voice: ${brand.guidelines.toneOfVoice}
-Key Messaging: ${brand.guidelines.keyMessaging}
+Key Messaging Pillars: ${brand.guidelines.keyMessaging}
 Target Audience: ${brand.guidelines.targetAudience}
 ${brand.guidelines.imageryStyle ? `Imagery Style: ${brand.guidelines.imageryStyle}` : ''}
 ${brand.guidelines.dosAndDonts ? `Dos and Don'ts: ${brand.guidelines.dosAndDonts}` : ''}
@@ -130,9 +134,15 @@ ${brand.guidelines.dosAndDonts ? `Dos and Don'ts: ${brand.guidelines.dosAndDonts
 BRAND COLORS:
 ${brand.guidelines.palette || 'Not specified'}
 
-CRITICAL: Study these successful examples carefully. Your output MUST match their tone, style, and approach:
+🏆 APPROVED EXAMPLES - Study these successful ${brand.name} ads carefully. Your output MUST match their tone, style, messaging approach, and brand voice:
 
 ${inspirationExamples || 'No inspiration examples available - write professional marketing copy based on brand guidelines above'}
+
+⚠️ BRAND MENTION REQUIREMENT:
+- The brand name "${brand.name}" MUST appear naturally in the primary text OR
+- The brand's unique selling points from Key Messaging MUST be clearly referenced OR
+- The copy must be so specific to ${brand.name} that it couldn't be about any other organization
+- Generic phrases like "our school" or "Auckland's online campus" WITHOUT brand context are NOT acceptable
 
 OUTPUT REQUIREMENTS:
 Format: ${format}
@@ -173,24 +183,41 @@ Return ONLY this JSON format:
 `}
 
 CRITICAL RULES:
-1. COUNT characters/words BEFORE responding - you will be penalized for exceeding limits
-2. ${specs.forbidden?.length ? `FORBIDDEN PHRASES/CHARACTERS: ${specs.forbidden.join(', ')} - do not use these at all` : ''}
-3. Write like a REAL marketer, not an AI - be specific and authentic
-4. Lead with benefits and transformation, not features
-5. Use natural, conversational language (${specs.tone})
-6. Be concrete and specific - avoid vague corporate language
-7. Borrow successful patterns from the inspiration examples above
-8. Return ONLY valid JSON - no markdown code fences, no explanations, no additional text
-9. ABSOLUTELY NO exclamation marks (!) in any field
-10. ABSOLUTELY NO hashtags (#) in any field
-11. ABSOLUTELY NO emoji in any field
+1. **BRAND NAME REQUIREMENT**: The brand name "${brand.name}" MUST be mentioned OR the brand's unique value propositions from Key Messaging MUST be clearly present. Generic copy that could apply to any organization is REJECTED.
+2. **BRAND SPECIFICITY**: Reference specific programs, unique selling points, or differentiators mentioned in Key Messaging. Make it impossible to mistake this for another brand.
+3. COUNT characters/words BEFORE responding - you will be penalized for exceeding limits
+4. ${specs.forbidden?.length ? `FORBIDDEN PHRASES/CHARACTERS: ${specs.forbidden.join(', ')} - do not use these at all` : ''}
+5. Write like a REAL ${brand.name} marketer - be specific and authentic to THIS brand
+6. Lead with ${brand.name}'s unique benefits and transformation story, not generic features
+7. Use natural, conversational language (${specs.tone}) that matches ${brand.name}'s voice
+8. Be concrete and specific - reference actual ${brand.name} programs, values, or differentiators
+9. Study and REPLICATE the patterns from the approved ${brand.name} examples above
+10. Return ONLY valid JSON - no markdown code fences, no explanations, no additional text
+11. ABSOLUTELY NO exclamation marks (!) in any field
+12. ABSOLUTELY NO hashtags (#) in any field
+13. ABSOLUTELY NO emoji in any field
 
 TONE: ${specs.tone}
-Write as if speaking ${brand.name === 'CGA' ? 'to parents of teenagers seeking flexible education options' : `to ${brand.guidelines.targetAudience}`}`;
+Context: You are writing for ${brand.name}
+Audience: ${brand.name === 'CGA' ? 'Parents of teenagers seeking flexible, online education with global pathways' : brand.guidelines.targetAudience}
+Goal: Create ads that are DISTINCTLY ${brand.name} - not generic education marketing`;
+
+  // Enhance user prompt with brand context
+  const enhancedUserPrompt = `Create ${count} ad copy variations for ${brand.name}.
+
+BRAND CONTEXT:
+${brand.name} is targeting: ${brand.guidelines.targetAudience}
+Core brand values: ${brand.guidelines.values}
+Key messaging pillars: ${brand.guidelines.keyMessaging}
+
+USER REQUEST:
+${userPrompt}
+
+REMINDER: Every variation must clearly represent ${brand.name} - either by mentioning the brand name or by including distinctive brand messaging that makes it unmistakable. Generic education marketing is not acceptable.`;
 
   return {
     system: systemPrompt,
-    user: userPrompt
+    user: enhancedUserPrompt
   };
 }
 
