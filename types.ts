@@ -20,9 +20,19 @@ export interface Brand {
 
 export type TaskType = 'copy' | 'ad' | 'email';
 
+export interface AdVariation {
+  headline: string;
+  primaryText: string;
+  cta: string;
+  keywords: string[];
+  imageUrl?: string; // Generated image for this variation
+}
+
 export interface GeneratedCreative {
     text: string;
     images: string[];
+    variations?: AdVariation[]; // For multi-variation ad generation
+    selectedVariation?: AdVariation; // The variation user selected
 }
 
 // Brand Guidelines Management Types

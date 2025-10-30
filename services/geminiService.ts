@@ -23,7 +23,7 @@ const generateText = async (prompt: string): Promise<string> => {
     }
 }
 
-const generateImages = async (prompt: string, count: number): Promise<string[]> => {
+export const generateImages = async (prompt: string, count: number): Promise<string[]> => {
     // Check if image generation is disabled via env var
     const imageGenDisabled = import.meta.env.VITE_DISABLE_IMAGE_GENERATION === 'true';
 
@@ -33,53 +33,80 @@ const generateImages = async (prompt: string, count: number): Promise<string[]> 
     }
 
     try {
-        console.log('🖼️ Generating images with Gemini 2.5 Flash Image (production model)...');
+        console.log('🖼️ Generating images with Gemini 2.5 Flash Image...');
         console.log('   Prompt:', prompt.substring(0, 200) + '...');
         console.log('   Requested count:', count);
 
-        // Use Gemini 2.5 Flash Image (production-ready model with better availability)
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-image', // Production-ready image generation model
-            contents: prompt,
-            config: {
-                responseModalities: ["TEXT", "IMAGE"], // Request both text and images
-            },
-        });
+        // Use direct API call instead of SDK for better control
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+        if (!apiKey) {
+            throw new Error('VITE_GEMINI_API_KEY environment variable not set');
+        }
 
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp-01-21:generateContent?key=${apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        role: 'user',
+                        parts: [{
+                            text: prompt
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        responseModalities: ['IMAGE'], // Only request IMAGE, not TEXT
+                        imageMimeType: 'image/png'
+                    }
+                })
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Gemini API error:', errorText);
+            throw new Error(`Gemini API returned ${response.status}: ${errorText}`);
+        }
+
+        const data = await response.json();
         console.log('✅ Gemini response received');
-        console.log('   Response candidates:', response.candidates?.length);
+        console.log('   Full response structure:', JSON.stringify(data, null, 2).substring(0, 500));
 
         // Extract images from response
         const images: string[] = [];
 
-        if (response.candidates && response.candidates.length > 0) {
-            const candidate = response.candidates[0];
+        if (data.candidates) {
+            console.log(`   Found ${data.candidates.length} candidate(s)`);
 
-            if (candidate.content && candidate.content.parts) {
-                console.log('   Response parts:', candidate.content.parts.length);
+            for (const candidate of data.candidates) {
+                if (candidate.content?.parts) {
+                    console.log(`   Candidate has ${candidate.content.parts.length} part(s)`);
 
-                for (const part of candidate.content.parts) {
-                    // Check for inline image data
-                    if (part.inline_data && part.inline_data.data) {
-                        console.log('   Found image data (base64)');
-                        images.push(part.inline_data.data);
-                    }
+                    for (const part of candidate.content.parts) {
+                        // Check for inlineData (not inline_data)
+                        if (part.inlineData?.data) {
+                            console.log('   ✅ Found image data (base64)');
+                            images.push(part.inlineData.data);
+                        } else if (part.inline_data?.data) {
+                            console.log('   ✅ Found image data (base64, snake_case)');
+                            images.push(part.inline_data.data);
+                        }
 
-                    // Log text parts for debugging
-                    if (part.text) {
-                        console.log('   Found text part:', part.text.substring(0, 100));
+                        // Log part structure for debugging
+                        console.log('   Part keys:', Object.keys(part));
                     }
                 }
             }
         }
 
-        console.log(`✅ Image generation complete! Generated ${images.length} image(s)`);
+        console.log(`📊 Extracted ${images.length} image(s)`);
 
-        // If no images were generated, log helpful info
         if (images.length === 0) {
-            console.warn('⚠️ No images found in Gemini response');
-            console.warn('   This may mean the model did not generate images');
-            console.warn('   Try adjusting the prompt or model');
+            console.error('⚠️ No images found in Gemini response');
+            console.error('⚠️ Full response:', JSON.stringify(data, null, 2));
+            throw new Error('Gemini did not generate any images. This may be due to regional restrictions, content policy violations, or the model not supporting image generation. Check console logs for full response structure.');
         }
 
         return images;
@@ -88,7 +115,6 @@ const generateImages = async (prompt: string, count: number): Promise<string[]> 
         console.error("❌ Image generation failed:", error);
         console.error("   Error name:", error?.name);
         console.error("   Error message:", error?.message);
-        console.error("   Error stack:", error?.stack);
 
         // Return helpful error message
         const errorMessage = error?.message || error?.toString() || "Unknown error";
