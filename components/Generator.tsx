@@ -7,6 +7,7 @@ import { getApprovedContentForBrand, formatApprovedContentAsInspiration, saveApp
 import { getAssetsByCategory } from '../services/assetService';
 import { getBrandInstructions } from '../services/instructionsService';
 import LoadingSpinner from './LoadingSpinner';
+import BrandAssetInspector from './BrandAssetInspector';
 
 interface GeneratorProps {
   brand: Brand;
@@ -452,6 +453,9 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
         Back to Task Selection
       </button>
+
+      {/* Brand Asset Inspector */}
+      <BrandAssetInspector brand={brand} />
 
       <form onSubmit={handleSubmit} className="p-8 bg-gray-800 rounded-lg border border-gray-700">
         <h2 className="text-2xl font-semibold text-white mb-6">{taskDetails.title}</h2>

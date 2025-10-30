@@ -104,6 +104,31 @@ export const generateImages = async (prompt: string, count: number): Promise<str
         console.log('   Prompt:', prompt.substring(0, 200) + '...');
         console.log('   Requested count:', count);
 
+        // Enhance prompt with Facebook/Instagram ad requirements
+        const enhancedPrompt = prompt + `
+
+**CRITICAL FACEBOOK/INSTAGRAM AD REQUIREMENTS:**
+- Image must look professional and polished (not amateur or low-quality)
+- Must be visually striking to stop scrolling in feed
+- Clear focal point that draws attention immediately
+- High contrast between subject and background
+- Bright, well-lit photography (avoid dark/murky images)
+- Clean, uncluttered composition
+- Professional-grade photography quality
+- Colors should be vibrant but not oversaturated
+- Authentic, real-looking people (not overly posed or stock-photo-like)
+- Modern, contemporary aesthetic
+- Ad-ready quality (could be used immediately without editing)
+
+**TECHNICAL REQUIREMENTS:**
+- 1:1 aspect ratio (square format) - 1024x1024px
+- Text overlay must be clearly readable on mobile
+- High resolution and sharp focus
+- Proper lighting and exposure
+- Professional composition and framing
+
+Generate an image that looks like it was professionally shot for a major brand campaign.`;
+
         // Use direct API call instead of SDK for better control
         const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
         if (!apiKey) {
@@ -119,7 +144,7 @@ export const generateImages = async (prompt: string, count: number): Promise<str
                     contents: [{
                         role: 'user',
                         parts: [{
-                            text: prompt
+                            text: enhancedPrompt
                         }]
                     }],
                     generationConfig: {

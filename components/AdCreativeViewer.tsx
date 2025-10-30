@@ -392,21 +392,21 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
                         </button>
                     </div>
 
-                    {/* Create More Like These Section */}
+                    {/* Generate Fresh Images Section */}
                     <div className="pt-6 border-t border-gray-600">
-                        <h5 className="text-md font-medium text-gray-300 mb-2">Create More Like These</h5>
-                        <p className="text-sm text-gray-400 mb-3">Generate additional variations with the same style:</p>
+                        <h5 className="text-md font-medium text-gray-300 mb-2">Generate New Images</h5>
+                        <p className="text-sm text-gray-400 mb-3">Create fresh images for this ad copy (analyzes your brand assets):</p>
                         <div className="flex items-center gap-4 mb-3">
-                            <label htmlFor="imageCount" className="text-gray-300 text-sm">How many more:</label>
+                            <label htmlFor="imageCount" className="text-gray-300 text-sm">How many:</label>
                             <select
                                 id="imageCount"
                                 value={imageCount}
                                 onChange={(e) => setImageCount(Number(e.target.value))}
                                 className="bg-gray-700 border border-gray-600 text-white rounded-md p-2 flex-1"
                             >
-                                <option value={1}>1 variation</option>
-                                <option value={2}>2 variations</option>
-                                <option value={4}>4 variations</option>
+                                <option value={1}>1 image</option>
+                                <option value={2}>2 images</option>
+                                <option value={4}>4 images</option>
                             </select>
                         </div>
                         <button
@@ -417,7 +417,7 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
                             disabled={isLoading}
                             className="w-full py-2 px-4 bg-brand-primary text-white font-semibold rounded-md hover:bg-red-500 disabled:bg-gray-500 disabled:cursor-not-allowed"
                         >
-                            {isLoading ? 'Generating...' : `Create ${imageCount} More`}
+                            {isLoading ? 'Generating...' : `🎨 Generate ${imageCount} Image${imageCount > 1 ? 's' : ''}`}
                         </button>
                     </div>
                 </div>
