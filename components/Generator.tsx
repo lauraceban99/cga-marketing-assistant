@@ -147,23 +147,56 @@ const Generator: React.FC<GeneratorProps> = ({ brand, taskType, onAssetGenerated
 
       console.log(`✅ Loaded ${logos.length} logos and ${competitorAds.length} example ads`);
 
+      // Analyze brand assets using Gemini vision
+      console.log('🔍 Analyzing brand assets with AI vision...');
+      const { analyzeBrandAssetImage } = await import('../services/geminiService');
+
+      const analyses = {
+        logo: '',
+        exampleAds: [] as string[]
+      };
+
+      // Analyze logo (take first logo if multiple)
+      if (logos.length > 0 && logos[0].fileUrl) {
+        try {
+          analyses.logo = await analyzeBrandAssetImage(logos[0].fileUrl, 'logo');
+        } catch (err) {
+          console.warn('Could not analyze logo:', err);
+        }
+      }
+
+      // Analyze example ads (up to 2 for performance)
+      const adsToAnalyze = competitorAds.slice(0, 2).filter(ad => ad.fileUrl && ad.fileType.startsWith('image/'));
+      if (adsToAnalyze.length > 0) {
+        analyses.exampleAds = await Promise.all(
+          adsToAnalyze.map(ad => analyzeBrandAssetImage(ad.fileUrl, 'example-ad'))
+        );
+      }
+
+      console.log('✅ Asset analysis complete');
+
       // Generate image using Gemini for the selected variation
       console.log('🖼️ Generating image for selected variation...');
 
       // Import generateImages from geminiService
       const { generateImages } = await import('../services/geminiService');
 
-      // Build enhanced image prompt with brand assets
+      // Build enhanced image prompt with actual brand asset analysis
       let imagePrompt = `Generate a square 1024x1024 photorealistic advertisement image for ${brand.name}.
 
-**Ad Headline:** ${selectedVariation.headline}
+**THE AD MESSAGE (PRIMARY FOCUS):**
+Headline: "${selectedVariation.headline}"
+Primary Text: "${selectedVariation.primaryText}"
+Call to Action: "${selectedVariation.cta}"
+
+The image MUST visually support and enhance this specific message. The scene, composition, and mood should directly relate to the headline and message.
 
 **BRAND IDENTITY (CRITICAL - MUST FOLLOW):**`;
 
-      // Add logo information
-      if (logos.length > 0) {
-        imagePrompt += `\n- Logo: ${brand.name} logo MUST be prominently displayed (reference provided brand logo assets)`;
-        imagePrompt += `\n- Logo placement: Top corner or integrated naturally into the design`;
+      // Add actual logo analysis
+      if (analyses.logo) {
+        imagePrompt += `\n\n**BRAND LOGO (MUST INCLUDE):**\n${analyses.logo}`;
+        imagePrompt += `\n- The logo must be visible and integrated into the design`;
         if (brand.guidelines.logoRules) {
           imagePrompt += `\n- Logo rules: ${brand.guidelines.logoRules}`;
         }
@@ -171,19 +204,23 @@ const Generator: React.FC<GeneratorProps> = ({ brand, taskType, onAssetGenerated
 
       // Add color palette
       if (brand.guidelines.palette) {
-        imagePrompt += `\n- Color scheme: STRICTLY use ${brand.guidelines.palette}`;
-        imagePrompt += `\n- Apply brand colors to backgrounds, accents, and design elements`;
+        imagePrompt += `\n\n**COLOR PALETTE:**`;
+        imagePrompt += `\n- STRICTLY use these colors: ${brand.guidelines.palette}`;
+        imagePrompt += `\n- Apply brand colors to backgrounds, accents, text overlays, and all design elements`;
       }
 
       // Add imagery style
       if (brand.guidelines.imageryStyle) {
-        imagePrompt += `\n- Visual style: ${brand.guidelines.imageryStyle}`;
+        imagePrompt += `\n\n**IMAGERY STYLE:**\n${brand.guidelines.imageryStyle}`;
       }
 
-      // Add example ads reference
-      if (competitorAds.length > 0) {
-        imagePrompt += `\n- Style reference: Match the visual style and composition from ${competitorAds.length} example ad(s) provided`;
-        imagePrompt += `\n- Take inspiration from composition, color usage, and layout of example ads`;
+      // Add actual example ad analysis
+      if (analyses.exampleAds.length > 0) {
+        imagePrompt += `\n\n**VISUAL STYLE REFERENCE (MATCH THIS):**`;
+        analyses.exampleAds.forEach((analysis, i) => {
+          imagePrompt += `\n\nExample Ad ${i + 1}:\n${analysis}`;
+        });
+        imagePrompt += `\n\nYour generated image MUST match this visual style, composition approach, and aesthetic.`;
       }
 
       imagePrompt += `

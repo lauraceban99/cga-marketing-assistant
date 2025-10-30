@@ -1,6 +1,6 @@
 
 import { GoogleGenAI } from "@google/genai";
-import type { Brand, TaskType, ParsedGuidelines } from '../types';
+import type { Brand, TaskType, ParsedGuidelines, BrandAsset } from '../types';
 import { getBrandGuideline } from './firebaseService';
 import { parseGuidelinesFromText } from './guidelinesExtractor';
 
@@ -9,6 +9,73 @@ if (!import.meta.env.VITE_GEMINI_API_KEY) {
 }
 
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY as string });
+
+/**
+ * Analyze brand asset images using Gemini vision to extract visual style
+ */
+export const analyzeBrandAssetImage = async (imageUrl: string, assetType: 'logo' | 'example-ad'): Promise<string> => {
+    try {
+        console.log(`🔍 Analyzing ${assetType} image...`);
+
+        // Fetch the image
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const base64 = await blobToBase64(blob);
+
+        const analysisPrompt = assetType === 'logo'
+            ? `Analyze this brand logo image and describe:
+1. Primary colors used (be specific with color names/hex if possible)
+2. Visual style (modern, classic, playful, professional, etc.)
+3. Key design elements (shapes, symbols, typography style)
+4. Overall brand personality conveyed
+
+Provide a concise description in 2-3 sentences that can be used to ensure brand consistency in generated images.`
+            : `Analyze this advertisement example and describe:
+1. Visual composition and layout (how elements are arranged)
+2. Color scheme and mood
+3. Photography style (lighting, angle, subject matter)
+4. Text placement and integration
+5. Overall aesthetic and feel
+
+Provide a concise description in 3-4 sentences that captures the visual style for replication.`;
+
+        const result = await ai.models.generateContent({
+            model: 'gemini-2.0-flash-exp',
+            contents: [{
+                role: 'user',
+                parts: [
+                    { text: analysisPrompt },
+                    {
+                        inlineData: {
+                            mimeType: blob.type,
+                            data: base64.split(',')[1] // Remove data:image/jpeg;base64, prefix
+                        }
+                    }
+                ]
+            }]
+        });
+
+        const analysis = result.text;
+        console.log(`✅ ${assetType} analysis complete:`, analysis.substring(0, 100) + '...');
+        return analysis;
+
+    } catch (error) {
+        console.error(`❌ Error analyzing ${assetType} image:`, error);
+        return '';
+    }
+};
+
+/**
+ * Helper function to convert Blob to base64
+ */
+const blobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+};
 
 const generateText = async (prompt: string): Promise<string> => {
     try {
@@ -538,21 +605,43 @@ export const regenerateImages = async (
 
     console.log(`📦 Loaded ${logos.length} logos and ${competitorAds.length} example ads for regeneration`);
 
-    // Build Gemini-friendly refinement prompt with brand assets
+    // Analyze brand assets using Gemini vision
+    console.log('🔍 Analyzing brand assets for regeneration...');
+    const analyses = {
+        logo: '',
+        exampleAds: [] as string[]
+    };
+
+    if (logos.length > 0 && logos[0].fileUrl) {
+        try {
+            analyses.logo = await analyzeBrandAssetImage(logos[0].fileUrl, 'logo');
+        } catch (err) {
+            console.warn('Could not analyze logo:', err);
+        }
+    }
+
+    const adsToAnalyze = competitorAds.slice(0, 2).filter(ad => ad.fileUrl && ad.fileType.startsWith('image/'));
+    if (adsToAnalyze.length > 0) {
+        analyses.exampleAds = await Promise.all(
+            adsToAnalyze.map(ad => analyzeBrandAssetImage(ad.fileUrl, 'example-ad'))
+        );
+    }
+
+    // Build Gemini-friendly refinement prompt with actual brand asset analysis
     let imagePrompt = `Generate ${count} square 1024x1024 photorealistic advertisement image${count > 1 ? 's' : ''} for ${brand.name}.
 
 **Original Ad Copy:**
-${text.substring(0, 300)}...
+${text}
 
 **Refinement Requested:**
-${refinement}
+${refinement || 'Generate more variations with the same style'}
 
 **BRAND IDENTITY (CRITICAL - MUST FOLLOW):**`;
 
-    // Add logo information
-    if (logos.length > 0) {
-        imagePrompt += `\n- Logo: ${brand.name} logo MUST be prominently displayed`;
-        imagePrompt += `\n- Logo placement: Top corner or integrated naturally`;
+    // Add actual logo analysis
+    if (analyses.logo) {
+        imagePrompt += `\n\n**BRAND LOGO (MUST INCLUDE):**\n${analyses.logo}`;
+        imagePrompt += `\n- The logo must be visible and integrated into the design`;
         if (brand.guidelines.logoRules) {
             imagePrompt += `\n- Logo rules: ${brand.guidelines.logoRules}`;
         }
@@ -560,18 +649,23 @@ ${refinement}
 
     // Add color palette
     if (brand.guidelines.palette) {
-        imagePrompt += `\n- Color scheme: STRICTLY use ${brand.guidelines.palette}`;
-        imagePrompt += `\n- Apply brand colors to backgrounds, accents, and design elements`;
+        imagePrompt += `\n\n**COLOR PALETTE:**`;
+        imagePrompt += `\n- STRICTLY use these colors: ${brand.guidelines.palette}`;
+        imagePrompt += `\n- Apply brand colors to backgrounds, accents, text overlays, and all design elements`;
     }
 
     // Add imagery style
     if (brand.guidelines.imageryStyle) {
-        imagePrompt += `\n- Visual style: ${brand.guidelines.imageryStyle}`;
+        imagePrompt += `\n\n**IMAGERY STYLE:**\n${brand.guidelines.imageryStyle}`;
     }
 
-    // Add example ads reference
-    if (competitorAds.length > 0) {
-        imagePrompt += `\n- Style reference: Match visual style from ${competitorAds.length} example ad(s)`;
+    // Add actual example ad analysis
+    if (analyses.exampleAds.length > 0) {
+        imagePrompt += `\n\n**VISUAL STYLE REFERENCE (MATCH THIS):**`;
+        analyses.exampleAds.forEach((analysis, i) => {
+            imagePrompt += `\n\nExample Ad ${i + 1}:\n${analysis}`;
+        });
+        imagePrompt += `\n\nYour generated image MUST match this visual style, composition approach, and aesthetic.`;
     }
 
     imagePrompt += `
