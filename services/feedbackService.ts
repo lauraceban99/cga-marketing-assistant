@@ -27,15 +27,22 @@ export async function saveApprovedContent(
   try {
     console.log('💾 Saving approved content to knowledge base...');
 
-    const docRef = await addDoc(collection(db, 'approvedContent'), {
+    // Build document data, excluding undefined fields
+    const docData: any = {
       brandId,
       brandName,
       variation,
       userPrompt,
       contentType,
-      imageUrl,
       approvedAt: Timestamp.now()
-    });
+    };
+
+    // Only include imageUrl if it's defined
+    if (imageUrl !== undefined && imageUrl !== null) {
+      docData.imageUrl = imageUrl;
+    }
+
+    const docRef = await addDoc(collection(db, 'approvedContent'), docData);
 
     console.log('✅ Approved content saved with ID:', docRef.id);
   } catch (error) {
