@@ -23,21 +23,38 @@ export const analyzeBrandAssetImage = async (imageUrl: string, assetType: 'logo'
         const base64 = await blobToBase64(blob);
 
         const analysisPrompt = assetType === 'logo'
-            ? `Analyze this brand logo image and describe:
-1. Primary colors used (be specific with color names/hex if possible)
-2. Visual style (modern, classic, playful, professional, etc.)
-3. Key design elements (shapes, symbols, typography style)
-4. Overall brand personality conveyed
+            ? `Analyze this brand logo image in detail:
 
-Provide a concise description in 2-3 sentences that can be used to ensure brand consistency in generated images.`
-            : `Analyze this advertisement example and describe:
-1. Visual composition and layout (how elements are arranged)
-2. Color scheme and mood
-3. Photography style (lighting, angle, subject matter)
-4. Text placement and integration
-5. Overall aesthetic and feel
+**CRITICAL - Identify these specific elements:**
+1. **Exact colors used**: List all colors with specific names (e.g., "burgundy", "gold", "white") and approximate hex values if possible
+2. **Logo shape and structure**: Describe the overall shape (circle, square, emblem, wordmark, etc.)
+3. **Typography style**: Font characteristics (serif/sans-serif, bold/light, modern/classic)
+4. **Key symbols or icons**: Any distinctive visual elements (shields, crowns, academic symbols, etc.)
+5. **Background/container**: Describe if logo sits on a solid background, in a circle, etc.
 
-Provide a concise description in 3-4 sentences that captures the visual style for replication.`;
+**Focus on these details for replication:**
+- Where should this logo be placed in ads? (corner placement, size relative to image)
+- What colors surround it typically?
+- Does it have a white circle background or other container?
+
+Provide a 3-4 sentence description that gives SPECIFIC, ACTIONABLE details for placing this logo correctly in generated images.`
+            : `Analyze this advertisement example in detail:
+
+**CRITICAL - Identify these specific elements:**
+1. **Color blocking and layout**: How is the ad space divided? (e.g., "left 40% solid burgundy, right 60% photo")
+2. **Brand colors used**: What specific colors are prominent? (burgundy, gold, white, etc.)
+3. **Text size and placement**: Where is text placed? How LARGE is it relative to the image?
+4. **Logo placement**: Where exactly is the logo? What size? On what background?
+5. **Photography composition**: How many people? What are they doing? Posed or candid?
+6. **Background style**: Solid colors, gradients, photos, or mixed?
+
+**Focus on these details:**
+- Is text on a solid color background or overlaid on photos?
+- What percentage of the image is text vs. photography?
+- Are photos used as full-frame backgrounds or in specific sections?
+- Is the aesthetic minimal/clean or busy/layered?
+
+Provide a 4-5 sentence description with SPECIFIC composition details that can be replicated (e.g., "Text occupies left third on burgundy background, photo fills right two-thirds").`;
 
         const result = await ai.models.generateContent({
             model: 'gemini-2.0-flash-exp',
@@ -104,30 +121,30 @@ export const generateImages = async (prompt: string, count: number): Promise<str
         console.log('   Prompt:', prompt.substring(0, 200) + '...');
         console.log('   Requested count:', count);
 
-        // Enhance prompt with Facebook/Instagram ad requirements
+        // Enhance prompt with social media ad quality requirements
         const enhancedPrompt = prompt + `
 
-**CRITICAL FACEBOOK/INSTAGRAM AD REQUIREMENTS:**
-- Image must look professional and polished (not amateur or low-quality)
-- Must be visually striking to stop scrolling in feed
-- Clear focal point that draws attention immediately
-- High contrast between subject and background
-- Bright, well-lit photography (avoid dark/murky images)
-- Clean, uncluttered composition
-- Professional-grade photography quality
-- Colors should be vibrant but not oversaturated
-- Authentic, real-looking people (not overly posed or stock-photo-like)
+**SOCIAL MEDIA AD QUALITY STANDARDS:**
+- Image must be scroll-stopping and attention-grabbing
+- Clear, single focal point (not cluttered or busy)
+- High contrast and bold visual hierarchy
+- Bright, well-lit photography (not dark or murky)
+- Professional-grade quality (sharp, high-resolution)
+- Authentic, real-looking people (not overly posed)
 - Modern, contemporary aesthetic
-- Ad-ready quality (could be used immediately without editing)
 
 **TECHNICAL REQUIREMENTS:**
 - 1:1 aspect ratio (square format) - 1024x1024px
-- Text overlay must be clearly readable on mobile
-- High resolution and sharp focus
-- Proper lighting and exposure
-- Professional composition and framing
+- Text must be LARGE and clearly readable on mobile screens
+- High resolution and sharp focus throughout
+- Proper exposure and professional lighting
+- Clean composition with intentional negative space
 
-Generate an image that looks like it was professionally shot for a major brand campaign.`;
+**CRITICAL REMINDERS:**
+- If text is included, it MUST be LARGE (15-20% of image height)
+- Colors must be used intentionally and match brand guidelines
+- Avoid generic stock photo aesthetics
+- Generate professional campaign-quality imagery`;
 
         // Use direct API call instead of SDK for better control
         const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -542,31 +559,62 @@ Generate again NOW with ABSOLUTE adherence to these limits in JSON format.`;
         const validation = validateAndParseAdCopy(text);
         const headline = validation.parsed.headline || '';
 
+        // Extract first 5-7 words from headline for short, punchy text overlay
+        const headlineWords = headline.split(/\s+/).slice(0, 7).join(' ');
+
         // Build Gemini-friendly image prompt (NOT Midjourney format)
-        const imagePrompt = `Generate a square 1024x1024 photorealistic advertisement image.
+        const imagePrompt = `Generate a square 1024x1024 photorealistic advertisement image for ${brand.name}.
 
-**Visual Requirements:**
-- Modern, clean composition with bold focal point
-- High contrast and clutter-free background
-- Professional photography style
+**CGA BRAND IDENTITY (CRITICAL - MUST FOLLOW):**
+- Primary colors: Burgundy (#8B1538) and Gold (#D4AF37) MUST be prominent
+- These colors should be used for text backgrounds, design elements, or color blocking
+- Logo: CGA logo in white circle MUST be visible (top-left or bottom-left corner)
+- Typography: Bold, modern sans-serif for headlines
+- Photography style: Authentic students in natural learning environments
+- NOT generic stock photos - must feel real and personal
+- Modern, premium educational brand aesthetic
+${brand.guidelines.palette ? `- Additional brand colors: ${brand.guidelines.palette}` : ''}
+${brand.guidelines.dosAndDonts ? `- Brand rules: ${brand.guidelines.dosAndDonts}` : ''}
+
+**COMPOSITION REQUIREMENTS:**
+- HERO IMAGE: One clear focal point (student, learning moment, or aspirational scene)
+- MINIMAL TEXT: Only headline in LARGE, BOLD typography - NOT small body copy
+- COLOR BLOCKING: Use burgundy/gold for text backgrounds or design elements
+- NEGATIVE SPACE: Clean, uncluttered - let the image breathe
+- LOGO: CGA logo prominently placed but not dominating (bottom-left or top-left)
+- Call-to-action element: Gold background with white text or burgundy with gold text
+
+**CRITICAL - AVOID STOCK PHOTO LOOK:**
+- NO overly diverse "UN ad" style group shots
+- NO everyone smiling directly at camera
+- NO overly staged/posed scenes
+- YES authentic, candid learning moments
+- YES natural interactions between students
+- YES realistic home/classroom environments
+- Show 1-3 students maximum (not large groups)
+- Natural expressions, not forced smiles
+
+**Text Overlay (SHORT AND BOLD):**
+${headlineWords ? `- Text overlay: "${headlineWords}" (Maximum 5-7 words)` : '- No text overlay needed'}
+- Text should be LARGE, bold, highly readable - NOT small body copy
+- Use bold sans-serif typography
+- Place on solid color background (burgundy or gold) for maximum contrast
+- Text size should be at least 15-20% of image height
+
+**Visual Style:**
+${brand.guidelines.imageryStyle ? `- ${brand.guidelines.imageryStyle}` : '- Authentic students aged 13-17 in modern learning spaces'}
+- High contrast and clean composition
+- Professional but personal and approachable
+- Modern, aspirational atmosphere
+- Well-lit, bright photography (avoid dark/murky)
 - 1:1 square aspect ratio
-
-**Content:**
-${brand.guidelines.imageryStyle ? `- Style: ${brand.guidelines.imageryStyle}` : '- Feature authentic-looking students aged 10-18'}
-- Show diverse teenagers engaged in learning or collaborative activities
-- Aspirational and empowering atmosphere
-${brand.guidelines.palette ? `- Color palette: Use ${brand.guidelines.palette} prominently` : '- Use modern, professional color tones'}
-
-**Text Overlay:**
-${headline ? `- Include brief text overlay (≤6 words): "${headline.substring(0, 50)}"` : '- No text overlay needed'}
-- If text is included, use modern bold typography
-- Text should be clearly readable and well-positioned
 
 **Important:**
 - DO NOT reference Facebook, Meta, or specific platforms
+- MUST use burgundy and gold colors prominently
+- MUST include CGA logo in white circle
 - Avoid generic stock photo aesthetics
 - Modern, authentic, professional quality
-${brand.guidelines.dosAndDonts ? `- Brand adherence: ${brand.guidelines.dosAndDonts}` : ''}
 
 Generate one high-quality square advertisement image that matches these specifications.`;
 
@@ -652,6 +700,9 @@ export const regenerateImages = async (
         );
     }
 
+    // Extract first 5-7 words from headline for short, punchy text overlay
+    const headlineWords = headline.split(/\s+/).slice(0, 7).join(' ');
+
     // Build Gemini-friendly refinement prompt with actual brand asset analysis
     let imagePrompt = `Generate ${count} square 1024x1024 photorealistic advertisement image${count > 1 ? 's' : ''} for ${brand.name}.
 
@@ -661,11 +712,18 @@ ${text}
 **Refinement Requested:**
 ${refinement || 'Generate more variations with the same style'}
 
-**BRAND IDENTITY (CRITICAL - MUST FOLLOW):**`;
+**CGA BRAND IDENTITY (CRITICAL - MUST FOLLOW):**
+- Primary colors: Burgundy (#8B1538) and Gold (#D4AF37) MUST be prominent
+- These colors should be used for text backgrounds, design elements, or color blocking
+- Logo: CGA logo in white circle MUST be visible (top-left or bottom-left corner)
+- Typography: Bold, modern sans-serif for headlines
+- Photography style: Authentic students in natural learning environments
+- NOT generic stock photos - must feel real and personal
+- Modern, premium educational brand aesthetic`;
 
     // Add actual logo analysis
     if (analyses.logo) {
-        imagePrompt += `\n\n**BRAND LOGO (MUST INCLUDE):**\n${analyses.logo}`;
+        imagePrompt += `\n\n**BRAND LOGO ANALYSIS (MUST INCLUDE):**\n${analyses.logo}`;
         imagePrompt += `\n- The logo must be visible and integrated into the design`;
         if (brand.guidelines.logoRules) {
             imagePrompt += `\n- Logo rules: ${brand.guidelines.logoRules}`;
@@ -674,8 +732,8 @@ ${refinement || 'Generate more variations with the same style'}
 
     // Add color palette
     if (brand.guidelines.palette) {
-        imagePrompt += `\n\n**COLOR PALETTE:**`;
-        imagePrompt += `\n- STRICTLY use these colors: ${brand.guidelines.palette}`;
+        imagePrompt += `\n\n**ADDITIONAL BRAND COLORS:**`;
+        imagePrompt += `\n- ${brand.guidelines.palette}`;
         imagePrompt += `\n- Apply brand colors to backgrounds, accents, text overlays, and all design elements`;
     }
 
@@ -695,34 +753,50 @@ ${refinement || 'Generate more variations with the same style'}
 
     imagePrompt += `
 
-**Visual Requirements:**
-- Modern, clean composition with bold focal point
-- High contrast and clutter-free background
-- Professional photography style matching brand guidelines
+**COMPOSITION REQUIREMENTS:**
+- HERO IMAGE: One clear focal point (student, learning moment, or aspirational scene)
+- MINIMAL TEXT: Only headline in LARGE, BOLD typography - NOT small body copy
+- COLOR BLOCKING: Use burgundy/gold for text backgrounds or design elements
+- NEGATIVE SPACE: Clean, uncluttered - let the image breathe
+- LOGO: CGA logo prominently placed but not dominating (bottom-left or top-left)
+- Call-to-action element: Gold background with white text or burgundy with gold text
+
+**CRITICAL - AVOID STOCK PHOTO LOOK:**
+- NO overly diverse "UN ad" style group shots
+- NO everyone smiling directly at camera
+- NO overly staged/posed scenes
+- YES authentic, candid learning moments
+- YES natural interactions between students
+- YES realistic home/classroom environments
+- Show 1-3 students maximum (not large groups)
+- Natural expressions, not forced smiles
+
+**Text Overlay (SHORT AND BOLD):**
+${headlineWords ? `- Text overlay: "${headlineWords}" (Maximum 5-7 words)` : '- No text overlay needed'}
+- Text should be LARGE, bold, highly readable - NOT small body copy
+- Use bold sans-serif typography
+- Place on solid color background (burgundy or gold) for maximum contrast
+- Text size should be at least 15-20% of image height
+
+**Visual Style:**
+${brand.guidelines.imageryStyle || '- Authentic students aged 13-17 in modern learning spaces'}
+- High contrast and clean composition
+- Professional but personal and approachable
+- Modern, aspirational atmosphere
+- Well-lit, bright photography (avoid dark/murky)
 - 1:1 square aspect ratio
 - Brand-consistent visual language
 
-**Content:**
-${brand.guidelines.imageryStyle || '- Feature authentic-looking students aged 10-18'}
-- Show diverse teenagers engaged in learning or collaborative activities
-- Aspirational and empowering atmosphere
-- Natural, authentic photography (not stock photo aesthetic)
-
-**Text Overlay:**
-${headline ? `- Include headline text overlay: "${headline.substring(0, 50)}"` : '- No text overlay needed'}
-- Modern bold typography matching brand identity
-- Clearly readable and well-positioned
-
 **Critical Brand Adherence:**
 ${brand.guidelines.dosAndDonts || '- Maintain professional, authentic brand image'}
-- Ensure all brand colors are used prominently
-- Logo must be visible and properly displayed
+- MUST use burgundy and gold colors prominently
+- Logo must be visible and properly displayed (CGA logo in white circle)
 - Visual style must match brand identity
+- Avoid generic stock photo aesthetics
 
 **Important:**
 - Apply the refinement feedback above
 - DO NOT reference Facebook, Meta, or specific platforms
-- Avoid generic stock photo aesthetics
 - Modern, authentic, professional quality
 
 Generate ${count} diverse, high-quality, ON-BRAND variations incorporating the feedback.`;
@@ -784,6 +858,100 @@ export const extractTextFromPDF = async (pdfFile: File): Promise<string> => {
   } catch (error) {
     console.error('Error extracting text from PDF:', error);
     throw new Error('Failed to extract text from PDF.');
+  }
+};
+
+/**
+ * Extract text from a PDF via URL using Gemini API
+ */
+export const extractTextFromPDFUrl = async (pdfUrl: string): Promise<string> => {
+  try {
+    console.log('📄 Downloading PDF from URL...');
+
+    // Fetch the PDF
+    const response = await fetch(pdfUrl);
+    const blob = await response.blob();
+    const file = new File([blob], 'document.pdf', { type: 'application/pdf' });
+
+    // Use existing function
+    return await extractTextFromPDF(file);
+  } catch (error) {
+    console.error('Error extracting text from PDF URL:', error);
+    throw new Error('Failed to extract text from PDF URL.');
+  }
+};
+
+/**
+ * Analyze PDF visually (design, layout, colors) using Gemini vision
+ */
+export const analyzePDFVisually = async (pdfUrl: string): Promise<string> => {
+  try {
+    console.log('🔍 Analyzing PDF visually (design, layout, colors)...');
+
+    // Fetch the PDF
+    const response = await fetch(pdfUrl);
+    const blob = await response.blob();
+    const file = new File([blob], 'document.pdf', { type: 'application/pdf' });
+
+    // Upload file to Gemini
+    const uploadedFile = await ai.files.upload({
+      file: file,
+      config: {
+        mimeType: 'application/pdf',
+      },
+    });
+
+    // Wait for file to be processed
+    let processedFile = await ai.files.get({ name: uploadedFile.name });
+    while (processedFile.state === 'PROCESSING') {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      processedFile = await ai.files.get({ name: uploadedFile.name });
+    }
+
+    if (processedFile.state === 'FAILED') {
+      throw new Error('PDF processing failed');
+    }
+
+    // Analyze visual design using Gemini
+    const result = await ai.models.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              fileData: {
+                mimeType: uploadedFile.mimeType,
+                fileUri: uploadedFile.uri,
+              },
+            },
+            {
+              text: `Analyze this brand guidelines PDF document VISUALLY and describe:
+
+1. **Color Palette**: List all prominent colors you see (be specific with color names or approximate hex values)
+2. **Typography**: Describe font styles, headings, body text styles
+3. **Visual Style**: Overall design aesthetic (modern, classic, minimalist, bold, etc.)
+4. **Layout Patterns**: How content is structured and presented
+5. **Key Design Elements**: Logos, icons, patterns, shapes used throughout
+6. **Photography/Imagery Style**: If present, describe the visual approach to images
+
+Provide a concise 4-5 sentence summary that captures the VISUAL brand identity for use in image generation.`,
+            },
+          ],
+        },
+      ],
+    });
+
+    // Clean up uploaded file
+    await ai.files.delete({ name: uploadedFile.name });
+
+    const analysis = result.text;
+    console.log('✅ PDF visual analysis complete:', analysis.substring(0, 100) + '...');
+    return analysis;
+
+  } catch (error) {
+    console.error('❌ Error analyzing PDF visually:', error);
+    return '';
   }
 };
 

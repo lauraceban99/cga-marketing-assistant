@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Brand, BrandAsset } from '../types';
 import { getAssetsByCategory } from '../services/assetService';
-import { analyzeBrandAssetImage } from '../services/geminiService';
-import { extractTextFromPDF } from '../services/geminiService';
+import { analyzeBrandAssetImage, extractTextFromPDFUrl, analyzePDFVisually } from '../services/geminiService';
 import LoadingSpinner from './LoadingSpinner';
 
 interface BrandAssetInspectorProps {
@@ -69,9 +68,25 @@ const BrandAssetInspector: React.FC<BrandAssetInspectorProps> = ({ brand }) => {
           const type = asset.category === 'logos' ? 'logo' : 'example-ad';
           analysis = await analyzeBrandAssetImage(asset.fileUrl, type);
         } else if (asset.fileType === 'application/pdf') {
-          // For PDFs, we'd need to fetch the file first
-          // For now, just note that text extraction is available
-          analysis = 'PDF text extraction available via extractTextFromPDF()';
+          // For PDFs, extract both text AND analyze visually
+          console.log('📄 Analyzing PDF (text + visual)...');
+
+          const [textContent, visualAnalysis] = await Promise.all([
+            extractTextFromPDFUrl(asset.fileUrl).catch(err => {
+              console.warn('PDF text extraction failed:', err);
+              return 'Text extraction failed';
+            }),
+            analyzePDFVisually(asset.fileUrl).catch(err => {
+              console.warn('PDF visual analysis failed:', err);
+              return 'Visual analysis failed';
+            })
+          ]);
+
+          const textPreview = textContent.length > 300
+            ? textContent.substring(0, 300) + '...'
+            : textContent;
+
+          analysis = `**📝 TEXT CONTENT (${textContent.length} characters):**\n${textPreview}\n\n**🎨 VISUAL DESIGN ANALYSIS:**\n${visualAnalysis}`;
         } else if (asset.fileType.startsWith('text/')) {
           const response = await fetch(asset.fileUrl);
           const text = await response.text();

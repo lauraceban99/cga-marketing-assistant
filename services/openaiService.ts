@@ -113,7 +113,8 @@ function buildOpenAIPrompt(
   brand: Brand,
   inspirationExamples: string,
   contentConfig: ContentConfig,
-  brandInstructions?: BrandInstructions | null
+  brandInstructions?: BrandInstructions | null,
+  pdfGuidelinesText?: string
 ): { system: string; user: string } {
 
   const { type, specs, format, count } = contentConfig;
@@ -141,19 +142,28 @@ You MUST return ONLY valid JSON in this exact format:
 
 Return EXACTLY ${count} variations in this JSON structure. No markdown, no explanations, only JSON.`;
 
+    // Build brand guidelines section with PDF text if available
+    let brandGuidelinesSection = `
+Core Values: ${brand.guidelines.values}
+Tone of Voice: ${brand.guidelines.toneOfVoice}
+Key Messaging: ${brand.guidelines.keyMessaging}
+Target Audience: ${brand.guidelines.targetAudience}
+${brand.guidelines.dosAndDonts || ''}
+`;
+
+    // Add PDF content if available (truncated to first 1000 chars to avoid token limits)
+    if (pdfGuidelinesText && pdfGuidelinesText.length > 0) {
+      const pdfExcerpt = pdfGuidelinesText.substring(0, 1000);
+      brandGuidelinesSection += `\n\n📄 BRAND GUIDELINES (FROM PDF - AUTHORITATIVE):\n${pdfExcerpt}${pdfGuidelinesText.length > 1000 ? '...' : ''}`;
+    }
+
     // Replace template variables in user prompt template
     const userPromptWithVariables = brandInstructions.copyUserPromptTemplate
       .replace(/\{\{brand\}\}/g, brand.name)
       .replace(/\{\{theme\}\}/g, userPrompt)
       .replace(/\{\{location\}\}/g, '') // Extract if mentioned in userPrompt
       .replace(/\{\{audience\}\}/g, brand.guidelines.targetAudience)
-      .replace(/\{\{brandGuidelines\}\}/g, `
-Core Values: ${brand.guidelines.values}
-Tone of Voice: ${brand.guidelines.toneOfVoice}
-Key Messaging: ${brand.guidelines.keyMessaging}
-Target Audience: ${brand.guidelines.targetAudience}
-${brand.guidelines.dosAndDonts || ''}
-      `)
+      .replace(/\{\{brandGuidelines\}\}/g, brandGuidelinesSection)
       .replace(/\{\{referenceCopy\}\}/g, inspirationExamples || 'No reference copy available')
       .replace(/\{\{tone\}\}/g, brandInstructions.toneRules);
 
@@ -321,7 +331,8 @@ export async function generateAdCopyWithOpenAI(
   prompt: string,
   brand: Brand,
   inspirationExamples: string,
-  brandInstructions?: BrandInstructions | null
+  brandInstructions?: BrandInstructions | null,
+  pdfGuidelinesText?: string
 ): Promise<AdVariation[]> {
   console.log('🎯 Generating ad copy with OpenAI GPT-4o-mini...');
 
@@ -342,9 +353,10 @@ export async function generateAdCopyWithOpenAI(
   console.log('  Tone:', brand.guidelines.toneOfVoice || 'Not specified');
   console.log('  Inspiration examples:', inspirationExamples ? `${inspirationExamples.length} chars` : 'None');
   console.log('  Custom instructions:', brandInstructions ? 'Yes ✨' : 'No (using defaults)');
+  console.log('  PDF Guidelines:', pdfGuidelinesText ? `${pdfGuidelinesText.length} chars extracted` : 'None');
 
   // Build prompts
-  const { system, user } = buildOpenAIPrompt(prompt, brand, inspirationExamples, contentConfig, brandInstructions);
+  const { system, user } = buildOpenAIPrompt(prompt, brand, inspirationExamples, contentConfig, brandInstructions, pdfGuidelinesText);
 
   console.log('🚀 Calling OpenAI API...');
 

@@ -141,20 +141,23 @@ const Generator: React.FC<GeneratorProps> = ({ brand, taskType, onAssetGenerated
 
       // Load brand assets
       console.log('📦 Loading brand assets...');
-      const [logos, competitorAds] = await Promise.all([
+      const [logos, competitorAds, brandGuidelines] = await Promise.all([
         getAssetsByCategory(brand.id, 'logos'),
-        getAssetsByCategory(brand.id, 'competitor-ads')
+        getAssetsByCategory(brand.id, 'competitor-ads'),
+        getAssetsByCategory(brand.id, 'brand-guidelines')
       ]);
 
-      console.log(`✅ Loaded ${logos.length} logos and ${competitorAds.length} example ads`);
+      console.log(`✅ Loaded ${logos.length} logos, ${competitorAds.length} example ads, ${brandGuidelines.length} brand guidelines`);
 
       // Analyze brand assets using Gemini vision
       console.log('🔍 Analyzing brand assets with AI vision...');
-      const { analyzeBrandAssetImage } = await import('../services/geminiService');
+      const { analyzeBrandAssetImage, extractTextFromPDFUrl, analyzePDFVisually } = await import('../services/geminiService');
 
       const analyses = {
         logo: '',
-        exampleAds: [] as string[]
+        exampleAds: [] as string[],
+        guidelinesText: '',
+        guidelinesVisual: ''
       };
 
       // Analyze logo (take first logo if multiple)
@@ -172,6 +175,29 @@ const Generator: React.FC<GeneratorProps> = ({ brand, taskType, onAssetGenerated
         analyses.exampleAds = await Promise.all(
           adsToAnalyze.map(ad => analyzeBrandAssetImage(ad.fileUrl, 'example-ad'))
         );
+      }
+
+      // Extract text and analyze PDFs visually (first brand guidelines PDF)
+      const guidelinePDF = brandGuidelines.find(asset => asset.fileType === 'application/pdf');
+      if (guidelinePDF && guidelinePDF.fileUrl) {
+        try {
+          console.log('📄 Analyzing brand guidelines PDF...');
+          const [textContent, visualAnalysis] = await Promise.all([
+            extractTextFromPDFUrl(guidelinePDF.fileUrl).catch(err => {
+              console.warn('PDF text extraction failed:', err);
+              return '';
+            }),
+            analyzePDFVisually(guidelinePDF.fileUrl).catch(err => {
+              console.warn('PDF visual analysis failed:', err);
+              return '';
+            })
+          ]);
+          analyses.guidelinesText = textContent;
+          analyses.guidelinesVisual = visualAnalysis;
+          console.log(`✅ Extracted ${textContent.length} chars of text from guidelines PDF`);
+        } catch (err) {
+          console.warn('Could not analyze guidelines PDF:', err);
+        }
       }
 
       console.log('✅ Asset analysis complete');
@@ -201,6 +227,12 @@ The image MUST visually support and enhance this specific message. The scene, co
         if (brand.guidelines.logoRules) {
           imagePrompt += `\n- Logo rules: ${brand.guidelines.logoRules}`;
         }
+      }
+
+      // Add PDF brand guidelines visual analysis
+      if (analyses.guidelinesVisual) {
+        imagePrompt += `\n\n**BRAND GUIDELINES (FROM PDF - CRITICAL):**\n${analyses.guidelinesVisual}`;
+        imagePrompt += `\n- Follow this visual identity precisely`;
       }
 
       // Add color palette
