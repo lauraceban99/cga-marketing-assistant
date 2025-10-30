@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import type { Brand, TaskType, GeneratedCreative, AdVariation } from '../types';
+import type { Brand, TaskType, GeneratedCreative, AdVariation, BrandInstructions } from '../types';
 import { generateAsset } from '../services/geminiService';
 import { generateAdCopyWithOpenAI } from '../services/openaiService';
 import { getApprovedContentForBrand, formatApprovedContentAsInspiration, saveApprovedContent } from '../services/feedbackService';
 import { getAssetsByCategory } from '../services/assetService';
+import { getBrandInstructions } from '../services/instructionsService';
 import LoadingSpinner from './LoadingSpinner';
 
 interface GeneratorProps {
@@ -53,20 +54,28 @@ const Generator: React.FC<GeneratorProps> = ({ brand, taskType, onAssetGenerated
   const [inspirationContext, setInspirationContext] = useState<string>('');
   const [editingVariationIndex, setEditingVariationIndex] = useState<number | null>(null);
   const [editedVariation, setEditedVariation] = useState<AdVariation | null>(null);
+  const [brandInstructions, setBrandInstructions] = useState<BrandInstructions | null>(null);
 
   const taskDetails = getTaskDetails(taskType);
 
-  // Load approved content for inspiration on mount
+  // Load approved content and brand instructions on mount
   useEffect(() => {
-    const loadInspirationContext = async () => {
-      console.log('📚 Loading approved content for brand', brand.id);
+    const loadBrandContext = async () => {
+      console.log('📚 Loading brand context for', brand.id);
+
+      // Load approved content for inspiration
       const approvedContent = await getApprovedContentForBrand(brand.id, 10);
       const formattedInspiration = formatApprovedContentAsInspiration(approvedContent);
       setInspirationContext(formattedInspiration);
       console.log('✅ Loaded inspiration context:', approvedContent.length, 'examples');
+
+      // Load custom brand instructions
+      const instructions = await getBrandInstructions(brand.id);
+      setBrandInstructions(instructions);
+      console.log('✅ Loaded brand instructions:', instructions ? 'Custom' : 'Default');
     };
 
-    loadInspirationContext();
+    loadBrandContext();
   }, [brand.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,7 +99,8 @@ const Generator: React.FC<GeneratorProps> = ({ brand, taskType, onAssetGenerated
         const generatedVariations = await generateAdCopyWithOpenAI(
           prompt,
           brand,
-          combinedInspiration
+          combinedInspiration,
+          brandInstructions
         );
 
         setVariations(generatedVariations);
@@ -116,6 +126,17 @@ const Generator: React.FC<GeneratorProps> = ({ brand, taskType, onAssetGenerated
 
     try {
       const selectedVariation = variations[index];
+
+      // Auto-approve: Save to knowledge base when user selects "Use This One"
+      console.log('✅ Auto-approving selected variation...');
+      await saveApprovedContent(
+        brand.id,
+        brand.name,
+        selectedVariation,
+        prompt,
+        'facebook_ad'
+      );
+      console.log('✅ Saved to knowledge base for future learning');
 
       // Load brand assets
       console.log('📦 Loading brand assets...');
@@ -233,28 +254,6 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
     }
   };
 
-  const handleApproveVariation = async (index: number) => {
-    console.log(`✅ User approved variation ${index + 1}`);
-
-    try {
-      const variation = variations[index];
-      await saveApprovedContent(
-        brand.id,
-        brand.name,
-        variation,
-        prompt,
-        'facebook_ad'
-      );
-
-      console.log('✅ Saved approved variation to knowledge base');
-
-      // Show success message briefly
-      alert('Saved to knowledge base! Future ads will learn from this example.');
-    } catch (err) {
-      console.error('Failed to save approved content:', err);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="text-center py-16">
@@ -287,7 +286,7 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
         </button>
 
         <h2 className="text-3xl font-bold text-white mb-2">Select Your Favorite Variation</h2>
-        <p className="text-gray-400 mb-8">Choose the ad copy you like best, then we'll generate the perfect image for it.</p>
+        <p className="text-gray-400 mb-8">Edit if needed, then click "Use This One" to generate images. Selected ads are automatically saved to train future generations.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {variations.map((variation, index) => {
@@ -305,22 +304,13 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
                   <span className="text-xs font-semibold text-brand-primary">Variation {index + 1}</span>
                   <div className="flex gap-2">
                     {!isEditing ? (
-                      <>
-                        <button
-                          onClick={() => handleStartEdit(index)}
-                          className="text-xs text-gray-400 hover:text-blue-400 transition-colors"
-                          title="Edit this variation"
-                        >
-                          ✏️ Edit
-                        </button>
-                        <button
-                          onClick={() => handleApproveVariation(index)}
-                          className="text-xs text-gray-400 hover:text-green-400 transition-colors"
-                          title="Save to knowledge base"
-                        >
-                          ⭐ Approve
-                        </button>
-                      </>
+                      <button
+                        onClick={() => handleStartEdit(index)}
+                        className="text-xs text-gray-400 hover:text-blue-400 transition-colors"
+                        title="Edit this variation"
+                      >
+                        ✏️ Edit
+                      </button>
                     ) : (
                       <>
                         <button
@@ -400,8 +390,9 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
                   <button
                     onClick={() => handleSelectVariation(index)}
                     className="w-full py-2 px-4 bg-brand-primary text-white font-semibold rounded-md hover:bg-red-500 transition-colors"
+                    title="This will auto-approve and save to knowledge base"
                   >
-                    Use This One
+                    ✓ Use This One
                   </button>
                 )}
               </div>

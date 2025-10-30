@@ -1,4 +1,4 @@
-import type { Brand } from '../types';
+import type { Brand, BrandInstructions } from '../types';
 
 export interface ContentSpecs {
   headline: { max: number; unit: string };
@@ -112,11 +112,42 @@ function buildOpenAIPrompt(
   userPrompt: string,
   brand: Brand,
   inspirationExamples: string,
-  contentConfig: ContentConfig
+  contentConfig: ContentConfig,
+  brandInstructions?: BrandInstructions | null
 ): { system: string; user: string } {
 
   const { type, specs, format, count } = contentConfig;
 
+  // If custom brand instructions exist, use them
+  if (brandInstructions?.copySystemPrompt && brandInstructions?.copyUserPromptTemplate) {
+    console.log('✨ Using custom brand instructions from Firestore');
+
+    const systemPrompt = brandInstructions.copySystemPrompt;
+
+    // Replace template variables in user prompt template
+    const userPromptWithVariables = brandInstructions.copyUserPromptTemplate
+      .replace(/\{\{brand\}\}/g, brand.name)
+      .replace(/\{\{theme\}\}/g, userPrompt)
+      .replace(/\{\{location\}\}/g, '') // Extract if mentioned in userPrompt
+      .replace(/\{\{audience\}\}/g, brand.guidelines.targetAudience)
+      .replace(/\{\{brandGuidelines\}\}/g, `
+Core Values: ${brand.guidelines.values}
+Tone of Voice: ${brand.guidelines.toneOfVoice}
+Key Messaging: ${brand.guidelines.keyMessaging}
+Target Audience: ${brand.guidelines.targetAudience}
+${brand.guidelines.dosAndDonts || ''}
+      `)
+      .replace(/\{\{referenceCopy\}\}/g, inspirationExamples || 'No reference copy available')
+      .replace(/\{\{tone\}\}/g, brandInstructions.toneRules);
+
+    return {
+      system: systemPrompt,
+      user: userPromptWithVariables
+    };
+  }
+
+  // Otherwise, use default prompts (existing logic)
+  console.log('📝 Using default prompt structure');
   const systemPrompt = `You are an expert marketing copywriter for ${brand.name}.
 
 🎯 YOUR PRIMARY MISSION:
@@ -272,7 +303,8 @@ function validateVariation(variation: AdVariation, specs: ContentSpecs): { isVal
 export async function generateAdCopyWithOpenAI(
   prompt: string,
   brand: Brand,
-  inspirationExamples: string
+  inspirationExamples: string,
+  brandInstructions?: BrandInstructions | null
 ): Promise<AdVariation[]> {
   console.log('🎯 Generating ad copy with OpenAI GPT-4o-mini...');
 
@@ -292,9 +324,10 @@ export async function generateAdCopyWithOpenAI(
   console.log('  Guidelines:', brand.guidelines ? 'Present' : 'Missing');
   console.log('  Tone:', brand.guidelines.toneOfVoice || 'Not specified');
   console.log('  Inspiration examples:', inspirationExamples ? `${inspirationExamples.length} chars` : 'None');
+  console.log('  Custom instructions:', brandInstructions ? 'Yes ✨' : 'No (using defaults)');
 
   // Build prompts
-  const { system, user } = buildOpenAIPrompt(prompt, brand, inspirationExamples, contentConfig);
+  const { system, user } = buildOpenAIPrompt(prompt, brand, inspirationExamples, contentConfig, brandInstructions);
 
   console.log('🚀 Calling OpenAI API...');
 

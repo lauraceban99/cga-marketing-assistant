@@ -1,9 +1,10 @@
 
-import React, { useState, useMemo } from 'react';
-import type { Brand, GeneratedCreative, TaskType, AdVariation } from '../types';
+import React, { useState, useMemo, useEffect } from 'react';
+import type { Brand, GeneratedCreative, TaskType, AdVariation, BrandInstructions } from '../types';
 import { regenerateImages, refineCreativeText, generateAsset } from '../services/geminiService';
 import { generateAdCopyWithOpenAI } from '../services/openaiService';
 import { getApprovedContentForBrand, formatApprovedContentAsInspiration, saveApprovedContent } from '../services/feedbackService';
+import { getBrandInstructions } from '../services/instructionsService';
 import LoadingSpinner from './LoadingSpinner';
 
 interface ResultsViewerProps {
@@ -27,6 +28,17 @@ const ResultsViewer: React.FC<ResultsViewerProps> = ({ brand, initialCreative, i
   const [moreVariationsCount, setMoreVariationsCount] = useState(3);
   const [isGeneratingMoreVariations, setIsGeneratingMoreVariations] = useState(false);
   const [showApprovedMessage, setShowApprovedMessage] = useState(false);
+  const [brandInstructions, setBrandInstructions] = useState<BrandInstructions | null>(null);
+
+  // Load brand instructions on mount
+  useEffect(() => {
+    const loadInstructions = async () => {
+      const instructions = await getBrandInstructions(brand.id);
+      setBrandInstructions(instructions);
+      console.log('✅ Loaded brand instructions for AdCreativeViewer');
+    };
+    loadInstructions();
+  }, [brand.id]);
 
   const handleTryAgain = async () => {
       setIsLoading(true);
@@ -152,7 +164,8 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
       const newVariations = await generateAdCopyWithOpenAI(
         `Generate ${moreVariationsCount} more ad variations similar to the approved example. ${initialPrompt}`,
         brand,
-        combinedInspiration
+        combinedInspiration,
+        brandInstructions
       );
 
       // Update creative with new variations
