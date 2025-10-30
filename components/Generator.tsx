@@ -4,6 +4,7 @@ import type { Brand, TaskType, GeneratedCreative, AdVariation } from '../types';
 import { generateAsset } from '../services/geminiService';
 import { generateAdCopyWithOpenAI } from '../services/openaiService';
 import { getApprovedContentForBrand, formatApprovedContentAsInspiration, saveApprovedContent } from '../services/feedbackService';
+import { getAssetsByCategory } from '../services/assetService';
 import LoadingSpinner from './LoadingSpinner';
 
 interface GeneratorProps {
@@ -50,6 +51,8 @@ const Generator: React.FC<GeneratorProps> = ({ brand, taskType, onAssetGenerated
   const [selectedVariationIndex, setSelectedVariationIndex] = useState<number | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [inspirationContext, setInspirationContext] = useState<string>('');
+  const [editingVariationIndex, setEditingVariationIndex] = useState<number | null>(null);
+  const [editedVariation, setEditedVariation] = useState<AdVariation | null>(null);
 
   const taskDetails = getTaskDetails(taskType);
 
@@ -114,32 +117,82 @@ const Generator: React.FC<GeneratorProps> = ({ brand, taskType, onAssetGenerated
     try {
       const selectedVariation = variations[index];
 
+      // Load brand assets
+      console.log('📦 Loading brand assets...');
+      const [logos, competitorAds] = await Promise.all([
+        getAssetsByCategory(brand.id, 'logos'),
+        getAssetsByCategory(brand.id, 'competitor-ads')
+      ]);
+
+      console.log(`✅ Loaded ${logos.length} logos and ${competitorAds.length} example ads`);
+
       // Generate image using Gemini for the selected variation
       console.log('🖼️ Generating image for selected variation...');
 
       // Import generateImages from geminiService
       const { generateImages } = await import('../services/geminiService');
 
-      // Build image prompt from the selected headline
-      const imagePrompt = `Generate a square 1024x1024 photorealistic advertisement image for ${brand.name}.
+      // Build enhanced image prompt with brand assets
+      let imagePrompt = `Generate a square 1024x1024 photorealistic advertisement image for ${brand.name}.
 
 **Ad Headline:** ${selectedVariation.headline}
+
+**BRAND IDENTITY (CRITICAL - MUST FOLLOW):**`;
+
+      // Add logo information
+      if (logos.length > 0) {
+        imagePrompt += `\n- Logo: ${brand.name} logo MUST be prominently displayed (reference provided brand logo assets)`;
+        imagePrompt += `\n- Logo placement: Top corner or integrated naturally into the design`;
+        if (brand.guidelines.logoRules) {
+          imagePrompt += `\n- Logo rules: ${brand.guidelines.logoRules}`;
+        }
+      }
+
+      // Add color palette
+      if (brand.guidelines.palette) {
+        imagePrompt += `\n- Color scheme: STRICTLY use ${brand.guidelines.palette}`;
+        imagePrompt += `\n- Apply brand colors to backgrounds, accents, and design elements`;
+      }
+
+      // Add imagery style
+      if (brand.guidelines.imageryStyle) {
+        imagePrompt += `\n- Visual style: ${brand.guidelines.imageryStyle}`;
+      }
+
+      // Add example ads reference
+      if (competitorAds.length > 0) {
+        imagePrompt += `\n- Style reference: Match the visual style and composition from ${competitorAds.length} example ad(s) provided`;
+        imagePrompt += `\n- Take inspiration from composition, color usage, and layout of example ads`;
+      }
+
+      imagePrompt += `
 
 **Visual Requirements:**
 - Modern, clean composition with bold focal point
 - High contrast and clutter-free background
-- Professional photography style
-- 1:1 square aspect ratio
+- Professional photography style matching brand guidelines
+- 1:1 square aspect ratio (1024x1024px)
+- Brand-consistent visual language
 
 **Content:**
 ${brand.guidelines.imageryStyle || 'Feature authentic-looking students aged 10-18 engaged in learning'}
-${brand.guidelines.palette ? `- Use color palette: ${brand.guidelines.palette}` : ''}
+- Show diverse teenagers engaged in learning or collaborative activities
+- Aspirational and empowering atmosphere
+- Natural, authentic photography (not stock photo aesthetic)
 
 **Text Overlay:**
-- Include brief text overlay: "${selectedVariation.headline}"
-- Modern bold typography, clearly readable
+- Include headline text overlay: "${selectedVariation.headline}"
+- Use modern, bold typography that matches brand identity
+- Clearly readable and well-positioned
+- Typography should complement the brand fonts if specified
 
-Generate one high-quality square advertisement image matching these specifications.`;
+**Critical Brand Adherence:**
+${brand.guidelines.dosAndDonts || '- Maintain professional, authentic brand image'}
+- Ensure all brand colors are used prominently
+- Logo must be visible and properly displayed
+- Visual style must match brand identity
+
+Generate one high-quality, ON-BRAND square advertisement image matching these specifications.`;
 
       const images = await generateImages(imagePrompt, 1);
 
@@ -157,6 +210,26 @@ Generate one high-quality square advertisement image matching these specificatio
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate image for this variation.');
       setIsGeneratingImage(false);
+    }
+  };
+
+  const handleStartEdit = (index: number) => {
+    setEditingVariationIndex(index);
+    setEditedVariation({ ...variations[index] });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingVariationIndex(null);
+    setEditedVariation(null);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingVariationIndex !== null && editedVariation) {
+      const newVariations = [...variations];
+      newVariations[editingVariationIndex] = editedVariation;
+      setVariations(newVariations);
+      setEditingVariationIndex(null);
+      setEditedVariation(null);
     }
   };
 
@@ -217,58 +290,123 @@ Generate one high-quality square advertisement image matching these specificatio
         <p className="text-gray-400 mb-8">Choose the ad copy you like best, then we'll generate the perfect image for it.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {variations.map((variation, index) => (
-            <div
-              key={index}
-              className="bg-gray-800 rounded-lg border border-gray-700 p-6 hover:border-brand-primary transition-all duration-300"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-semibold text-brand-primary">Variation {index + 1}</span>
-                <button
-                  onClick={() => handleApproveVariation(index)}
-                  className="text-xs text-gray-400 hover:text-green-400 transition-colors"
-                  title="Save to knowledge base"
-                >
-                  ⭐ Approve
-                </button>
-              </div>
+          {variations.map((variation, index) => {
+            const isEditing = editingVariationIndex === index;
+            const displayVariation = isEditing ? editedVariation! : variation;
 
-              <div className="space-y-4 mb-6">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Headline ({variation.headline.length} chars)</p>
-                  <p className="text-lg font-bold text-white">{variation.headline}</p>
-                </div>
-
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Primary Text ({variation.primaryText.split(/\s+/).length} words)</p>
-                  <p className="text-sm text-gray-300 leading-relaxed">{variation.primaryText}</p>
-                </div>
-
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">CTA ({variation.cta.split(/\s+/).length} words)</p>
-                  <p className="text-md font-semibold text-brand-primary">{variation.cta}</p>
-                </div>
-
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Keywords</p>
-                  <div className="flex flex-wrap gap-1">
-                    {variation.keywords.map((keyword, i) => (
-                      <span key={i} className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
-                        {keyword}
-                      </span>
-                    ))}
+            return (
+              <div
+                key={index}
+                className={`bg-gray-800 rounded-lg border p-6 transition-all duration-300 ${
+                  isEditing ? 'border-indigo-500 shadow-lg' : 'border-gray-700 hover:border-brand-primary'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-semibold text-brand-primary">Variation {index + 1}</span>
+                  <div className="flex gap-2">
+                    {!isEditing ? (
+                      <>
+                        <button
+                          onClick={() => handleStartEdit(index)}
+                          className="text-xs text-gray-400 hover:text-blue-400 transition-colors"
+                          title="Edit this variation"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleApproveVariation(index)}
+                          className="text-xs text-gray-400 hover:text-green-400 transition-colors"
+                          title="Save to knowledge base"
+                        >
+                          ⭐ Approve
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={handleSaveEdit}
+                          className="text-xs text-green-400 hover:text-green-300 transition-colors"
+                        >
+                          ✓ Save
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                        >
+                          ✕ Cancel
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
-              </div>
 
-              <button
-                onClick={() => handleSelectVariation(index)}
-                className="w-full py-2 px-4 bg-brand-primary text-white font-semibold rounded-md hover:bg-red-500 transition-colors"
-              >
-                Use This One
-              </button>
-            </div>
-          ))}
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Headline ({displayVariation.headline.length} chars)</p>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={displayVariation.headline}
+                        onChange={(e) => setEditedVariation({ ...displayVariation, headline: e.target.value })}
+                        className="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 text-lg font-bold"
+                        maxLength={40}
+                      />
+                    ) : (
+                      <p className="text-lg font-bold text-white">{displayVariation.headline}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Primary Text ({displayVariation.primaryText.split(/\s+/).length} words)</p>
+                    {isEditing ? (
+                      <textarea
+                        value={displayVariation.primaryText}
+                        onChange={(e) => setEditedVariation({ ...displayVariation, primaryText: e.target.value })}
+                        className="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 text-sm leading-relaxed"
+                        rows={5}
+                      />
+                    ) : (
+                      <p className="text-sm text-gray-300 leading-relaxed">{displayVariation.primaryText}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">CTA ({displayVariation.cta.split(/\s+/).length} words)</p>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={displayVariation.cta}
+                        onChange={(e) => setEditedVariation({ ...displayVariation, cta: e.target.value })}
+                        className="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 font-semibold"
+                      />
+                    ) : (
+                      <p className="text-md font-semibold text-brand-primary">{displayVariation.cta}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Keywords</p>
+                    <div className="flex flex-wrap gap-1">
+                      {displayVariation.keywords.map((keyword, i) => (
+                        <span key={i} className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {!isEditing && (
+                  <button
+                    onClick={() => handleSelectVariation(index)}
+                    className="w-full py-2 px-4 bg-brand-primary text-white font-semibold rounded-md hover:bg-red-500 transition-colors"
+                  >
+                    Use This One
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {error && (

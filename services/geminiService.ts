@@ -529,8 +529,17 @@ export const regenerateImages = async (
     const headlineMatch = text.match(/\*\*Headline:\*\*\s*(.+?)(?:\n|$)/i);
     const headline = headlineMatch ? headlineMatch[1].trim() : '';
 
-    // Build Gemini-friendly refinement prompt
-    const imagePrompt = `Generate ${count} square 1024x1024 photorealistic advertisement image${count > 1 ? 's' : ''} for ${brand.name}.
+    // Load brand assets for on-brand image generation
+    const { getAssetsByCategory } = await import('./assetService');
+    const [logos, competitorAds] = await Promise.all([
+        getAssetsByCategory(brand.id, 'logos'),
+        getAssetsByCategory(brand.id, 'competitor-ads')
+    ]);
+
+    console.log(`📦 Loaded ${logos.length} logos and ${competitorAds.length} example ads for regeneration`);
+
+    // Build Gemini-friendly refinement prompt with brand assets
+    let imagePrompt = `Generate ${count} square 1024x1024 photorealistic advertisement image${count > 1 ? 's' : ''} for ${brand.name}.
 
 **Original Ad Copy:**
 ${text.substring(0, 300)}...
@@ -538,33 +547,68 @@ ${text.substring(0, 300)}...
 **Refinement Requested:**
 ${refinement}
 
+**BRAND IDENTITY (CRITICAL - MUST FOLLOW):**`;
+
+    // Add logo information
+    if (logos.length > 0) {
+        imagePrompt += `\n- Logo: ${brand.name} logo MUST be prominently displayed`;
+        imagePrompt += `\n- Logo placement: Top corner or integrated naturally`;
+        if (brand.guidelines.logoRules) {
+            imagePrompt += `\n- Logo rules: ${brand.guidelines.logoRules}`;
+        }
+    }
+
+    // Add color palette
+    if (brand.guidelines.palette) {
+        imagePrompt += `\n- Color scheme: STRICTLY use ${brand.guidelines.palette}`;
+        imagePrompt += `\n- Apply brand colors to backgrounds, accents, and design elements`;
+    }
+
+    // Add imagery style
+    if (brand.guidelines.imageryStyle) {
+        imagePrompt += `\n- Visual style: ${brand.guidelines.imageryStyle}`;
+    }
+
+    // Add example ads reference
+    if (competitorAds.length > 0) {
+        imagePrompt += `\n- Style reference: Match visual style from ${competitorAds.length} example ad(s)`;
+    }
+
+    imagePrompt += `
+
 **Visual Requirements:**
 - Modern, clean composition with bold focal point
 - High contrast and clutter-free background
-- Professional photography style
+- Professional photography style matching brand guidelines
 - 1:1 square aspect ratio
+- Brand-consistent visual language
 
 **Content:**
-${brand.guidelines.imageryStyle ? `- Style: ${brand.guidelines.imageryStyle}` : '- Feature authentic-looking students aged 10-18'}
+${brand.guidelines.imageryStyle || '- Feature authentic-looking students aged 10-18'}
 - Show diverse teenagers engaged in learning or collaborative activities
 - Aspirational and empowering atmosphere
-${brand.guidelines.palette ? `- Color palette: Use ${brand.guidelines.palette} prominently` : '- Use modern, professional color tones'}
+- Natural, authentic photography (not stock photo aesthetic)
 
 **Text Overlay:**
-${headline ? `- Include brief text overlay: "${headline.substring(0, 50)}"` : '- No text overlay needed'}
-- Modern bold typography
+${headline ? `- Include headline text overlay: "${headline.substring(0, 50)}"` : '- No text overlay needed'}
+- Modern bold typography matching brand identity
 - Clearly readable and well-positioned
+
+**Critical Brand Adherence:**
+${brand.guidelines.dosAndDonts || '- Maintain professional, authentic brand image'}
+- Ensure all brand colors are used prominently
+- Logo must be visible and properly displayed
+- Visual style must match brand identity
 
 **Important:**
 - Apply the refinement feedback above
 - DO NOT reference Facebook, Meta, or specific platforms
 - Avoid generic stock photo aesthetics
 - Modern, authentic, professional quality
-${brand.guidelines.dosAndDonts ? `- Brand adherence: ${brand.guidelines.dosAndDonts}` : ''}
 
-Generate ${count} diverse, high-quality variations incorporating the feedback.`;
+Generate ${count} diverse, high-quality, ON-BRAND variations incorporating the feedback.`;
 
-  console.log(`🎨 Regenerating ${count} image(s) with refinement...`);
+  console.log(`🎨 Regenerating ${count} image(s) with refinement and brand assets...`);
   return generateImages(imagePrompt, count);
 }
 
