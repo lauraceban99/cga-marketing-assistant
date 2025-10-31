@@ -207,34 +207,34 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
   if (isLoading) {
     return (
         <div className="text-center py-16">
-            <h2 className="text-2xl font-bold text-white mb-4">Generating a new version...</h2>
-            <p className="text-gray-400 mb-8">Please wait while the AI works its magic.</p>
+            <h2 className="text-2xl font-bold text-[#4b0f0d] mb-4">Generating a new version...</h2>
+            <p className="text-[#9b9b9b] mb-8">Please wait while the AI works its magic.</p>
             <LoadingSpinner />
-            {error && <p className="mt-4 text-red-400">{error}</p>}
+            {error && <p className="mt-4 text-[#780817]">{error}</p>}
       </div>
     );
   }
 
   return (
     <div className="max-w-6xl mx-auto py-8">
-      <button onClick={onBack} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-4">
+      <button onClick={onBack} className="flex items-center gap-2 text-sm text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
         Back to Tasks
       </button>
 
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-white">Your Asset is Ready!</h2>
-        <p className="text-gray-400 mt-1">Review your generated content for <span className="font-semibold text-gray-300">{brand.name}</span>.</p>
+        <h2 className="text-3xl font-bold text-[#4b0f0d]">Your Asset is Ready!</h2>
+        <p className="text-[#9b9b9b] mt-1">Review your generated content for <span className="font-semibold text-[#4b0f0d]">{brand.name}</span>.</p>
       </div>
 
       <div className={`grid grid-cols-1 ${taskType === 'ad' ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-8`}>
         {/* Copy Section */}
-        <div className={`p-6 bg-gray-800 rounded-lg border border-gray-700 ${taskType !== 'ad' ? 'lg:col-span-2' : ''}`}>
+        <div className={`p-6 bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg ${taskType !== 'ad' ? 'lg:col-span-2' : ''}`}>
             <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-white">Generated Text</h3>
+                <h3 className="text-xl font-semibold text-[#4b0f0d]">Generated Text</h3>
                 <button
                     onClick={handleCopy}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors"
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-[#4b0f0d] bg-[#f4f0f0] rounded-md hover:bg-[#04114a]/10 transition-colors"
                 >
                      {copied ? 'Copied!' : 'Copy All'}
                 </button>
@@ -242,26 +242,26 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
             {parsedAdCopy ? (
                 <div className="space-y-4">
                     <div>
-                        <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Headline</h4>
-                        <p className="text-gray-200 font-semibold text-lg">{parsedAdCopy.headline}</p>
+                        <h4 className="text-sm font-bold text-[#9b9b9b] uppercase tracking-wider">Headline</h4>
+                        <p className="text-[#4b0f0d] font-semibold text-lg">{parsedAdCopy.headline}</p>
                     </div>
                      <div>
-                        <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Primary Text</h4>
-                        <p className="text-gray-300 whitespace-pre-wrap">{parsedAdCopy.primaryText}</p>
+                        <h4 className="text-sm font-bold text-[#9b9b9b] uppercase tracking-wider">Primary Text</h4>
+                        <p className="text-[#4b0f0d] whitespace-pre-wrap">{parsedAdCopy.primaryText}</p>
                     </div>
                      <div>
-                        <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Call to Action</h4>
+                        <h4 className="text-sm font-bold text-[#9b9b9b] uppercase tracking-wider">Call to Action</h4>
                         <p className="text-brand-primary font-bold">{parsedAdCopy.cta}</p>
                     </div>
                 </div>
             ) : (
-                <p className="text-gray-300 whitespace-pre-wrap font-sans">{creative.text}</p>
+                <p className="text-[#4b0f0d] whitespace-pre-wrap font-sans">{creative.text}</p>
             )}
         </div>
         
         {/* Actions & Refinement Section */}
-        <div className="p-6 bg-gray-800 rounded-lg border border-gray-700">
-             <h3 className="text-xl font-semibold text-white mb-4">Actions & Refinements</h3>
+        <div className="p-6 bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg">
+             <h3 className="text-xl font-semibold text-[#4b0f0d] mb-4">Actions & Refinements</h3>
               <div className="space-y-4">
                 {/* Approve Button */}
                 {taskType === 'ad' && creative.selectedVariation && (
@@ -273,22 +273,22 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
                     >
                       {showApprovedMessage ? '✓ Approved & Saved!' : '⭐ Approve This Content'}
                     </button>
-                    <p className="text-xs text-gray-400 mt-1">Save to knowledge base for future learning</p>
+                    <p className="text-xs text-[#9b9b9b] mt-1">Save to knowledge base for future learning</p>
                   </div>
                 )}
 
                 {/* Generate More Like This */}
                 {taskType === 'ad' && creative.selectedVariation && (
-                  <div className="pt-4 border-t border-gray-600">
-                    <p className="text-sm font-medium text-gray-300 mb-2">Generate More Like This</p>
-                    <p className="text-xs text-gray-400 mb-3">Create additional ad copy variations with similar style:</p>
+                  <div className="pt-4 border-t border-[#f4f0f0]">
+                    <p className="text-sm font-medium text-[#4b0f0d] mb-2">Generate More Like This</p>
+                    <p className="text-xs text-[#9b9b9b] mb-3">Create additional ad copy variations with similar style:</p>
                     <div className="flex items-center gap-3 mb-2">
-                      <label htmlFor="moreVariationsCount" className="text-sm text-gray-300">How many:</label>
+                      <label htmlFor="moreVariationsCount" className="text-sm text-[#4b0f0d]">How many:</label>
                       <select
                         id="moreVariationsCount"
                         value={moreVariationsCount}
                         onChange={(e) => setMoreVariationsCount(Number(e.target.value))}
-                        className="bg-gray-700 border border-gray-600 text-white rounded-md p-2 flex-1"
+                        className="bg-[#f4f0f0] border border-[#f4f0f0] text-[#4b0f0d] rounded-md p-2 flex-1"
                         disabled={isGeneratingMoreVariations}
                       >
                         <option value={3}>3 variations</option>
@@ -299,7 +299,7 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
                     <button
                       onClick={handleGenerateMoreVariations}
                       disabled={isGeneratingMoreVariations}
-                      className="w-full py-2 px-4 bg-purple-600 text-white font-semibold rounded-md hover:bg-purple-500 disabled:bg-gray-500 transition-colors"
+                      className="w-full py-2 px-4 bg-purple-600 text-[#4b0f0d] font-semibold rounded-md hover:bg-purple-500 disabled:bg-gray-500 transition-colors"
                     >
                       {isGeneratingMoreVariations ? 'Generating...' : `Generate ${moreVariationsCount} More`}
                     </button>
@@ -307,26 +307,26 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
                 )}
 
                 {/* Text Refinement */}
-                <div className="pt-4 border-t border-gray-600">
-                    <label htmlFor="refinementPrompt" className="block text-sm font-medium text-gray-300 mb-1">Refine the text:</label>
+                <div className="pt-4 border-t border-[#f4f0f0]">
+                    <label htmlFor="refinementPrompt" className="block text-sm font-medium text-[#4b0f0d] mb-1">Refine the text:</label>
                     <textarea
                         id="refinementPrompt"
                         value={refinementPrompt}
                         onChange={(e) => setRefinementPrompt(e.target.value)}
                         placeholder="e.g., 'Make it more professional' or 'Add a bit more urgency'"
-                        className="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2"
+                        className="w-full bg-[#f4f0f0] border border-[#f4f0f0] text-[#4b0f0d] rounded-md p-2"
                         rows={3}
                         disabled={isRefiningText}
                     />
-                     <button onClick={handleRefineText} disabled={isRefiningText} className="w-full mt-2 py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-500 disabled:bg-gray-500">
+                     <button onClick={handleRefineText} disabled={isRefiningText} className="w-full mt-2 py-2 px-4 bg-[#04114a] text-white font-semibold rounded-md hover:bg-[#04114a]/80 disabled:bg-gray-500">
                         {isRefiningText ? 'Refining...' : 'Refine Text'}
                     </button>
                 </div>
 
                 {/* Try Again */}
-                 <div className="pt-4 border-t border-gray-600">
-                     <p className="text-sm text-gray-400 mb-2">Not quite right?</p>
-                    <button onClick={handleTryAgain} className="w-full py-2 px-4 bg-gray-600 text-white font-semibold rounded-md hover:bg-gray-500">
+                 <div className="pt-4 border-t border-[#f4f0f0]">
+                     <p className="text-sm text-[#9b9b9b] mb-2">Not quite right?</p>
+                    <button onClick={handleTryAgain} className="w-full py-2 px-4 bg-gray-600 text-[#4b0f0d] font-semibold rounded-md hover:bg-gray-500">
                         Try Again (Regenerate from scratch)
                     </button>
                  </div>
@@ -335,13 +335,13 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
         
         {/* Image Section - Conditional */}
         {taskType === 'ad' && (
-            <div className="p-6 bg-gray-800 rounded-lg border border-gray-700 lg:col-span-2">
+            <div className="p-6 bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg lg:col-span-2">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold text-white">Ad Image</h3>
+                    <h3 className="text-xl font-semibold text-[#4b0f0d]">Ad Image</h3>
                     {hasImages && !isLoading && (
                         <button
                             onClick={handleDownloadAllImages}
-                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors"
+                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-[#4b0f0d] bg-[#f4f0f0] rounded-md hover:bg-[#04114a]/10 transition-colors"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                             Download All
@@ -357,7 +357,7 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
                                         <img src={`data:image/jpeg;base64,${img}`} alt={`Generated ad creative ${index + 1}`} className="rounded-md w-full aspect-square object-cover" />
                                         <button
                                             onClick={() => handleDownloadImage(img, index)}
-                                            className="absolute top-2 right-2 p-2 bg-gray-900/80 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-900"
+                                            className="absolute top-2 right-2 p-2 bg-gray-900/80 text-[#4b0f0d] rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-900"
                                             title="Download this image"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -365,45 +365,45 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
                                     </div>
                                 ))}
                             </div>
-                        ) : <p className="text-gray-400 text-center py-12">Image generation failed. You can try refining the prompt below.</p>}
+                        ) : <p className="text-[#9b9b9b] text-center py-12">Image generation failed. You can try refining the prompt below.</p>}
                     </>
                 )}
                 {error && <p className="mt-4 text-center text-red-400">{error}</p>}
                 
                 <div className="mt-6 pt-6 border-t border-gray-700">
-                    <h4 className="text-lg font-semibold text-white mb-4">Image Options</h4>
+                    <h4 className="text-lg font-semibold text-[#4b0f0d] mb-4">Image Options</h4>
 
                     {/* Change Image Section */}
                     <div className="mb-6">
-                        <h5 className="text-md font-medium text-gray-300 mb-2">Change Image</h5>
-                        <p className="text-sm text-gray-400 mb-3">Describe how you'd like to modify the image:</p>
+                        <h5 className="text-md font-medium text-[#4b0f0d] mb-2">Change Image</h5>
+                        <p className="text-sm text-[#9b9b9b] mb-3">Describe how you'd like to modify the image:</p>
                         <textarea
                             value={imagePrompt}
                             onChange={(e) => setImagePrompt(e.target.value)}
                             placeholder="e.g., 'Make it more diverse' or 'Change the background to a library'"
-                            className="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 mb-2"
+                            className="w-full bg-[#f4f0f0] border border-[#f4f0f0] text-[#4b0f0d] rounded-md p-2 mb-2"
                             rows={3}
                         />
                         <button
                             onClick={handleRegenerateImages}
                             disabled={isLoading || !imagePrompt.trim()}
-                            className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-500 disabled:bg-gray-500 disabled:cursor-not-allowed"
+                            className="w-full py-2 px-4 bg-[#04114a] text-white font-semibold rounded-md hover:bg-[#04114a]/80 disabled:bg-gray-500 disabled:cursor-not-allowed"
                         >
                             {isLoading ? 'Generating...' : 'Change Image'}
                         </button>
                     </div>
 
                     {/* Generate Fresh Images Section */}
-                    <div className="pt-6 border-t border-gray-600">
-                        <h5 className="text-md font-medium text-gray-300 mb-2">Generate New Images</h5>
-                        <p className="text-sm text-gray-400 mb-3">Create fresh images for this ad copy (analyzes your brand assets):</p>
+                    <div className="pt-6 border-t border-[#f4f0f0]">
+                        <h5 className="text-md font-medium text-[#4b0f0d] mb-2">Generate New Images</h5>
+                        <p className="text-sm text-[#9b9b9b] mb-3">Create fresh images for this ad copy (analyzes your brand assets):</p>
                         <div className="flex items-center gap-4 mb-3">
-                            <label htmlFor="imageCount" className="text-gray-300 text-sm">How many:</label>
+                            <label htmlFor="imageCount" className="text-[#4b0f0d] text-sm">How many:</label>
                             <select
                                 id="imageCount"
                                 value={imageCount}
                                 onChange={(e) => setImageCount(Number(e.target.value))}
-                                className="bg-gray-700 border border-gray-600 text-white rounded-md p-2 flex-1"
+                                className="bg-[#f4f0f0] border border-[#f4f0f0] text-[#4b0f0d] rounded-md p-2 flex-1"
                             >
                                 <option value={1}>1 image</option>
                                 <option value={2}>2 images</option>
@@ -416,7 +416,7 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
                                 handleRegenerateImages();
                             }}
                             disabled={isLoading}
-                            className="w-full py-2 px-4 bg-brand-primary text-white font-semibold rounded-md hover:bg-red-500 disabled:bg-gray-500 disabled:cursor-not-allowed"
+                            className="w-full py-2 px-4 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] disabled:bg-gray-500 disabled:cursor-not-allowed"
                         >
                             {isLoading ? 'Generating...' : `🎨 Generate ${imageCount} Image${imageCount > 1 ? 's' : ''}`}
                         </button>
@@ -424,7 +424,7 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
 
                     {/* Enhanced Image Generator - NEW! */}
                     {creative.selectedVariation && (
-                        <div className="pt-6 border-t border-gray-600">
+                        <div className="pt-6 border-t border-[#f4f0f0]">
                             <EnhancedImageGenerator
                                 brand={brand}
                                 adCopy={{

@@ -114,18 +114,18 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-6 flex justify-between items-center">
+        <div className="sticky top-0 bg-white border-b border-[#f4f0f0] p-6 flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold text-white">Upload Assets</h2>
-            <p className="text-sm text-gray-400 mt-1">
+            <h2 className="text-2xl font-bold text-[#4b0f0d]">Upload Assets</h2>
+            <p className="text-sm text-[#9b9b9b] mt-1">
               {brandName} → {categoryConfig.icon} {categoryConfig.label}
             </p>
           </div>
           <button
             onClick={onCancel}
-            className="text-gray-400 hover:text-white text-2xl leading-none"
+            className="text-[#9b9b9b] hover:text-[#4b0f0d] text-2xl leading-none"
             disabled={isUploading}
           >
             ×
@@ -144,7 +144,7 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
                 onClick={() => fileInputRef.current?.click()}
                 className={`
                   border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-                  ${isDragging ? 'border-brand-primary bg-gray-900' : 'border-gray-600 hover:border-gray-500'}
+                  ${isDragging ? 'border-brand-primary bg-gray-900' : 'border-[#f4f0f0] hover:border-gray-500'}
                 `}
               >
                 <input
@@ -155,7 +155,7 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
                   onChange={(e) => handleFileSelect(e.target.files)}
                   className="hidden"
                 />
-                <div className="text-gray-400">
+                <div className="text-[#9b9b9b]">
                   <svg
                     className="mx-auto h-12 w-12 mb-3"
                     stroke="currentColor"
@@ -182,22 +182,22 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
               {/* Selected Files */}
               {selectedFiles.length > 0 && (
                 <div className="bg-gray-900 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-white mb-3">
+                  <h4 className="text-sm font-semibold text-[#4b0f0d] mb-3">
                     Selected Files ({selectedFiles.length})
                   </h4>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {selectedFiles.map((file, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between bg-gray-800 p-2 rounded"
+                        className="flex items-center justify-between bg-white p-2 rounded"
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white truncate">{file.name}</p>
-                          <p className="text-xs text-gray-400">{formatFileSize(file.size)}</p>
+                          <p className="text-sm text-[#4b0f0d] truncate">{file.name}</p>
+                          <p className="text-xs text-[#9b9b9b]">{formatFileSize(file.size)}</p>
                         </div>
                         <button
                           onClick={() => removeFile(index)}
-                          className="ml-2 text-gray-400 hover:text-red-400"
+                          className="ml-2 text-[#9b9b9b] hover:text-red-400"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -213,7 +213,7 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
               {selectedFiles.length > 0 && (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-[#4b0f0d] mb-1">
                       Description (optional)
                     </label>
                     <input
@@ -221,11 +221,11 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="e.g., Q1 2024 social media campaign"
-                      className="w-full bg-gray-900 text-white border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-primary"
+                      className="w-full bg-gray-900 text-[#4b0f0d] border-2 border-[#f4f0f0] shadow-lg rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-primary"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-[#4b0f0d] mb-1">
                       Tags (optional, comma-separated)
                     </label>
                     <input
@@ -233,7 +233,7 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
                       value={tags}
                       onChange={(e) => setTags(e.target.value)}
                       placeholder="e.g., facebook, instagram, 2024"
-                      className="w-full bg-gray-900 text-white border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-primary"
+                      className="w-full bg-gray-900 text-[#4b0f0d] border-2 border-[#f4f0f0] shadow-lg rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-primary"
                     />
                   </div>
                 </div>
@@ -244,14 +244,14 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
           {/* Upload Queue */}
           {showQueue && (
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-white mb-3">Upload Progress</h4>
+              <h4 className="text-sm font-semibold text-[#4b0f0d] mb-3">Upload Progress</h4>
               {uploadQueue.map((item, index) => (
                 <div key={index} className="bg-gray-900 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-white truncate">{item.fileName}</span>
-                    <span className="text-xs text-gray-400">{item.progress.toFixed(0)}%</span>
+                    <span className="text-sm text-[#4b0f0d] truncate">{item.fileName}</span>
+                    <span className="text-xs text-[#9b9b9b]">{item.progress.toFixed(0)}%</span>
                   </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="w-full bg-[#f4f0f0] rounded-full h-2">
                     <div
                       className={`h-2 rounded-full transition-all ${
                         item.status === 'complete'
@@ -279,11 +279,11 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-6 flex gap-3">
+        <div className="sticky bottom-0 bg-white border-t border-[#f4f0f0] p-6 flex gap-3">
           <button
             onClick={onCancel}
             disabled={isUploading}
-            className="flex-1 bg-gray-700 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-[#f4f0f0] text-[#4b0f0d] py-2 px-4 rounded-lg hover:bg-[#04114a]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {showQueue && uploadQueue.every((item) => item.status === 'complete') ? 'Close' : 'Cancel'}
           </button>
@@ -291,7 +291,7 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({
             <button
               onClick={handleUpload}
               disabled={isUploading}
-              className="flex-1 bg-brand-primary text-white py-2 px-4 rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-brand-primary text-[#4b0f0d] py-2 px-4 rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Upload {selectedFiles.length} {selectedFiles.length === 1 ? 'File' : 'Files'}
             </button>

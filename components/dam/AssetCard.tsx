@@ -53,7 +53,7 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, onClick, mode = 
 
   if (mode === 'list') {
     return (
-      <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">
+      <div className="bg-white rounded-lg p-4 border-2 border-[#f4f0f0] shadow-lg hover:border-[#f4f0f0] transition-colors">
         <div className="flex items-center gap-4">
           {/* Icon/Thumbnail */}
           <div
@@ -67,7 +67,7 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, onClick, mode = 
                 className="w-12 h-12 object-cover rounded hover:opacity-80 transition-opacity"
               />
             ) : (
-              <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center text-2xl hover:bg-gray-600 transition-colors">
+              <div className="w-12 h-12 bg-[#f4f0f0] rounded flex items-center justify-center text-2xl hover:bg-[#04114a]/10 transition-colors">
                 {getFileIcon()}
               </div>
             )}
@@ -78,8 +78,8 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, onClick, mode = 
             className="flex-1 min-w-0 cursor-pointer"
             onClick={() => onClick?.(asset)}
           >
-            <h4 className="text-sm font-medium text-white truncate hover:text-brand-primary transition-colors">{asset.fileName}</h4>
-            <p className="text-xs text-gray-400 mt-1">
+            <h4 className="text-sm font-medium text-[#4b0f0d] truncate hover:text-brand-primary transition-colors">{asset.fileName}</h4>
+            <p className="text-xs text-[#9b9b9b] mt-1">
               {formatFileSize(asset.fileSize)} • {formatDate(asset.uploadedAt)}
             </p>
             {asset.metadata.description && (
@@ -93,7 +93,7 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, onClick, mode = 
               href={asset.fileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 text-gray-400 hover:text-white transition-colors"
+              className="p-2 text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors"
               title="Download"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,7 +102,7 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, onClick, mode = 
             </a>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="p-2 text-gray-400 hover:text-red-400 transition-colors"
+              className="p-2 text-[#9b9b9b] hover:text-red-400 transition-colors"
               title="Delete"
               disabled={isDeleting}
             >
@@ -115,20 +115,20 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, onClick, mode = 
 
         {/* Delete Confirmation */}
         {showDeleteConfirm && (
-          <div className="mt-3 pt-3 border-t border-gray-700">
-            <p className="text-sm text-gray-300 mb-2">Delete this asset?</p>
+          <div className="mt-3 pt-3 border-t border-[#f4f0f0]">
+            <p className="text-sm text-[#4b0f0d] mb-2">Delete this asset?</p>
             <div className="flex gap-2">
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
+                className="px-3 py-1 bg-red-600 text-[#4b0f0d] text-sm rounded hover:bg-red-700 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={isDeleting}
-                className="px-3 py-1 bg-gray-700 text-white text-sm rounded hover:bg-gray-600"
+                className="px-3 py-1 bg-[#f4f0f0] text-[#4b0f0d] text-sm rounded hover:bg-[#04114a]/10"
               >
                 Cancel
               </button>
@@ -141,7 +141,7 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, onClick, mode = 
 
   // Grid mode
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 transition-all overflow-hidden">
+    <div className="bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg hover:border-[#f4f0f0] transition-all overflow-hidden">
       {/* Preview */}
       <div
         className="aspect-square bg-gray-900 flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
@@ -161,13 +161,13 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, onClick, mode = 
       {/* Info */}
       <div className="p-3">
         <h4
-          className="text-sm font-medium text-white truncate cursor-pointer hover:text-brand-primary transition-colors"
+          className="text-sm font-medium text-[#4b0f0d] truncate cursor-pointer hover:text-brand-primary transition-colors"
           title={asset.fileName}
           onClick={() => onClick?.(asset)}
         >
           {asset.fileName}
         </h4>
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-xs text-[#9b9b9b] mt-1">
           {formatFileSize(asset.fileSize)}
         </p>
         <p className="text-xs text-gray-500">
@@ -180,13 +180,13 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, onClick, mode = 
             href={asset.fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 text-center px-2 py-1 bg-gray-700 text-white text-xs rounded hover:bg-gray-600 transition-colors"
+            className="flex-1 text-center px-2 py-1 bg-[#f4f0f0] text-[#4b0f0d] text-xs rounded hover:bg-[#04114a]/10 transition-colors"
           >
             Download
           </a>
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="px-2 py-1 bg-gray-700 text-red-400 text-xs rounded hover:bg-red-900 hover:text-red-300 transition-colors"
+            className="px-2 py-1 bg-[#f4f0f0] text-red-400 text-xs rounded hover:bg-red-900 hover:text-red-300 transition-colors"
             disabled={isDeleting}
           >
             Delete
@@ -195,20 +195,20 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onDelete, onClick, mode = 
 
         {/* Delete Confirmation */}
         {showDeleteConfirm && (
-          <div className="mt-3 pt-3 border-t border-gray-700">
-            <p className="text-xs text-gray-300 mb-2">Delete this asset?</p>
+          <div className="mt-3 pt-3 border-t border-[#f4f0f0]">
+            <p className="text-xs text-[#4b0f0d] mb-2">Delete this asset?</p>
             <div className="flex gap-2">
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="flex-1 px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:opacity-50"
+                className="flex-1 px-2 py-1 bg-red-600 text-[#4b0f0d] text-xs rounded hover:bg-red-700 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Yes'}
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={isDeleting}
-                className="flex-1 px-2 py-1 bg-gray-700 text-white text-xs rounded hover:bg-gray-600"
+                className="flex-1 px-2 py-1 bg-[#f4f0f0] text-[#4b0f0d] text-xs rounded hover:bg-[#04114a]/10"
               >
                 No
               </button>

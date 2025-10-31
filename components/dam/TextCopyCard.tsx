@@ -69,50 +69,50 @@ const TextCopyCard: React.FC<TextCopyCardProps> = ({ asset, onDelete, onUpdate }
   const previewContent = content.length > 200 ? content.substring(0, 200) + '...' : content;
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors">
+    <div className="bg-white border-2 border-[#f4f0f0] shadow-lg rounded-lg p-4 hover:border-[#f4f0f0] transition-colors">
       {isEditing ? (
         /* Edit Mode */
         <div className="space-y-3">
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Title</label>
+            <label className="block text-xs text-[#9b9b9b] mb-1">Title</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-brand-primary"
+              className="w-full bg-gray-900 text-[#4b0f0d] border-2 border-[#f4f0f0] shadow-lg rounded px-3 py-1.5 text-sm focus:outline-none focus:border-brand-primary"
             />
           </div>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Content</label>
+            <label className="block text-xs text-[#9b9b9b] mb-1">Content</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={8}
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-primary font-mono"
+              className="w-full bg-gray-900 text-[#4b0f0d] border-2 border-[#f4f0f0] shadow-lg rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-primary font-mono"
             />
             <p className="text-xs text-gray-500 mt-1">{content.length} characters</p>
           </div>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Campaign Name</label>
+            <label className="block text-xs text-[#9b9b9b] mb-1">Campaign Name</label>
             <input
               type="text"
               value={campaignName}
               onChange={(e) => setCampaignName(e.target.value)}
               placeholder="Optional"
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-brand-primary"
+              className="w-full bg-gray-900 text-[#4b0f0d] border-2 border-[#f4f0f0] shadow-lg rounded px-3 py-1.5 text-sm focus:outline-none focus:border-brand-primary"
             />
           </div>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Tags (comma-separated)</label>
+            <label className="block text-xs text-[#9b9b9b] mb-1">Tags (comma-separated)</label>
             <input
               type="text"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               placeholder="Optional"
-              className="w-full bg-gray-900 text-white border border-gray-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-brand-primary"
+              className="w-full bg-gray-900 text-[#4b0f0d] border-2 border-[#f4f0f0] shadow-lg rounded px-3 py-1.5 text-sm focus:outline-none focus:border-brand-primary"
             />
           </div>
 
@@ -120,14 +120,14 @@ const TextCopyCard: React.FC<TextCopyCardProps> = ({ asset, onDelete, onUpdate }
             <button
               onClick={handleCancel}
               disabled={isSaving}
-              className="flex-1 bg-gray-700 text-white py-2 px-3 rounded text-sm hover:bg-gray-600 transition-colors disabled:opacity-50"
+              className="flex-1 bg-[#f4f0f0] text-[#4b0f0d] py-2 px-3 rounded text-sm hover:bg-[#04114a]/10 transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex-1 bg-brand-primary text-white py-2 px-3 rounded text-sm hover:bg-opacity-90 transition-colors disabled:opacity-50"
+              className="flex-1 bg-brand-primary text-[#4b0f0d] py-2 px-3 rounded text-sm hover:bg-opacity-90 transition-colors disabled:opacity-50"
             >
               {isSaving ? 'Saving...' : 'Save'}
             </button>
@@ -139,15 +139,15 @@ const TextCopyCard: React.FC<TextCopyCardProps> = ({ asset, onDelete, onUpdate }
           {/* Header */}
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0">
-              <h3 className="text-white font-medium text-sm truncate mb-1">{asset.fileName}</h3>
-              <p className="text-xs text-gray-400">
+              <h3 className="text-[#4b0f0d] font-medium text-sm truncate mb-1">{asset.fileName}</h3>
+              <p className="text-xs text-[#9b9b9b]">
                 {formatDate(asset.uploadedAt)} • {content.length} chars
               </p>
             </div>
             <div className="flex gap-1 ml-2">
               <button
                 onClick={() => setIsEditing(true)}
-                className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
+                className="p-1.5 text-[#9b9b9b] hover:text-[#4b0f0d] hover:bg-[#f4f0f0] rounded transition-colors"
                 title="Edit"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +156,7 @@ const TextCopyCard: React.FC<TextCopyCardProps> = ({ asset, onDelete, onUpdate }
               </button>
               <button
                 onClick={handleDelete}
-                className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded transition-colors"
+                className="p-1.5 text-[#9b9b9b] hover:text-red-400 hover:bg-[#f4f0f0] rounded transition-colors"
                 title="Delete"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,7 +168,7 @@ const TextCopyCard: React.FC<TextCopyCardProps> = ({ asset, onDelete, onUpdate }
 
           {/* Content Preview */}
           <div className="bg-gray-900 rounded p-3 mb-3">
-            <p className="text-sm text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">
+            <p className="text-sm text-[#4b0f0d] whitespace-pre-wrap font-mono leading-relaxed">
               {isExpanded ? content : previewContent}
             </p>
             {content.length > 200 && (
@@ -186,7 +186,7 @@ const TextCopyCard: React.FC<TextCopyCardProps> = ({ asset, onDelete, onUpdate }
             {asset.metadata.campaignName && (
               <div className="flex items-center gap-2 text-xs">
                 <span className="text-gray-500">Campaign:</span>
-                <span className="text-gray-300">{asset.metadata.campaignName}</span>
+                <span className="text-[#4b0f0d]">{asset.metadata.campaignName}</span>
               </div>
             )}
             {asset.metadata.tags && asset.metadata.tags.length > 0 && (
@@ -194,7 +194,7 @@ const TextCopyCard: React.FC<TextCopyCardProps> = ({ asset, onDelete, onUpdate }
                 {asset.metadata.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-2 py-0.5 bg-gray-700 text-gray-300 rounded text-xs"
+                    className="px-2 py-0.5 bg-[#f4f0f0] text-[#4b0f0d] rounded text-xs"
                   >
                     {tag}
                   </span>

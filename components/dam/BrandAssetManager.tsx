@@ -63,14 +63,14 @@ const BrandAssetManager: React.FC<BrandAssetManagerProps> = ({ onBack }) => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-white">Brand Asset Manager</h1>
-            <p className="text-gray-400 mt-1">
+            <h1 className="text-3xl font-bold text-[#4b0f0d]">Brand Asset Manager</h1>
+            <p className="text-[#9b9b9b] mt-1">
               Manage digital assets for all brands
             </p>
           </div>
           <button
             onClick={onBack}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            className="px-4 py-2 bg-[#f4f0f0] text-[#4b0f0d] rounded-lg hover:bg-[#04114a]/10 transition-colors"
           >
             ← Back to App
           </button>
@@ -79,16 +79,16 @@ const BrandAssetManager: React.FC<BrandAssetManagerProps> = ({ onBack }) => {
         {/* Global Stats */}
         {!loading && (
           <div className="flex gap-4 flex-wrap">
-            <div className="bg-gray-800 rounded-lg px-4 py-3 border border-gray-700">
-              <p className="text-sm text-gray-400">Total Brands</p>
-              <p className="text-2xl font-bold text-white">{BRANDS.length}</p>
+            <div className="bg-white rounded-lg px-4 py-3 border-2 border-[#f4f0f0] shadow-lg">
+              <p className="text-sm text-[#9b9b9b]">Total Brands</p>
+              <p className="text-2xl font-bold text-[#4b0f0d]">{BRANDS.length}</p>
             </div>
-            <div className="bg-gray-800 rounded-lg px-4 py-3 border border-gray-700">
-              <p className="text-sm text-gray-400">With Assets</p>
+            <div className="bg-white rounded-lg px-4 py-3 border-2 border-[#f4f0f0] shadow-lg">
+              <p className="text-sm text-[#9b9b9b]">With Assets</p>
               <p className="text-2xl font-bold text-green-400">{brandsWithAssets}</p>
             </div>
-            <div className="bg-gray-800 rounded-lg px-4 py-3 border border-gray-700">
-              <p className="text-sm text-gray-400">Total Assets</p>
+            <div className="bg-white rounded-lg px-4 py-3 border-2 border-[#f4f0f0] shadow-lg">
+              <p className="text-sm text-[#9b9b9b]">Total Assets</p>
               <p className="text-2xl font-bold text-blue-400">{totalAssets}</p>
             </div>
           </div>
@@ -99,7 +99,7 @@ const BrandAssetManager: React.FC<BrandAssetManagerProps> = ({ onBack }) => {
       {loading && (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
-          <p className="text-gray-400 mt-4">Loading brand assets...</p>
+          <p className="text-[#9b9b9b] mt-4">Loading brand assets...</p>
         </div>
       )}
 
@@ -114,7 +114,7 @@ const BrandAssetManager: React.FC<BrandAssetManagerProps> = ({ onBack }) => {
               <button
                 key={brand.id}
                 onClick={() => handleBrandClick(brand)}
-                className="group p-6 text-left bg-gray-800 rounded-lg border border-gray-700 hover:border-brand-primary transition-all duration-300 transform hover:-translate-y-1"
+                className="group p-6 text-left bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg hover:border-brand-primary transition-all duration-300 transform hover:-translate-y-1"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
@@ -154,8 +154,8 @@ const BrandAssetManager: React.FC<BrandAssetManagerProps> = ({ onBack }) => {
                       )}
                     </span>
                     <div>
-                      <h3 className="text-lg font-bold text-white">{brand.name}</h3>
-                      <p className="text-sm text-gray-400">{brand.id}</p>
+                      <h3 className="text-lg font-bold text-[#4b0f0d]">{brand.name}</h3>
+                      <p className="text-sm text-[#9b9b9b]">{brand.id}</p>
                     </div>
                   </div>
                   {hasAssets ? (
@@ -187,40 +187,40 @@ const BrandAssetManager: React.FC<BrandAssetManagerProps> = ({ onBack }) => {
                   <div className="space-y-2 text-sm">
                     {stats.assetsByCategory['brand-guidelines'] > 0 && (
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-400">📋 Guidelines</span>
-                        <span className="text-white font-semibold">
+                        <span className="text-[#9b9b9b]">📋 Guidelines</span>
+                        <span className="text-[#4b0f0d] font-semibold">
                           {stats.assetsByCategory['brand-guidelines']}
                         </span>
                       </div>
                     )}
                     {stats.assetsByCategory['competitor-ads'] > 0 && (
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-400">🎯 Ad Examples</span>
-                        <span className="text-white font-semibold">
+                        <span className="text-[#9b9b9b]">🎯 Ad Examples</span>
+                        <span className="text-[#4b0f0d] font-semibold">
                           {stats.assetsByCategory['competitor-ads']}
                         </span>
                       </div>
                     )}
                     {stats.assetsByCategory['reference-copy'] > 0 && (
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-400">✍️ Reference Copy</span>
-                        <span className="text-white font-semibold">
+                        <span className="text-[#9b9b9b]">✍️ Reference Copy</span>
+                        <span className="text-[#4b0f0d] font-semibold">
                           {stats.assetsByCategory['reference-copy']}
                         </span>
                       </div>
                     )}
                     {stats.assetsByCategory['logos'] > 0 && (
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-400">🏷️ Logos</span>
-                        <span className="text-white font-semibold">
+                        <span className="text-[#9b9b9b]">🏷️ Logos</span>
+                        <span className="text-[#4b0f0d] font-semibold">
                           {stats.assetsByCategory['logos']}
                         </span>
                       </div>
                     )}
                     {stats.assetsByCategory['other'] > 0 && (
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-400">📦 Other</span>
-                        <span className="text-white font-semibold">
+                        <span className="text-[#9b9b9b]">📦 Other</span>
+                        <span className="text-[#4b0f0d] font-semibold">
                           {stats.assetsByCategory['other']}
                         </span>
                       </div>

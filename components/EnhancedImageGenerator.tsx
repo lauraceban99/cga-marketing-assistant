@@ -135,8 +135,8 @@ const EnhancedImageGenerator: React.FC<EnhancedImageGeneratorProps> = ({
   const estimatedTime = generateMultiple ? estimateBatchTime(variationCount) : 15;
 
   return (
-    <div className="bg-gray-700 p-6 rounded-lg space-y-4">
-      <h3 className="text-lg font-semibold text-white">🎨 Enhanced Image Generation</h3>
+    <div className="bg-[#f4f0f0] p-6 rounded-lg space-y-4">
+      <h3 className="text-lg font-semibold text-[#4b0f0d]">🎨 Enhanced Image Generation</h3>
 
       <div className="space-y-3">
         {/* Enhanced Prompts Toggle */}
@@ -149,8 +149,8 @@ const EnhancedImageGenerator: React.FC<EnhancedImageGeneratorProps> = ({
             disabled={isGenerating}
           />
           <div>
-            <span className="text-white font-medium">Use Enhanced Prompts</span>
-            <p className="text-xs text-gray-400">
+            <span className="text-[#4b0f0d] font-medium">Use Enhanced Prompts</span>
+            <p className="text-xs text-[#9b9b9b]">
               Detailed, structured prompts for 85-90% production-ready ads
             </p>
           </div>
@@ -166,8 +166,8 @@ const EnhancedImageGenerator: React.FC<EnhancedImageGeneratorProps> = ({
             disabled={isGenerating || !useEnhanced}
           />
           <div>
-            <span className="text-white font-medium">Generate Multiple Variations</span>
-            <p className="text-xs text-gray-400">
+            <span className="text-[#4b0f0d] font-medium">Generate Multiple Variations</span>
+            <p className="text-xs text-[#9b9b9b]">
               Create multiple variations with slight differences
             </p>
           </div>
@@ -176,18 +176,18 @@ const EnhancedImageGenerator: React.FC<EnhancedImageGeneratorProps> = ({
         {/* Variation Count Selector */}
         {generateMultiple && (
           <div className="ml-8 space-y-2">
-            <label className="text-sm text-gray-300">Number of variations:</label>
+            <label className="text-sm text-[#4b0f0d]">Number of variations:</label>
             <select
               value={variationCount}
               onChange={(e) => setVariationCount(Number(e.target.value))}
-              className="w-full bg-gray-600 border border-gray-500 text-white rounded-md p-2"
+              className="w-full bg-gray-600 border border-gray-500 text-[#4b0f0d] rounded-md p-2"
               disabled={isGenerating}
             >
               <option value={2}>2 variations</option>
               <option value={3}>3 variations</option>
               <option value={5}>5 variations</option>
             </select>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-[#9b9b9b]">
               Estimated time: {estimatedTime} seconds
             </p>
           </div>
@@ -197,7 +197,7 @@ const EnhancedImageGenerator: React.FC<EnhancedImageGeneratorProps> = ({
         <button
           onClick={handleGenerate}
           disabled={isGenerating}
-          className="w-full py-3 px-4 bg-brand-primary text-white font-semibold rounded-md hover:bg-red-600 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-3 px-4 bg-brand-primary text-[#4b0f0d] font-semibold rounded-md hover:bg-red-600 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors"
         >
           {isGenerating ? (
             <>

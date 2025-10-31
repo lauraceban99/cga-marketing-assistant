@@ -46,14 +46,14 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({ asset, onSave, onClose 
     <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-gray-900 rounded-lg overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-[#f4f0f0]">
           <div>
-            <h2 className="text-xl font-bold text-white">Edit Asset Metadata</h2>
-            <p className="text-sm text-gray-400 truncate max-w-md">{asset.fileName}</p>
+            <h2 className="text-xl font-bold text-[#4b0f0d]">Edit Asset Metadata</h2>
+            <p className="text-sm text-[#9b9b9b] truncate max-w-md">{asset.fileName}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-white transition-colors"
+            className="p-2 text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -65,21 +65,21 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({ asset, onSave, onClose 
         <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
               Description
             </label>
             <textarea
               value={metadata.description || ''}
               onChange={(e) => setMetadata({ ...metadata, description: e.target.value })}
               rows={3}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary resize-none"
+              className="w-full px-4 py-3 bg-white border-2 border-[#f4f0f0] shadow-lg rounded-lg text-[#4b0f0d] text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary resize-none"
               placeholder="Add a description for this asset..."
             />
           </div>
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
               Tags
             </label>
             <div className="flex gap-2 mb-3">
@@ -93,12 +93,12 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({ asset, onSave, onClose 
                     addTag();
                   }
                 }}
-                className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                className="flex-1 px-4 py-2 bg-white border-2 border-[#f4f0f0] shadow-lg rounded-lg text-[#4b0f0d] text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 placeholder="Type a tag and press Enter..."
               />
               <button
                 onClick={addTag}
-                className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-opacity-90 transition-colors text-sm"
+                className="px-4 py-2 bg-brand-primary text-[#4b0f0d] rounded-lg hover:bg-opacity-90 transition-colors text-sm"
               >
                 Add
               </button>
@@ -113,7 +113,7 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({ asset, onSave, onClose 
                     {tag}
                     <button
                       onClick={() => removeTag(tag)}
-                      className="hover:text-white transition-colors"
+                      className="hover:text-[#4b0f0d] transition-colors"
                     >
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -127,60 +127,60 @@ const EditAssetModal: React.FC<EditAssetModalProps> = ({ asset, onSave, onClose 
 
           {/* Campaign Name */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
               Campaign Name
             </label>
             <input
               type="text"
               value={metadata.campaignName || ''}
               onChange={(e) => setMetadata({ ...metadata, campaignName: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+              className="w-full px-4 py-2 bg-white border-2 border-[#f4f0f0] shadow-lg rounded-lg text-[#4b0f0d] text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
               placeholder="e.g., Q1 Open Day 2025"
             />
           </div>
 
           {/* Source URL */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
               Source URL
             </label>
             <input
               type="url"
               value={metadata.sourceUrl || ''}
               onChange={(e) => setMetadata({ ...metadata, sourceUrl: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+              className="w-full px-4 py-2 bg-white border-2 border-[#f4f0f0] shadow-lg rounded-lg text-[#4b0f0d] text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
               placeholder="https://..."
             />
           </div>
 
           {/* Usage Rights */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
               Usage Rights
             </label>
             <input
               type="text"
               value={metadata.usageRights || ''}
               onChange={(e) => setMetadata({ ...metadata, usageRights: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+              className="w-full px-4 py-2 bg-white border-2 border-[#f4f0f0] shadow-lg rounded-lg text-[#4b0f0d] text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
               placeholder="e.g., Licensed, Public Domain, Internal Use Only"
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-700">
+        <div className="flex items-center justify-end gap-3 p-4 border-t border-[#f4f0f0]">
           <button
             onClick={onClose}
             disabled={saving}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
+            className="px-4 py-2 bg-[#f4f0f0] text-[#4b0f0d] rounded-lg hover:bg-[#04114a]/10 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center gap-2 disabled:opacity-50"
+            className="px-4 py-2 bg-brand-primary text-[#4b0f0d] rounded-lg hover:bg-opacity-90 transition-colors flex items-center gap-2 disabled:opacity-50"
           >
             {saving ? (
               <>

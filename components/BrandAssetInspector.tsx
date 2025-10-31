@@ -139,13 +139,13 @@ const BrandAssetInspector: React.FC<BrandAssetInspectorProps> = ({ brand }) => {
     <div className="mb-8">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
+        className="w-full flex items-center justify-between p-4 bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg hover:border-[#f4f0f0] transition-colors"
       >
         <div className="flex items-center gap-3">
           <span className="text-2xl">🔍</span>
           <div className="text-left">
-            <h3 className="text-lg font-semibold text-white">Brand Asset Inspector</h3>
-            <p className="text-sm text-gray-400">See what the AI extracts from your {assets.length} uploaded assets</p>
+            <h3 className="text-lg font-semibold text-[#4b0f0d]">Brand Asset Inspector</h3>
+            <p className="text-sm text-[#9b9b9b]">See what the AI extracts from your {assets.length} uploaded assets</p>
           </div>
         </div>
         <svg
@@ -158,29 +158,29 @@ const BrandAssetInspector: React.FC<BrandAssetInspectorProps> = ({ brand }) => {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`text-[#9b9b9b] transition-transform ${isOpen ? 'rotate-180' : ''}`}
         >
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </button>
 
       {isOpen && (
-        <div className="mt-4 p-6 bg-gray-800 rounded-lg border border-gray-700">
+        <div className="mt-4 p-6 bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg">
           {assets.length === 0 ? (
-            <p className="text-gray-400 text-center py-8">No assets uploaded yet. Upload assets to see what the AI extracts.</p>
+            <p className="text-[#9b9b9b] text-center py-8">No assets uploaded yet. Upload assets to see what the AI extracts.</p>
           ) : (
             <>
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h4 className="text-white font-semibold">Asset Analysis</h4>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <h4 className="text-[#4b0f0d] font-semibold">Asset Analysis</h4>
+                  <p className="text-sm text-[#9b9b9b] mt-1">
                     {assets.length} asset{assets.length !== 1 ? 's' : ''} found
                   </p>
                 </div>
                 <button
                   onClick={analyzeAllAssets}
                   disabled={isAnalyzing}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-indigo-600 text-[#4b0f0d] rounded-md hover:bg-indigo-500 disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
                   {isAnalyzing ? 'Analyzing...' : 'Analyze All Assets'}
                 </button>
@@ -188,12 +188,12 @@ const BrandAssetInspector: React.FC<BrandAssetInspectorProps> = ({ brand }) => {
 
               <div className="space-y-4">
                 {analyses.map((analysis, idx) => (
-                  <div key={idx} className="p-4 bg-gray-900 rounded-lg border border-gray-700">
+                  <div key={idx} className="p-4 bg-gray-900 rounded-lg border-2 border-[#f4f0f0] shadow-lg">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xl">{getCategoryIcon(analysis.category)}</span>
                         <div>
-                          <h5 className="text-white font-medium">{analysis.fileName}</h5>
+                          <h5 className="text-[#4b0f0d] font-medium">{analysis.fileName}</h5>
                           <p className="text-xs text-gray-500">
                             {getCategoryLabel(analysis.category)} • {analysis.fileType}
                           </p>
@@ -214,9 +214,9 @@ const BrandAssetInspector: React.FC<BrandAssetInspectorProps> = ({ brand }) => {
                     </div>
 
                     {analysis.status === 'complete' && analysis.analysis && (
-                      <div className="mt-3 p-3 bg-gray-800 rounded border border-gray-700">
-                        <p className="text-xs font-semibold text-gray-400 mb-2">AI EXTRACTED:</p>
-                        <p className="text-sm text-gray-300 whitespace-pre-wrap">{analysis.analysis}</p>
+                      <div className="mt-3 p-3 bg-white rounded border-2 border-[#f4f0f0] shadow-lg">
+                        <p className="text-xs font-semibold text-[#9b9b9b] mb-2">AI EXTRACTED:</p>
+                        <p className="text-sm text-[#4b0f0d] whitespace-pre-wrap">{analysis.analysis}</p>
                       </div>
                     )}
 
@@ -235,7 +235,7 @@ const BrandAssetInspector: React.FC<BrandAssetInspectorProps> = ({ brand }) => {
 
               <div className="mt-6 p-4 bg-indigo-900/20 border border-indigo-700 rounded-lg">
                 <h5 className="text-indigo-300 font-semibold mb-2">💡 How This Helps</h5>
-                <ul className="text-sm text-gray-300 space-y-1">
+                <ul className="text-sm text-[#4b0f0d] space-y-1">
                   <li>• <strong>Logo Analysis:</strong> Extracts colors, style, and design elements used in image generation</li>
                   <li>• <strong>Example Ads:</strong> Analyzes visual composition, photography style, and mood to replicate</li>
                   <li>• <strong>Brand Guidelines:</strong> Text extraction provides copy rules and brand voice</li>

@@ -327,10 +327,10 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
   if (isLoading) {
     return (
       <div className="text-center py-16">
-        <h2 className="text-2xl font-bold text-white mb-4">{taskDetails.loadingMessage}</h2>
-        <p className="text-gray-400 mb-8">The AI is warming up. This may take a moment.</p>
+        <h2 className="text-2xl font-bold text-[#4b0f0d] mb-4">{taskDetails.loadingMessage}</h2>
+        <p className="text-[#9b9b9b] mb-8">The AI is warming up. This may take a moment.</p>
         <LoadingSpinner />
-        {error && <p className="mt-4 text-red-400">{error}</p>}
+        {error && <p className="mt-4 text-[#780817]">{error}</p>}
       </div>
     );
   }
@@ -338,10 +338,10 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
   if (isGeneratingImage) {
     return (
       <div className="text-center py-16">
-        <h2 className="text-2xl font-bold text-white mb-4">Generating image for your selected variation...</h2>
-        <p className="text-gray-400 mb-8">Creating the perfect visual to match your ad copy.</p>
+        <h2 className="text-2xl font-bold text-[#4b0f0d] mb-4">Generating image for your selected variation...</h2>
+        <p className="text-[#9b9b9b] mb-8">Creating the perfect visual to match your ad copy.</p>
         <LoadingSpinner />
-        {error && <p className="mt-4 text-red-400">{error}</p>}
+        {error && <p className="mt-4 text-[#780817]">{error}</p>}
       </div>
     );
   }
@@ -350,13 +350,13 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
   if (variations.length > 0) {
     return (
       <div className="max-w-6xl mx-auto py-8">
-        <button onClick={() => setVariations([])} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-4">
+        <button onClick={() => setVariations([])} className="flex items-center gap-2 text-sm text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors mb-4">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
           Start Over
         </button>
 
-        <h2 className="text-3xl font-bold text-white mb-2">Select Your Favorite Variation</h2>
-        <p className="text-gray-400 mb-8">Edit if needed, then click "Use This One" to generate images. Selected ads are automatically saved to train future generations.</p>
+        <h2 className="text-3xl font-bold text-[#4b0f0d] mb-2">Select Your Favorite Variation</h2>
+        <p className="text-[#9b9b9b] mb-8">Edit if needed, then click "Use This One" to generate images. Selected ads are automatically saved to train future generations.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {variations.map((variation, index) => {
@@ -366,17 +366,17 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
             return (
               <div
                 key={index}
-                className={`bg-gray-800 rounded-lg border p-6 transition-all duration-300 ${
-                  isEditing ? 'border-indigo-500 shadow-lg' : 'border-gray-700 hover:border-brand-primary'
+                className={`bg-white rounded-lg border-2 p-6 transition-all duration-300 shadow-md ${
+                  isEditing ? 'border-[#04114a] shadow-xl' : 'border-[#f4f0f0] hover:border-[#780817]/30 hover:shadow-lg'
                 }`}
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-semibold text-brand-primary">Variation {index + 1}</span>
+                  <span className="text-xs font-semibold text-[#780817]">Variation {index + 1}</span>
                   <div className="flex gap-2">
                     {!isEditing ? (
                       <button
                         onClick={() => handleStartEdit(index)}
-                        className="text-xs text-gray-400 hover:text-blue-400 transition-colors"
+                        className="text-xs text-[#9b9b9b] hover:text-[#04114a] transition-colors"
                         title="Edit this variation"
                       >
                         ✏️ Edit
@@ -385,13 +385,13 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
                       <>
                         <button
                           onClick={handleSaveEdit}
-                          className="text-xs text-green-400 hover:text-green-300 transition-colors"
+                          className="text-xs text-green-600 hover:text-green-500 transition-colors font-semibold"
                         >
                           ✓ Save
                         </button>
                         <button
                           onClick={handleCancelEdit}
-                          className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                          className="text-xs text-[#780817] hover:text-[#4b0f0d] transition-colors font-semibold"
                         >
                           ✕ Cancel
                         </button>
@@ -402,53 +402,53 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
 
                 <div className="space-y-4 mb-6">
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Headline ({displayVariation.headline.length} chars)</p>
+                    <p className="text-xs text-[#9b9b9b] mb-1">Headline ({displayVariation.headline.length} chars)</p>
                     {isEditing ? (
                       <input
                         type="text"
                         value={displayVariation.headline}
                         onChange={(e) => setEditedVariation({ ...displayVariation, headline: e.target.value })}
-                        className="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 text-lg font-bold"
+                        className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 text-lg font-bold focus:border-[#780817] focus:ring-2 focus:ring-[#780817]/20"
                         maxLength={40}
                       />
                     ) : (
-                      <p className="text-lg font-bold text-white">{displayVariation.headline}</p>
+                      <p className="text-lg font-bold text-[#4b0f0d]">{displayVariation.headline}</p>
                     )}
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Primary Text ({displayVariation.primaryText.split(/\s+/).length} words)</p>
+                    <p className="text-xs text-[#9b9b9b] mb-1">Primary Text ({displayVariation.primaryText.split(/\s+/).length} words)</p>
                     {isEditing ? (
                       <textarea
                         value={displayVariation.primaryText}
                         onChange={(e) => setEditedVariation({ ...displayVariation, primaryText: e.target.value })}
-                        className="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 text-sm leading-relaxed"
+                        className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 text-sm leading-relaxed focus:border-[#780817] focus:ring-2 focus:ring-[#780817]/20"
                         rows={5}
                       />
                     ) : (
-                      <p className="text-sm text-gray-300 leading-relaxed">{displayVariation.primaryText}</p>
+                      <p className="text-sm text-[#4b0f0d] leading-relaxed">{displayVariation.primaryText}</p>
                     )}
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">CTA ({displayVariation.cta.split(/\s+/).length} words)</p>
+                    <p className="text-xs text-[#9b9b9b] mb-1">CTA ({displayVariation.cta.split(/\s+/).length} words)</p>
                     {isEditing ? (
                       <input
                         type="text"
                         value={displayVariation.cta}
                         onChange={(e) => setEditedVariation({ ...displayVariation, cta: e.target.value })}
-                        className="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 font-semibold"
+                        className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 font-semibold focus:border-[#780817] focus:ring-2 focus:ring-[#780817]/20"
                       />
                     ) : (
-                      <p className="text-md font-semibold text-brand-primary">{displayVariation.cta}</p>
+                      <p className="text-md font-semibold text-[#780817]">{displayVariation.cta}</p>
                     )}
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Keywords</p>
+                    <p className="text-xs text-[#9b9b9b] mb-1">Keywords</p>
                     <div className="flex flex-wrap gap-1">
                       {displayVariation.keywords.map((keyword, i) => (
-                        <span key={i} className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                        <span key={i} className="text-xs bg-[#04114a]/10 text-[#04114a] px-2 py-1 rounded">
                           {keyword}
                         </span>
                       ))}
@@ -459,7 +459,7 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
                 {!isEditing && (
                   <button
                     onClick={() => handleSelectVariation(index)}
-                    className="w-full py-2 px-4 bg-brand-primary text-white font-semibold rounded-md hover:bg-red-500 transition-colors"
+                    className="w-full py-2 px-4 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors shadow-md hover:shadow-lg"
                     title="This will auto-approve and save to knowledge base"
                   >
                     ✓ Use This One
@@ -471,8 +471,8 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
         </div>
 
         {error && (
-          <div className="mt-6 p-4 bg-red-900/20 border border-red-500 rounded-lg">
-            <p className="text-red-400">{error}</p>
+          <div className="mt-6 p-4 bg-[#780817]/10 border border-[#780817] rounded-lg">
+            <p className="text-[#780817] font-medium">{error}</p>
           </div>
         )}
       </div>
@@ -481,7 +481,7 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
 
   return (
     <div className="max-w-3xl mx-auto py-8">
-      <button onClick={onBack} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-4">
+      <button onClick={onBack} className="flex items-center gap-2 text-sm text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
         Back to Task Selection
       </button>
@@ -489,25 +489,25 @@ Generate one high-quality, ON-BRAND square advertisement image matching these sp
       {/* Brand Asset Inspector */}
       <BrandAssetInspector brand={brand} />
 
-      <form onSubmit={handleSubmit} className="p-8 bg-gray-800 rounded-lg border border-gray-700">
-        <h2 className="text-2xl font-semibold text-white mb-6">{taskDetails.title}</h2>
+      <form onSubmit={handleSubmit} className="p-8 bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg">
+        <h2 className="text-2xl font-semibold text-[#4b0f0d] mb-6">{taskDetails.title}</h2>
         <div className="space-y-6">
           <div>
-            <label htmlFor="prompt" className="block text-sm font-medium text-gray-300 mb-2">Your Request</label>
+            <label htmlFor="prompt" className="block text-sm font-medium text-[#4b0f0d] mb-2">Your Request</label>
             <textarea
               id="prompt"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               rows={8}
-              className="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-3 focus:ring-2 focus:ring-brand-primary text-lg leading-relaxed"
+              className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817] text-lg leading-relaxed"
               placeholder={taskDetails.placeholder}
               required
             />
-             <p className="text-xs text-gray-500 mt-2">Be as descriptive as possible. The more detail you provide, the better the result will be.</p>
+             <p className="text-xs text-[#9b9b9b] mt-2">Be as descriptive as possible. The more detail you provide, the better the result will be.</p>
           </div>
         </div>
-        <div className="mt-8 pt-6 border-t border-gray-700">
-          <button type="submit" className="w-full py-3 px-6 bg-brand-primary text-white font-semibold rounded-md hover:bg-red-500 transition-colors">
+        <div className="mt-8 pt-6 border-t border-[#f4f0f0]">
+          <button type="submit" className="w-full py-3 px-6 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors shadow-md hover:shadow-lg">
             {taskType === 'ad' ? 'Generate 5 Variations' : 'Generate Asset'}
           </button>
         </div>

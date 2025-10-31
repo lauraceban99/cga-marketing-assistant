@@ -149,7 +149,7 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
           <div>
             <button
               onClick={onBack}
-              className="text-gray-400 hover:text-white mb-2 flex items-center gap-2 text-sm"
+              className="text-[#9b9b9b] hover:text-[#4b0f0d] mb-2 flex items-center gap-2 text-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -164,7 +164,7 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
                   className="h-10 w-10 object-contain rounded"
                 />
               )}
-              <h1 className="text-3xl font-bold text-white">{brand.name} Asset Library</h1>
+              <h1 className="text-3xl font-bold text-[#4b0f0d]">{brand.name} Asset Library</h1>
             </div>
           </div>
         </div>
@@ -172,18 +172,18 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
         {/* Stats */}
         {stats && (
           <div className="flex gap-4 flex-wrap text-sm">
-            <div className="bg-gray-800 rounded px-3 py-2 border border-gray-700">
-              <span className="text-gray-400">Total Assets:</span>{' '}
-              <span className="text-white font-semibold">{stats.totalAssets}</span>
+            <div className="bg-white rounded px-3 py-2 border-2 border-[#f4f0f0] shadow-lg">
+              <span className="text-[#9b9b9b]">Total Assets:</span>{' '}
+              <span className="text-[#4b0f0d] font-semibold">{stats.totalAssets}</span>
             </div>
-            <div className="bg-gray-800 rounded px-3 py-2 border border-gray-700">
-              <span className="text-gray-400">Total Size:</span>{' '}
-              <span className="text-white font-semibold">{formatFileSize(stats.totalSize)}</span>
+            <div className="bg-white rounded px-3 py-2 border-2 border-[#f4f0f0] shadow-lg">
+              <span className="text-[#9b9b9b]">Total Size:</span>{' '}
+              <span className="text-[#4b0f0d] font-semibold">{formatFileSize(stats.totalSize)}</span>
             </div>
             {stats.lastUpdated && (
-              <div className="bg-gray-800 rounded px-3 py-2 border border-gray-700">
-                <span className="text-gray-400">Last Updated:</span>{' '}
-                <span className="text-white font-semibold">{formatDate(stats.lastUpdated)}</span>
+              <div className="bg-white rounded px-3 py-2 border-2 border-[#f4f0f0] shadow-lg">
+                <span className="text-[#9b9b9b]">Last Updated:</span>{' '}
+                <span className="text-[#4b0f0d] font-semibold">{formatDate(stats.lastUpdated)}</span>
               </div>
             )}
           </div>
@@ -191,7 +191,7 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
       </div>
 
       {/* Category Tabs + Instructions Tab */}
-      <div className="border-b border-gray-700">
+      <div className="border-b border-[#f4f0f0]">
         <div className="flex gap-2 overflow-x-auto">
           {/* Asset Category Tabs */}
           {(['brand-guidelines', 'competitor-ads', 'reference-copy', 'logos', 'other'] as AssetCategory[]).map(
@@ -208,8 +208,8 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
                     flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap
                     ${
                       isActive
-                        ? 'border-brand-primary text-white'
-                        : 'border-transparent text-gray-400 hover:text-white'
+                        ? 'border-brand-primary text-[#4b0f0d]'
+                        : 'border-transparent text-[#9b9b9b] hover:text-[#4b0f0d]'
                     }
                   `}
                 >
@@ -219,7 +219,7 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
                     <span
                       className={`
                         text-xs px-2 py-0.5 rounded-full
-                        ${isActive ? 'bg-brand-primary text-white' : 'bg-gray-700 text-gray-300'}
+                        ${isActive ? 'bg-brand-primary text-[#4b0f0d]' : 'bg-[#f4f0f0] text-[#4b0f0d]'}
                       `}
                     >
                       {count}
@@ -237,8 +237,8 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
               flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap
               ${
                 activeTab === 'instructions'
-                  ? 'border-brand-primary text-white'
-                  : 'border-transparent text-gray-400 hover:text-white'
+                  ? 'border-brand-primary text-[#4b0f0d]'
+                  : 'border-transparent text-[#9b9b9b] hover:text-[#4b0f0d]'
               }
             `}
           >
@@ -259,17 +259,17 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
             {/* Category Info & Upload Button */}
             <div className="flex items-start justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                <h2 className="text-xl font-semibold text-[#4b0f0d] flex items-center gap-2">
                   {categoryConfig.icon} {categoryConfig.label}
                 </h2>
-                <p className="text-sm text-gray-400 mt-1">{categoryConfig.description}</p>
+                <p className="text-sm text-[#9b9b9b] mt-1">{categoryConfig.description}</p>
               </div>
               {activeCategory === 'reference-copy' ? (
                 /* Reference Copy: Show both options */
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowTextCopyInput(true)}
-                    className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-brand-primary text-[#4b0f0d] rounded-lg hover:bg-opacity-90 transition-colors flex items-center gap-2"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -278,7 +278,7 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
                   </button>
                   <button
                     onClick={() => setShowUploader(true)}
-                    className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-[#f4f0f0] text-[#4b0f0d] rounded-lg hover:bg-[#04114a]/10 transition-colors flex items-center gap-2"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -290,7 +290,7 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
                 /* Other categories: Regular upload button */
                 <button
                   onClick={() => setShowUploader(true)}
-                  className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-brand-primary text-[#4b0f0d] rounded-lg hover:bg-opacity-90 transition-colors flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -316,7 +316,7 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
             {loading && (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
-                <p className="text-gray-400 mt-4 text-sm">Loading assets...</p>
+                <p className="text-[#9b9b9b] mt-4 text-sm">Loading assets...</p>
               </div>
             )}
 
@@ -331,20 +331,20 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
             {!loading && !error && (
               <>
                 {assets.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-800 rounded-lg border border-gray-700">
+                  <div className="text-center py-12 bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg">
                     <div className="text-4xl mb-3">{categoryConfig.icon}</div>
-                    <p className="text-gray-400">No assets in this category yet</p>
+                    <p className="text-[#9b9b9b]">No assets in this category yet</p>
                     {activeCategory === 'reference-copy' ? (
                       <div className="mt-4 flex gap-3 justify-center">
                         <button
                           onClick={() => setShowTextCopyInput(true)}
-                          className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-opacity-90 transition-colors"
+                          className="px-4 py-2 bg-brand-primary text-[#4b0f0d] rounded-lg hover:bg-opacity-90 transition-colors"
                         >
                           Add Text Copy
                         </button>
                         <button
                           onClick={() => setShowUploader(true)}
-                          className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                          className="px-4 py-2 bg-[#f4f0f0] text-[#4b0f0d] rounded-lg hover:bg-[#04114a]/10 transition-colors"
                         >
                           Upload Files
                         </button>
@@ -352,29 +352,29 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
                     ) : (
                       <button
                         onClick={() => setShowUploader(true)}
-                        className="mt-4 px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-opacity-90 transition-colors"
+                        className="mt-4 px-4 py-2 bg-brand-primary text-[#4b0f0d] rounded-lg hover:bg-opacity-90 transition-colors"
                       >
                         Upload First Asset
                       </button>
                     )}
                   </div>
                 ) : filteredAssets.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-800 rounded-lg border border-gray-700">
+                  <div className="text-center py-12 bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg">
                     <div className="text-4xl mb-3">🔍</div>
-                    <p className="text-gray-400">No assets match your search or filters</p>
+                    <p className="text-[#9b9b9b]">No assets match your search or filters</p>
                     <button
                       onClick={() => {
                         setSearchQuery('');
                         setFilterBy('all');
                       }}
-                      className="mt-4 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                      className="mt-4 px-4 py-2 bg-[#f4f0f0] text-[#4b0f0d] rounded-lg hover:bg-[#04114a]/10 transition-colors"
                     >
                       Clear Filters
                     </button>
                   </div>
                 ) : (
                   <>
-                    <div className="mb-3 text-sm text-gray-400">
+                    <div className="mb-3 text-sm text-[#9b9b9b]">
                       Showing {filteredAssets.length} of {assets.length} assets
                     </div>
                     <div
