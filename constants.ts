@@ -6,7 +6,7 @@ export const BRANDS: Brand[] = [
     id: 'aia',
     name: 'American Infinite Academy',
     color: 'bg-cyan-400',
-    logoUrl: '/logos/American%20Infinite%20Academy_White%20%281%29.png',
+    logoUrl: '/logos/American%20Infinite%20Academy_Blue%20%284%29.png',
     guidelines: {
       toneOfVoice: 'Aspirational, encouraging, and professional. Focus on student potential and future success.',
       keyMessaging: '"Unlock Your Potential," "A Foundation for Life," "Excellence in Education."',
@@ -23,7 +23,7 @@ export const BRANDS: Brand[] = [
     id: 'aoa',
     name: 'Aotearoa Infinite Academy',
     color: 'bg-green-400',
-    logoUrl: '/logos/Aotearoa%20Logo.svg',
+    logoUrl: '/logos/Aotearoa%20Blue%20Navy%20Logo.svg',
     guidelines: {
       toneOfVoice: 'Inclusive, community-oriented, and connected to nature. Emphasizes cultural heritage and environmental stewardship.',
       keyMessaging: '"Learning for a Sustainable Future," "Connected to Our Land," "Community of Learners."',
@@ -40,7 +40,7 @@ export const BRANDS: Brand[] = [
     id: 'cga',
     name: 'CGA',
     color: 'bg-blue-400',
-    logoUrl: '/logos/CGA%20Logo.svg',
+    logoUrl: '/logos/CGA%20Burgundy%20Logo.svg',
     guidelines: {
       toneOfVoice: 'Innovative, tech-forward, and collaborative. Highlight flexibility and global connectivity.',
       keyMessaging: '"The Future of Learning," "Education Without Borders," "Personalized Pathways."',
@@ -61,7 +61,7 @@ export const BRANDS: Brand[] = [
     id: 'crimson_age',
     name: 'Crimson Age',
     color: 'bg-yellow-400',
-    logoUrl: '/logos/AGE%20Logo.svg',
+    logoUrl: '/logos/Crimson%20Age%20Blue%20Colour%20Stacked.svg',
     guidelines: {
       toneOfVoice: 'Prestigious, exclusive, and results-driven. Focus on elite university pathways and academic rigor.',
       keyMessaging: '"Your Pathway to the Ivy League," "Excellence Redefined," "Join the Top 1%."',
@@ -95,7 +95,7 @@ export const BRANDS: Brand[] = [
     id: 'mt_hobson',
     name: 'Mt Hobson',
     color: 'bg-pink-400',
-    logoUrl: '/logos/Mt%20Hobson%20Logo.svg',
+    logoUrl: '/logos/mt%20hobson.svg',
     guidelines: {
       toneOfVoice: 'Nurturing, supportive, and boutique. Emphasizes small class sizes and personalized attention.',
       keyMessaging: '"Where Every Student is Known," "A Boutique School Experience," "Personalized Learning, Exceptional Care."',
