@@ -695,7 +695,24 @@ Generate one high-quality square advertisement image that matches these specific
         console.log(`   PDF guidelines loaded: ${assets.visualStyle ? 'Yes' : 'No'}`);
         console.log(`   Example ads analyzed: ${assets.exampleAdStyles.length}`);
 
-        const images = await generateImages(imagePrompt, 1);
+        let images = await generateImages(imagePrompt, 1);
+
+        // Apply logo overlay if brand has uploaded logo
+        const { getAssetsByCategory } = await import('./assetService');
+        const logos = await getAssetsByCategory(brand.id, 'logos');
+
+        if (logos.length > 0 && logos[0].fileUrl) {
+            console.log('   🏷️ Applying logo overlay...');
+            try {
+                images = await Promise.all(
+                    images.map(img => overlayLogoOnGeneratedImage(img, logos[0].fileUrl))
+                );
+                console.log('   ✅ Logo overlay applied to all images');
+            } catch (err) {
+                console.warn('   ⚠️ Logo overlay failed, using images without logo:', err);
+            }
+        }
+
         return { text, images };
     }
 
@@ -836,7 +853,25 @@ Generate ${count} diverse, high-quality, ON-BRAND variations incorporating the f
   console.log(`   PDF guidelines loaded: ${assets.visualStyle ? 'Yes' : 'No'}`);
   console.log(`   Example ads analyzed: ${assets.exampleAdStyles.length}`);
 
-  return generateImages(imagePrompt, count);
+  let images = await generateImages(imagePrompt, count);
+
+  // Apply logo overlay if brand has uploaded logo
+  const { getAssetsByCategory } = await import('./assetService');
+  const logos = await getAssetsByCategory(brand.id, 'logos');
+
+  if (logos.length > 0 && logos[0].fileUrl) {
+      console.log('   🏷️ Applying logo overlay...');
+      try {
+          images = await Promise.all(
+              images.map(img => overlayLogoOnGeneratedImage(img, logos[0].fileUrl))
+          );
+          console.log('   ✅ Logo overlay applied to all images');
+      } catch (err) {
+          console.warn('   ⚠️ Logo overlay failed, using images without logo:', err);
+      }
+  }
+
+  return images;
 }
 
 
@@ -1191,3 +1226,86 @@ export const loadAndAnalyzeBrandAssets = async (brandId: string) => {
     console.log(`✅ Brand asset loading complete for ${brandId}`);
     return result;
 };
+
+/**
+ * Overlay brand logo onto a generated image using HTML5 Canvas
+ * @param base64Image - Base64 encoded image data (without data URL prefix)
+ * @param logoUrl - URL to the logo image (from Firebase or local)
+ * @returns Base64 encoded image with logo overlay (without data URL prefix)
+ */
+export async function overlayLogoOnGeneratedImage(
+  base64Image: string,
+  logoUrl: string
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    try {
+      console.log('🎨 Overlaying logo on generated image...');
+
+      // Create canvas
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        throw new Error('Could not get canvas context');
+      }
+
+      // Load the base image
+      const baseImg = new Image();
+      baseImg.crossOrigin = 'anonymous';
+
+      baseImg.onload = () => {
+        // Set canvas size to match base image
+        canvas.width = baseImg.width;
+        canvas.height = baseImg.height;
+
+        // Draw base image
+        ctx.drawImage(baseImg, 0, 0);
+
+        // Load and draw logo
+        const logoImg = new Image();
+        logoImg.crossOrigin = 'anonymous';
+
+        logoImg.onload = () => {
+          // Calculate logo size (15% of image width, maintain aspect ratio)
+          const logoWidth = canvas.width * 0.15;
+          const logoHeight = (logoImg.height / logoImg.width) * logoWidth;
+
+          // Position in top-right corner with 3% margin
+          const margin = canvas.width * 0.03;
+          const x = canvas.width - logoWidth - margin;
+          const y = margin;
+
+          // Draw logo
+          ctx.drawImage(logoImg, x, y, logoWidth, logoHeight);
+
+          // Convert to base64 (remove data URL prefix)
+          const compositeBase64 = canvas.toDataURL('image/jpeg', 0.95).split(',')[1];
+
+          console.log('✅ Logo overlay complete');
+          resolve(compositeBase64);
+        };
+
+        logoImg.onerror = (error) => {
+          console.warn('⚠️ Could not load logo, returning image without overlay:', error);
+          // Return original image if logo fails to load
+          resolve(base64Image);
+        };
+
+        // Load logo
+        logoImg.src = logoUrl;
+      };
+
+      baseImg.onerror = (error) => {
+        console.error('❌ Could not load base image:', error);
+        reject(new Error('Failed to load base image for logo overlay'));
+      };
+
+      // Load base image
+      baseImg.src = `data:image/jpeg;base64,${base64Image}`;
+    } catch (error) {
+      console.error('❌ Error in logo overlay:', error);
+      // Return original image on error
+      resolve(base64Image);
+    }
+  });
+}
