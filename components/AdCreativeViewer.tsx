@@ -1,11 +1,12 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import type { Brand, GeneratedCreative, TaskType, AdVariation, BrandInstructions } from '../types';
+import type { Brand, GeneratedCreative, TaskType, AdVariation, BrandInstructions, AdCopy } from '../types';
 import { regenerateImages, refineCreativeText, generateAsset } from '../services/geminiService';
 import { generateAdCopyWithOpenAI } from '../services/openaiService';
 import { getApprovedContentForBrand, formatApprovedContentAsInspiration, saveApprovedContent } from '../services/feedbackService';
 import { getBrandInstructions } from '../services/instructionsService';
 import LoadingSpinner from './LoadingSpinner';
+import EnhancedImageGenerator from './EnhancedImageGenerator';
 
 interface ResultsViewerProps {
   brand: Brand;
@@ -420,6 +421,27 @@ Generate variations that are VERY SIMILAR to this approved example in style, ton
                             {isLoading ? 'Generating...' : `🎨 Generate ${imageCount} Image${imageCount > 1 ? 's' : ''}`}
                         </button>
                     </div>
+
+                    {/* Enhanced Image Generator - NEW! */}
+                    {creative.selectedVariation && (
+                        <div className="pt-6 border-t border-gray-600">
+                            <EnhancedImageGenerator
+                                brand={brand}
+                                adCopy={{
+                                    headline: creative.selectedVariation.headline,
+                                    primaryText: creative.selectedVariation.primaryText,
+                                    cta: creative.selectedVariation.cta
+                                }}
+                                userPrompt={initialPrompt}
+                                onImagesGenerated={(images) => {
+                                    setCreative(prev => ({
+                                        ...prev,
+                                        images: [...(prev.images || []), ...images]
+                                    }));
+                                }}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         )}

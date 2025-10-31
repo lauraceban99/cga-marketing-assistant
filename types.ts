@@ -20,6 +20,21 @@ export interface Brand {
 
 export type TaskType = 'copy' | 'ad' | 'email';
 
+export interface Theme {
+  brand: Brand;
+  themeName: string;
+  audience: string;
+  location: string;
+  adFocus: string; // Emotion/focus like "excitement", "achievement", "community"
+  audiencePersona: string; // Description of target audience
+}
+
+export interface AdCopy {
+  headline: string;
+  primaryText: string;
+  cta: string;
+}
+
 export interface AdVariation {
   headline: string;
   primaryText: string;
