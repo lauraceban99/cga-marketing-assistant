@@ -1,9 +1,13 @@
 import React from 'react';
 
 // Set your Crimson Academies logo URL here
-const CRIMSON_LOGO_URL = import.meta.env.VITE_CRIMSON_LOGO_URL || '';
+// Fallback to direct path if environment variable is not set
+const CRIMSON_LOGO_URL = import.meta.env.VITE_CRIMSON_LOGO_URL || '/logos/Crimson%20Academies%20Logo.svg';
 
 const Header: React.FC = () => {
+  // Debug logging
+  console.log('Header - CRIMSON_LOGO_URL:', CRIMSON_LOGO_URL);
+
   return (
     <header className="py-12 text-center">
       <div className="flex flex-col items-center justify-center gap-6">
@@ -12,6 +16,7 @@ const Header: React.FC = () => {
             src={CRIMSON_LOGO_URL}
             alt="Crimson Academies"
             className="h-24 w-auto object-contain mx-auto"
+            onError={(e) => console.error('Failed to load Crimson logo:', e)}
           />
         )}
         <div>

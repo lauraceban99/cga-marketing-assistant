@@ -96,16 +96,16 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({ brands, onSelectBrand }) 
               </div>
 
               <div className="flex flex-col items-center gap-5">
-                {/* Logo Container with consistent height */}
-                <div className="flex items-center justify-center h-20 w-full">
+                {/* Logo Container with fixed dimensions for uniform appearance */}
+                <div className="flex items-center justify-center h-24 w-32">
                   {brand.logoUrl ? (
                     <img
                       src={brand.logoUrl}
                       alt={`${brand.name} logo`}
-                      className="h-20 w-auto max-w-full object-contain mx-auto"
+                      className="max-h-24 max-w-32 w-auto h-auto object-contain"
                     />
                   ) : (
-                    <span className={`h-20 w-20 rounded-full flex-shrink-0 ${brand.color} flex items-center justify-center mx-auto`}>
+                    <span className={`h-20 w-20 rounded-full flex-shrink-0 ${brand.color} flex items-center justify-center`}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 12 2 2 4-4"></path></svg>
                     </span>
                   )}
