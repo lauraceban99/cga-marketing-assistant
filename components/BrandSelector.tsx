@@ -50,7 +50,7 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({ brands, onSelectBrand }) 
             <button
               key={brand.id}
               onClick={() => onSelectBrand(brand)}
-              className="group relative p-6 text-left bg-gray-800 rounded-lg border border-gray-700 hover:border-brand-primary transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-brand-primary"
+              className="group relative p-8 text-center bg-gray-800 rounded-lg border border-gray-700 hover:border-brand-primary transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-brand-primary"
               aria-label={`Select brand: ${brand.name}`}
             >
               {/* Status Indicators */}
@@ -95,21 +95,30 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({ brands, onSelectBrand }) 
                 )}
               </div>
 
-              <div className="flex items-center gap-4">
-                {brand.logoUrl ? (
-                  <img
-                    src={brand.logoUrl}
-                    alt={`${brand.name} logo`}
-                    className="h-16 w-16 object-contain flex-shrink-0 rounded"
-                  />
-                ) : (
-                  <span className={`h-16 w-16 rounded-full flex-shrink-0 ${brand.color} flex items-center justify-center`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 12 2 2 4-4"></path></svg>
-                  </span>
-                )}
-                <h3 className="text-xl font-bold text-white">{brand.name}</h3>
+              <div className="flex flex-col items-center gap-5">
+                {/* Logo Container with consistent height */}
+                <div className="flex items-center justify-center h-20 w-full">
+                  {brand.logoUrl ? (
+                    <img
+                      src={brand.logoUrl}
+                      alt={`${brand.name} logo`}
+                      className="h-20 max-w-full object-contain"
+                    />
+                  ) : (
+                    <span className={`h-20 w-20 rounded-full flex-shrink-0 ${brand.color} flex items-center justify-center`}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 12 2 2 4-4"></path></svg>
+                    </span>
+                  )}
+                </div>
+
+                {/* Brand Name */}
+                <h3 className="text-xl font-bold text-white leading-tight">{brand.name}</h3>
               </div>
-              <p className="mt-3 text-sm text-gray-400">Click to generate marketing assets using the {brand.name} brand guidelines.</p>
+
+              {/* Description */}
+              <p className="mt-4 text-sm text-gray-400 leading-relaxed">
+                Click to generate marketing assets using the {brand.name} brand guidelines.
+              </p>
             </button>
           );
         })}
