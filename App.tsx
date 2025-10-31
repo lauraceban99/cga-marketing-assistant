@@ -73,27 +73,32 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white font-sans px-4 pb-10">
-      <Header />
+    <div className="min-h-screen bg-[#f4f0f0] font-sans px-4 pb-10 relative">
+      {/* Subtle gradient overlay using brand colors */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#4b0f0d]/5 via-transparent to-[#04114a]/5 pointer-events-none"></div>
 
-      {/* Admin Access Button (only on brand selection page) */}
-      {appState === 'brand_selection' && (
-        <div className="max-w-4xl mx-auto mb-4">
-          <button
-            onClick={() => setAppState('dam')}
-            className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg border border-gray-700 hover:border-brand-primary hover:text-white transition-colors text-sm"
-          >
-            📁 Manage Brand Assets
-          </button>
-        </div>
-      )}
+      <div className="relative">
+        <Header />
 
-      <main>
-        {renderContent()}
-      </main>
-      <footer className="text-center py-6 text-gray-500 text-sm mt-8">
-        <p>Built with React, TypeScript, and the Gemini API.</p>
-      </footer>
+        {/* Admin Access Button (only on brand selection page) */}
+        {appState === 'brand_selection' && (
+          <div className="max-w-4xl mx-auto mb-8 text-center">
+            <button
+              onClick={() => setAppState('dam')}
+              className="px-6 py-3 bg-[#780817] hover:bg-[#4b0f0d] text-white rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
+            >
+              📁 Manage Brand Assets
+            </button>
+          </div>
+        )}
+
+        <main>
+          {renderContent()}
+        </main>
+        <footer className="text-center py-6 text-[#9b9b9b] text-sm mt-8">
+          <p>Built with React, TypeScript, and the Gemini API.</p>
+        </footer>
+      </div>
     </div>
   );
 };

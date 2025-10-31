@@ -15,15 +15,15 @@ const Header: React.FC = () => {
           <img
             src={CRIMSON_LOGO_URL}
             alt="Crimson Academies"
-            className="h-24 w-auto object-contain mx-auto"
+            className="h-20 w-auto object-contain mx-auto"
             onError={(e) => console.error('Failed to load Crimson logo:', e)}
           />
         )}
         <div>
-          <h1 className="text-4xl font-bold text-white tracking-tight">
+          <h1 className="text-4xl font-bold text-[#4b0f0d] tracking-tight">
             Crimson Academies Creative Assistant
           </h1>
-          <p className="mt-3 text-lg text-gray-400">
+          <p className="mt-3 text-lg text-[#9b9b9b]">
             Your AI partner for on-brand marketing assets.
           </p>
         </div>
