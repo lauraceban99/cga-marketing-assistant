@@ -100,11 +100,11 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({ brands, onSelectBrand }) 
                   <img
                     src={brand.logoUrl}
                     alt={`${brand.name} logo`}
-                    className="h-12 w-12 object-contain flex-shrink-0 rounded"
+                    className="h-16 w-16 object-contain flex-shrink-0 rounded"
                   />
                 ) : (
-                  <span className={`h-8 w-8 rounded-full flex-shrink-0 ${brand.color} flex items-center justify-center`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 12 2 2 4-4"></path></svg>
+                  <span className={`h-16 w-16 rounded-full flex-shrink-0 ${brand.color} flex items-center justify-center`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 12 2 2 4-4"></path></svg>
                   </span>
                 )}
                 <h3 className="text-xl font-bold text-white">{brand.name}</h3>
