@@ -6,7 +6,7 @@ export const BRANDS: Brand[] = [
     id: 'aia',
     name: 'American Infinite Academy',
     color: 'bg-cyan-400',
-    logoUrl: '/logos/American Infinite Academy_White (1).png',
+    logoUrl: '/logos/American%20Infinite%20Academy_White%20%281%29.png',
     guidelines: {
       toneOfVoice: 'Aspirational, encouraging, and professional. Focus on student potential and future success.',
       keyMessaging: '"Unlock Your Potential," "A Foundation for Life," "Excellence in Education."',
@@ -23,7 +23,7 @@ export const BRANDS: Brand[] = [
     id: 'aoa',
     name: 'Aotearoa Infinite Academy',
     color: 'bg-green-400',
-    logoUrl: '/logos/Aotearoa Logo.svg',
+    logoUrl: '/logos/Aotearoa%20Logo.svg',
     guidelines: {
       toneOfVoice: 'Inclusive, community-oriented, and connected to nature. Emphasizes cultural heritage and environmental stewardship.',
       keyMessaging: '"Learning for a Sustainable Future," "Connected to Our Land," "Community of Learners."',
@@ -40,7 +40,7 @@ export const BRANDS: Brand[] = [
     id: 'cga',
     name: 'CGA',
     color: 'bg-blue-400',
-    logoUrl: '/logos/CGA Logo.svg',
+    logoUrl: '/logos/CGA%20Logo.svg',
     guidelines: {
       toneOfVoice: 'Innovative, tech-forward, and collaborative. Highlight flexibility and global connectivity.',
       keyMessaging: '"The Future of Learning," "Education Without Borders," "Personalized Pathways."',
@@ -61,7 +61,7 @@ export const BRANDS: Brand[] = [
     id: 'crimson_age',
     name: 'Crimson Age',
     color: 'bg-yellow-400',
-    logoUrl: '/logos/AGE Logo.svg',
+    logoUrl: '/logos/AGE%20Logo.svg',
     guidelines: {
       toneOfVoice: 'Prestigious, exclusive, and results-driven. Focus on elite university pathways and academic rigor.',
       keyMessaging: '"Your Pathway to the Ivy League," "Excellence Redefined," "Join the Top 1%."',
@@ -78,7 +78,7 @@ export const BRANDS: Brand[] = [
     id: 'emi',
     name: 'EMI',
     color: 'bg-orange-300',
-    logoUrl: '/logos/EMI Logo.png',
+    logoUrl: '/logos/EMI%20Logo.png',
     guidelines: {
       toneOfVoice: 'Playful, creative, and foundational. English, Maths, Innovation.',
       keyMessaging: '"Building the Core Foundations," "Learn, Create, Innovate," "A Playful Approach to Learning."',
@@ -95,7 +95,7 @@ export const BRANDS: Brand[] = [
     id: 'mt_hobson',
     name: 'Mt Hobson',
     color: 'bg-pink-400',
-    logoUrl: '/logos/Mt Hobson Logo.svg',
+    logoUrl: '/logos/Mt%20Hobson%20Logo.svg',
     guidelines: {
       toneOfVoice: 'Nurturing, supportive, and boutique. Emphasizes small class sizes and personalized attention.',
       keyMessaging: '"Where Every Student is Known," "A Boutique School Experience," "Personalized Learning, Exceptional Care."',

@@ -11,7 +11,7 @@ const Header: React.FC = () => {
           <img
             src={CRIMSON_LOGO_URL}
             alt="Crimson Academies"
-            className="h-24 object-contain"
+            className="h-24 w-auto object-contain mx-auto"
           />
         )}
         <div>
