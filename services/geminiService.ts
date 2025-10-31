@@ -619,27 +619,41 @@ Generate again NOW with ABSOLUTE adherence to these limits in JSON format.`;
         // Extract first 5-7 words from headline for short, punchy text overlay
         const headlineWords = headline.split(/\s+/).slice(0, 7).join(' ');
 
-        // Build Gemini-friendly image prompt (NOT Midjourney format)
-        const imagePrompt = `Generate a square 1024x1024 photorealistic advertisement image for ${brand.name}.
+        // Load and analyze brand assets from Firebase
+        console.log('📦 Loading brand assets for image generation...');
+        const assets = await loadAndAnalyzeBrandAssets(brand.id);
 
-**CGA BRAND IDENTITY (CRITICAL - MUST FOLLOW):**
-- Primary colors: Burgundy (#8B1538) and Gold (#D4AF37) MUST be prominent
-- These colors should be used for text backgrounds, design elements, or color blocking
-- Logo: CGA logo in white circle MUST be visible (top-left or bottom-left corner)
-- Typography: Bold, modern sans-serif for headlines
-- Photography style: Authentic students in natural learning environments
+        // Build color palette string from extracted colors
+        const colorPalette = assets.colors.all.length > 0
+            ? `Brand colors: ${assets.colors.all.join(', ')} - These MUST be used prominently`
+            : brand.guidelines.palette
+            ? `Brand colors: ${brand.guidelines.palette}`
+            : 'Use brand-appropriate colors';
+
+        // Build Gemini-friendly image prompt with actual brand assets
+        let imagePrompt = `Generate a square 1024x1024 photorealistic advertisement image for ${brand.name}.
+
+**${brand.name.toUpperCase()} BRAND IDENTITY (CRITICAL - MUST FOLLOW):**
+- ${colorPalette}
+- Use these colors for text backgrounds, design elements, or color blocking
+${assets.logoDescription ? `- Logo: ${assets.logoDescription}` : '- Logo must be visible and properly placed'}
+${assets.logoRules ? `- Logo rules: ${assets.logoRules}` : ''}
+${assets.typography.primary ? `- Typography: ${assets.typography.primary} for headlines` : '- Typography: Bold, modern sans-serif for headlines'}
+${assets.imageryStyle ? `- Photography style: ${assets.imageryStyle}` : '- Photography style: Authentic students in natural learning environments'}
+${assets.visualStyle ? `\n**VISUAL STYLE FROM BRAND GUIDELINES:**\n${assets.visualStyle}\n` : ''}
 - NOT generic stock photos - must feel real and personal
 - Modern, premium educational brand aesthetic
-${brand.guidelines.palette ? `- Additional brand colors: ${brand.guidelines.palette}` : ''}
-${brand.guidelines.dosAndDonts ? `- Brand rules: ${brand.guidelines.dosAndDonts}` : ''}
+${brand.guidelines.palette ? `- Additional context: ${brand.guidelines.palette}` : ''}
+${assets.dosAndDonts ? `- Brand rules: ${assets.dosAndDonts}` : brand.guidelines.dosAndDonts ? `- Brand rules: ${brand.guidelines.dosAndDonts}` : ''}
 
 **COMPOSITION REQUIREMENTS:**
 - HERO IMAGE: One clear focal point (student, learning moment, or aspirational scene)
 - MINIMAL TEXT: Only headline in LARGE, BOLD typography - NOT small body copy
-- COLOR BLOCKING: Use burgundy/gold for text backgrounds or design elements
+- COLOR BLOCKING: Use brand colors for text backgrounds or design elements
 - NEGATIVE SPACE: Clean, uncluttered - let the image breathe
-- LOGO: CGA logo prominently placed but not dominating (bottom-left or top-left)
-- Call-to-action element: Gold background with white text or burgundy with gold text
+- LOGO: Brand logo prominently placed but not dominating (bottom-left or top-left)
+- Call-to-action element: Brand colors for CTA backgrounds
+${assets.exampleAdStyles.length > 0 ? `\n**VISUAL STYLE REFERENCE (MATCH THIS):**\n${assets.exampleAdStyles.map((style, i) => `Example Ad ${i + 1}:\n${style}`).join('\n\n')}\n\nYour generated image MUST match this visual style, composition approach, and aesthetic.\n` : ''}
 
 **CRITICAL - AVOID STOCK PHOTO LOOK:**
 - NO overly diverse "UN ad" style group shots
@@ -655,7 +669,7 @@ ${brand.guidelines.dosAndDonts ? `- Brand rules: ${brand.guidelines.dosAndDonts}
 ${headlineWords ? `- Text overlay: "${headlineWords}" (Maximum 5-7 words)` : '- No text overlay needed'}
 - Text should be LARGE, bold, highly readable - NOT small body copy
 - Use bold sans-serif typography
-- Place on solid color background (burgundy or gold) for maximum contrast
+- Place on solid color background (brand colors) for maximum contrast
 - Text size should be at least 15-20% of image height
 
 **Visual Style:**
@@ -668,14 +682,19 @@ ${brand.guidelines.imageryStyle ? `- ${brand.guidelines.imageryStyle}` : '- Auth
 
 **Important:**
 - DO NOT reference Facebook, Meta, or specific platforms
-- MUST use burgundy and gold colors prominently
-- MUST include CGA logo in white circle
+- MUST use brand colors prominently (${assets.colors.all.length > 0 ? assets.colors.all.join(', ') : 'as specified above'})
+- MUST include brand logo as described above
 - Avoid generic stock photo aesthetics
 - Modern, authentic, professional quality
 
 Generate one high-quality square advertisement image that matches these specifications.`;
 
-        console.log('🎨 Generating image with Gemini-optimized prompt...');
+        console.log('🎨 Generating image with brand-aware prompt...');
+        console.log(`   Using ${assets.colors.all.length} extracted colors`);
+        console.log(`   Logo analyzed: ${assets.logoDescription ? 'Yes' : 'No'}`);
+        console.log(`   PDF guidelines loaded: ${assets.visualStyle ? 'Yes' : 'No'}`);
+        console.log(`   Example ads analyzed: ${assets.exampleAdStyles.length}`);
+
         const images = await generateImages(imagePrompt, 1);
         return { text, images };
     }
@@ -726,39 +745,19 @@ export const regenerateImages = async (
     const headlineMatch = text.match(/\*\*Headline:\*\*\s*(.+?)(?:\n|$)/i);
     const headline = headlineMatch ? headlineMatch[1].trim() : '';
 
-    // Load brand assets for on-brand image generation
-    const { getAssetsByCategory } = await import('./assetService');
-    const [logos, competitorAds] = await Promise.all([
-        getAssetsByCategory(brand.id, 'logos'),
-        getAssetsByCategory(brand.id, 'competitor-ads')
-    ]);
-
-    console.log(`📦 Loaded ${logos.length} logos and ${competitorAds.length} example ads for regeneration`);
-
-    // Analyze brand assets using Gemini vision
-    console.log('🔍 Analyzing brand assets for regeneration...');
-    const analyses = {
-        logo: '',
-        exampleAds: [] as string[]
-    };
-
-    if (logos.length > 0 && logos[0].fileUrl) {
-        try {
-            analyses.logo = await analyzeBrandAssetImage(logos[0].fileUrl, 'logo');
-        } catch (err) {
-            console.warn('Could not analyze logo:', err);
-        }
-    }
-
-    const adsToAnalyze = competitorAds.slice(0, 2).filter(ad => ad.fileUrl && ad.fileType.startsWith('image/'));
-    if (adsToAnalyze.length > 0) {
-        analyses.exampleAds = await Promise.all(
-            adsToAnalyze.map(ad => analyzeBrandAssetImage(ad.fileUrl, 'example-ad'))
-        );
-    }
+    // Load and analyze brand assets using centralized function
+    console.log('📦 Loading brand assets for regeneration...');
+    const assets = await loadAndAnalyzeBrandAssets(brand.id);
 
     // Extract first 5-7 words from headline for short, punchy text overlay
     const headlineWords = headline.split(/\s+/).slice(0, 7).join(' ');
+
+    // Build color palette string from extracted colors
+    const colorPalette = assets.colors.all.length > 0
+        ? `Brand colors: ${assets.colors.all.join(', ')} - These MUST be used prominently`
+        : brand.guidelines.palette
+        ? `Brand colors: ${brand.guidelines.palette}`
+        : 'Use brand-appropriate colors';
 
     // Build Gemini-friendly refinement prompt with actual brand asset analysis
     let imagePrompt = `Generate ${count} square 1024x1024 photorealistic advertisement image${count > 1 ? 's' : ''} for ${brand.name}.
@@ -769,54 +768,27 @@ ${text}
 **Refinement Requested:**
 ${refinement || 'Generate more variations with the same style'}
 
-**CGA BRAND IDENTITY (CRITICAL - MUST FOLLOW):**
-- Primary colors: Burgundy (#8B1538) and Gold (#D4AF37) MUST be prominent
-- These colors should be used for text backgrounds, design elements, or color blocking
-- Logo: CGA logo in white circle MUST be visible (top-left or bottom-left corner)
-- Typography: Bold, modern sans-serif for headlines
-- Photography style: Authentic students in natural learning environments
+**${brand.name.toUpperCase()} BRAND IDENTITY (CRITICAL - MUST FOLLOW):**
+- ${colorPalette}
+- Use these colors for text backgrounds, design elements, or color blocking
+${assets.logoDescription ? `- Logo: ${assets.logoDescription}` : '- Logo must be visible and properly placed'}
+${assets.logoRules ? `- Logo rules: ${assets.logoRules}` : brand.guidelines.logoRules ? `- Logo rules: ${brand.guidelines.logoRules}` : ''}
+${assets.typography.primary ? `- Typography: ${assets.typography.primary} for headlines` : '- Typography: Bold, modern sans-serif for headlines'}
+${assets.imageryStyle ? `- Photography style: ${assets.imageryStyle}` : brand.guidelines.imageryStyle ? `- Photography style: ${brand.guidelines.imageryStyle}` : '- Photography style: Authentic students in natural learning environments'}
+${assets.visualStyle ? `\n**VISUAL STYLE FROM BRAND GUIDELINES:**\n${assets.visualStyle}\n` : ''}
 - NOT generic stock photos - must feel real and personal
-- Modern, premium educational brand aesthetic`;
+- Modern, premium educational brand aesthetic
+${assets.dosAndDonts ? `- Brand rules: ${assets.dosAndDonts}` : brand.guidelines.dosAndDonts ? `- Brand rules: ${brand.guidelines.dosAndDonts}` : ''}
 
-    // Add actual logo analysis
-    if (analyses.logo) {
-        imagePrompt += `\n\n**BRAND LOGO ANALYSIS (MUST INCLUDE):**\n${analyses.logo}`;
-        imagePrompt += `\n- The logo must be visible and integrated into the design`;
-        if (brand.guidelines.logoRules) {
-            imagePrompt += `\n- Logo rules: ${brand.guidelines.logoRules}`;
-        }
-    }
-
-    // Add color palette
-    if (brand.guidelines.palette) {
-        imagePrompt += `\n\n**ADDITIONAL BRAND COLORS:**`;
-        imagePrompt += `\n- ${brand.guidelines.palette}`;
-        imagePrompt += `\n- Apply brand colors to backgrounds, accents, text overlays, and all design elements`;
-    }
-
-    // Add imagery style
-    if (brand.guidelines.imageryStyle) {
-        imagePrompt += `\n\n**IMAGERY STYLE:**\n${brand.guidelines.imageryStyle}`;
-    }
-
-    // Add actual example ad analysis
-    if (analyses.exampleAds.length > 0) {
-        imagePrompt += `\n\n**VISUAL STYLE REFERENCE (MATCH THIS):**`;
-        analyses.exampleAds.forEach((analysis, i) => {
-            imagePrompt += `\n\nExample Ad ${i + 1}:\n${analysis}`;
-        });
-        imagePrompt += `\n\nYour generated image MUST match this visual style, composition approach, and aesthetic.`;
-    }
-
-    imagePrompt += `
+${assets.exampleAdStyles.length > 0 ? `**VISUAL STYLE REFERENCE (MATCH THIS):**\n${assets.exampleAdStyles.map((style, i) => `Example Ad ${i + 1}:\n${style}`).join('\n\n')}\n\nYour generated image MUST match this visual style, composition approach, and aesthetic.\n` : ''}
 
 **COMPOSITION REQUIREMENTS:**
 - HERO IMAGE: One clear focal point (student, learning moment, or aspirational scene)
 - MINIMAL TEXT: Only headline in LARGE, BOLD typography - NOT small body copy
-- COLOR BLOCKING: Use burgundy/gold for text backgrounds or design elements
+- COLOR BLOCKING: Use brand colors for text backgrounds or design elements
 - NEGATIVE SPACE: Clean, uncluttered - let the image breathe
-- LOGO: CGA logo prominently placed but not dominating (bottom-left or top-left)
-- Call-to-action element: Gold background with white text or burgundy with gold text
+- LOGO: Brand logo prominently placed but not dominating (bottom-left or top-left)
+- Call-to-action element: Brand colors for CTA backgrounds
 
 **CRITICAL - AVOID STOCK PHOTO LOOK:**
 - NO overly diverse "UN ad" style group shots
@@ -832,7 +804,7 @@ ${refinement || 'Generate more variations with the same style'}
 ${headlineWords ? `- Text overlay: "${headlineWords}" (Maximum 5-7 words)` : '- No text overlay needed'}
 - Text should be LARGE, bold, highly readable - NOT small body copy
 - Use bold sans-serif typography
-- Place on solid color background (burgundy or gold) for maximum contrast
+- Place on solid color background (brand colors) for maximum contrast
 - Text size should be at least 15-20% of image height
 
 **Visual Style:**
@@ -845,9 +817,9 @@ ${brand.guidelines.imageryStyle || '- Authentic students aged 13-17 in modern le
 - Brand-consistent visual language
 
 **Critical Brand Adherence:**
-${brand.guidelines.dosAndDonts || '- Maintain professional, authentic brand image'}
-- MUST use burgundy and gold colors prominently
-- Logo must be visible and properly displayed (CGA logo in white circle)
+${assets.dosAndDonts || brand.guidelines.dosAndDonts || '- Maintain professional, authentic brand image'}
+- MUST use brand colors prominently (${assets.colors.all.length > 0 ? assets.colors.all.join(', ') : 'as specified above'})
+- Logo must be visible and properly displayed as described above
 - Visual style must match brand identity
 - Avoid generic stock photo aesthetics
 
@@ -858,7 +830,12 @@ ${brand.guidelines.dosAndDonts || '- Maintain professional, authentic brand imag
 
 Generate ${count} diverse, high-quality, ON-BRAND variations incorporating the feedback.`;
 
-  console.log(`🎨 Regenerating ${count} image(s) with refinement and brand assets...`);
+  console.log(`🎨 Regenerating ${count} image(s) with brand assets...`);
+  console.log(`   Using ${assets.colors.all.length} extracted colors`);
+  console.log(`   Logo analyzed: ${assets.logoDescription ? 'Yes' : 'No'}`);
+  console.log(`   PDF guidelines loaded: ${assets.visualStyle ? 'Yes' : 'No'}`);
+  console.log(`   Example ads analyzed: ${assets.exampleAdStyles.length}`);
+
   return generateImages(imagePrompt, count);
 }
 
@@ -1116,4 +1093,101 @@ export const loadBrandGuidelinesFromFirestore = async (
     console.error(`Error loading guidelines for ${brandId}:`, error);
     return null;
   }
+};
+
+/**
+ * Centralized function to load and analyze all brand assets from Firebase
+ * Returns structured data for use in image generation prompts
+ */
+export const loadAndAnalyzeBrandAssets = async (brandId: string) => {
+    console.log(`📦 Loading brand assets for ${brandId}...`);
+
+    const { getAssetsByCategory } = await import('./assetService');
+
+    // Load all asset types in parallel
+    const [logos, pdfs, exampleAds] = await Promise.all([
+        getAssetsByCategory(brandId, 'logos'),
+        getAssetsByCategory(brandId, 'brand-guidelines'),
+        getAssetsByCategory(brandId, 'competitor-ads')
+    ]);
+
+    console.log(`   Found ${logos.length} logos, ${pdfs.length} PDFs, ${exampleAds.length} example ads`);
+
+    const result = {
+        logoDescription: '',
+        colors: {
+            primary: [] as string[],
+            secondary: [] as string[],
+            accent: [] as string[],
+            all: [] as string[]
+        },
+        typography: {
+            primary: '',
+            secondary: '',
+            details: ''
+        },
+        logoRules: '',
+        visualStyle: '',
+        exampleAdStyles: [] as string[],
+        dosAndDonts: '',
+        imageryStyle: ''
+    };
+
+    // 1. Analyze logo with Gemini vision
+    if (logos.length > 0 && logos[0].fileUrl) {
+        try {
+            console.log('   🔍 Analyzing logo with Gemini vision...');
+            result.logoDescription = await analyzeBrandAssetImage(logos[0].fileUrl, 'logo');
+            console.log(`   ✅ Logo analyzed`);
+        } catch (err) {
+            console.warn('   ⚠️ Could not analyze logo:', err);
+        }
+    }
+
+    // 2. Extract and parse brand guidelines from PDFs
+    if (pdfs.length > 0 && pdfs[0].fileUrl) {
+        try {
+            console.log('   📄 Extracting and analyzing PDF guidelines...');
+
+            // Extract text and visual analysis in parallel
+            const [extractedText, visualAnalysis] = await Promise.all([
+                extractTextFromPDFUrl(pdfs[0].fileUrl),
+                analyzePDFVisually(pdfs[0].fileUrl)
+            ]);
+
+            console.log(`   ✅ PDF text extracted (${extractedText.length} chars)`);
+            console.log(`   ✅ PDF visual analysis complete`);
+
+            // Parse guidelines with AI
+            const parsed = await parseGuidelinesWithAI(extractedText, brandId);
+
+            result.colors = parsed.colors;
+            result.typography = parsed.typography;
+            result.logoRules = parsed.logoRules || '';
+            result.visualStyle = visualAnalysis;
+            result.dosAndDonts = parsed.guidelines?.dosAndDonts || '';
+            result.imageryStyle = parsed.guidelines?.imageryStyle || '';
+
+            console.log(`   ✅ Extracted ${result.colors.all.length} colors, typography: ${result.typography.primary}`);
+        } catch (err) {
+            console.warn('   ⚠️ Could not analyze PDF:', err);
+        }
+    }
+
+    // 3. Analyze example ads
+    const adsToAnalyze = exampleAds.slice(0, 2).filter(ad => ad.fileUrl && ad.fileType.startsWith('image/'));
+    if (adsToAnalyze.length > 0) {
+        try {
+            console.log(`   🎨 Analyzing ${adsToAnalyze.length} example ads...`);
+            result.exampleAdStyles = await Promise.all(
+                adsToAnalyze.map(ad => analyzeBrandAssetImage(ad.fileUrl, 'example-ad'))
+            );
+            console.log(`   ✅ Example ads analyzed`);
+        } catch (err) {
+            console.warn('   ⚠️ Could not analyze example ads:', err);
+        }
+    }
+
+    console.log(`✅ Brand asset loading complete for ${brandId}`);
+    return result;
 };
