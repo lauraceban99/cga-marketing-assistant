@@ -641,71 +641,177 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
         {/* Blog Tab */}
         {activeTab === 'blog' && (
           <div className="space-y-8">
-            <h2 className="text-2xl font-bold text-[#4b0f0d]">Blog Post Instructions</h2>
+            <h2 className="text-2xl font-bold text-[#4b0f0d]">Blog Post Instructions & Examples</h2>
 
-            <div className="bg-[#f4f0f0] rounded-lg p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Target Word Count Range
-                </label>
-                <input
-                  type="text"
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="e.g., 2,000-3,000 words for comprehensive posts"
-                />
+            {/* Instructions Section */}
+            <div className="bg-[#f4f0f0] rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-[#4b0f0d] mb-4">Generation Instructions</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    System Prompt for Blog Generation
+                  </label>
+                  <textarea
+                    value={instructions.blogInstructions.systemPrompt}
+                    onChange={(e) => setInstructions({
+                      ...instructions,
+                      blogInstructions: { ...instructions.blogInstructions, systemPrompt: e.target.value }
+                    })}
+                    rows={4}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                    placeholder="You are an SEO + AI–optimized blog writer. Produce helpful, people-first long-form content that ranks, wins AI snippet visibility, and builds trust."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Hard Requirements
+                    <span className="text-xs text-[#9b9b9b] ml-2">Length, structure, SEO requirements</span>
+                  </label>
+                  <textarea
+                    value={instructions.blogInstructions.requirements}
+                    onChange={(e) => setInstructions({
+                      ...instructions,
+                      blogInstructions: { ...instructions.blogInstructions, requirements: e.target.value }
+                    })}
+                    rows={8}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] font-mono text-sm"
+                    placeholder="• Length: 1,800–2,400 words (evergreen), 1,200–1,600 (news)&#10;• H1 (1), H2/H3 every 250–350 words&#10;• TL;DR (3–5 bullets) after intro&#10;• Featured-snippet block: 40–55-word answer near top&#10;• FAQ: 4–6 questions&#10;• On-page SEO: keyword in H1, intro, 1–2 H2s&#10;• 3–7 visuals with alt text&#10;• One clear CTA tied to stage (TOFU/MOFU/BOFU)&#10;• No fabricated stats → use [PLACEHOLDER: stat/source]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Target SEO Keywords
+                  </label>
+                  <textarea
+                    rows={2}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                    placeholder="List your primary keywords and topics you want to rank for. E.g., online high school, flexible education, homeschooling alternatives"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Internal Linking Strategy
+                  </label>
+                  <textarea
+                    rows={2}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                    placeholder="Which pages should blog posts link to? E.g., 3 internal + 2 external links minimum"
+                  />
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
+                  >
+                    {saving ? 'Saving...' : 'Save Blog Instructions'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Examples Knowledge Base */}
+            <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-[#4b0f0d]">Blog Examples Knowledge Base</h3>
+                  <p className="text-sm text-[#9b9b9b] mt-1">
+                    Add examples of blog posts you like. AI will learn from these.
+                  </p>
+                </div>
+                <button
+                  onClick={() => addExample('blog')}
+                  className="px-4 py-2 bg-[#780817] text-white rounded-md hover:bg-[#4b0f0d] transition-colors text-sm font-semibold"
+                >
+                  + Add Example
+                </button>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  SEO Keywords to Target
-                </label>
-                <textarea
-                  rows={3}
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="List your primary keywords and topics you want to rank for. E.g., online high school, flexible education, homeschooling alternatives"
-                />
-              </div>
+              {instructions.blogInstructions.examples.map((example, index) => (
+                <div key={index} className="mb-6 p-4 bg-[#f4f0f0] rounded-lg">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-[#4b0f0d]">Example {index + 1}</h4>
+                    <button
+                      onClick={() => removeExample('blog', index)}
+                      className="text-sm text-[#780817] hover:text-[#4b0f0d]"
+                    >
+                      Remove
+                    </button>
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Internal Linking Strategy
-                </label>
-                <textarea
-                  rows={2}
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="Which pages should blog posts link to? E.g., Always link to enrollment page, program pages, testimonials"
-                />
-              </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Campaign Stage</label>
+                      <select
+                        value={example.stage}
+                        onChange={(e) => updateExample('blog', index, 'stage', e.target.value as CampaignStage)}
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      >
+                        <option value="tofu">TOFU - Awareness (e.g., "Online High School vs Traditional")</option>
+                        <option value="mofu">MOFU - Consideration (e.g., "Flexible Schedules for Athletes")</option>
+                        <option value="bofu">BOFU - Decision (e.g., "Admissions & Accreditation Explained")</option>
+                      </select>
+                    </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Topics to Cover
-                </label>
-                <textarea
-                  rows={3}
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="What topics align with your brand? E.g., study tips, university pathways, student success stories, parent guides"
-                />
-              </div>
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Blog Title/Headline *</label>
+                      <input
+                        type="text"
+                        value={example.headline || ''}
+                        onChange={(e) => updateExample('blog', index, 'headline', e.target.value)}
+                        placeholder="e.g., Online High School vs Traditional: Which Works Better?"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Topics to Avoid
-                </label>
-                <textarea
-                  rows={2}
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="Any sensitive topics or areas to avoid?"
-                />
-              </div>
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Blog Content/Excerpt *</label>
+                      <textarea
+                        value={example.copy}
+                        onChange={(e) => updateExample('blog', index, 'copy', e.target.value)}
+                        rows={6}
+                        placeholder="Paste the full blog post or a representative excerpt here. Include the structure, tone, and key sections you want the AI to learn from."
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
 
-              <div className="pt-4">
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Call to Action Used</label>
+                      <input
+                        type="text"
+                        value={example.cta}
+                        onChange={(e) => updateExample('blog', index, 'cta', e.target.value)}
+                        placeholder="e.g., Take the Fit Quiz, See Timetable & Fees, Book Consultation"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Notes (optional)</label>
+                      <textarea
+                        value={example.notes || ''}
+                        onChange={(e) => updateExample('blog', index, 'notes', e.target.value)}
+                        rows={2}
+                        placeholder="Why does this blog work well? What makes it effective for SEO or engagement?"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <div className="mt-6 pt-4 border-t border-[#f4f0f0]">
                 <button
                   onClick={handleSave}
                   disabled={saving}
                   className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
                 >
-                  {saving ? 'Saving...' : 'Save Blog Instructions'}
+                  {saving ? 'Saving...' : 'Save Blog Examples'}
                 </button>
               </div>
             </div>
@@ -715,71 +821,188 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
         {/* Landing Page Tab */}
         {activeTab === 'landing-page' && (
           <div className="space-y-8">
-            <h2 className="text-2xl font-bold text-[#4b0f0d]">Landing Page Instructions</h2>
+            <h2 className="text-2xl font-bold text-[#4b0f0d]">Landing Page Instructions & Examples</h2>
 
-            <div className="bg-[#f4f0f0] rounded-lg p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Primary Value Propositions
-                </label>
-                <textarea
-                  rows={3}
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="What are your strongest value propositions? E.g., Study on your schedule, Expert 1-on-1 support, Global community, University pathways"
-                />
+            {/* Instructions Section */}
+            <div className="bg-[#f4f0f0] rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-[#4b0f0d] mb-4">Generation Instructions</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    System Prompt for Landing Page Generation
+                  </label>
+                  <textarea
+                    value={instructions.landingPageInstructions.systemPrompt}
+                    onChange={(e) => setInstructions({
+                      ...instructions,
+                      landingPageInstructions: { ...instructions.landingPageInstructions, systemPrompt: e.target.value }
+                    })}
+                    rows={3}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                    placeholder="You create high-converting landing pages (US + EMEA). One clear goal per page. Mobile-first."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Page Structure & Copy Rules
+                    <span className="text-xs text-[#9b9b9b] ml-2">Structure: Hero → Value → How it works → Social Proof → FAQ → Final CTA</span>
+                  </label>
+                  <textarea
+                    value={instructions.landingPageInstructions.requirements}
+                    onChange={(e) => setInstructions({
+                      ...instructions,
+                      landingPageInstructions: { ...instructions.landingPageInstructions, requirements: e.target.value }
+                    })}
+                    rows={8}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] font-mono text-sm"
+                    placeholder="Hero:&#10;• Headline (≤10 words) – benefit-led&#10;• Subhead – 1-sentence proof/differentiator&#10;• CTA Button – action + outcome&#10;• Chips – accreditation / grant eligibility&#10;&#10;Copy Rules:&#10;• One primary CTA repeated 2–3×&#10;• Microcopy under form: 'Takes 60 sec. No obligation.'&#10;• Form fields: Name, Email, [optional Phone/State]&#10;• Hero clarity: offer understood in 3 seconds&#10;• Readability Grade 8"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Primary Value Propositions
+                  </label>
+                  <textarea
+                    rows={2}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                    placeholder="What are your strongest value propositions? E.g., Study on your schedule, Expert 1-on-1 support, Global community"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Common Objections to Address
+                  </label>
+                  <textarea
+                    rows={3}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                    placeholder="What concerns do prospects have? E.g., Is it accredited?, Will my teen be lonely?, How much does it cost?"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Social Proof Available
+                  </label>
+                  <textarea
+                    rows={2}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                    placeholder="What proof points can you use? E.g., Number of students, graduation rates, accreditation badges"
+                  />
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
+                  >
+                    {saving ? 'Saving...' : 'Save Landing Page Instructions'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Examples Knowledge Base */}
+            <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-[#4b0f0d]">Landing Page Examples Knowledge Base</h3>
+                  <p className="text-sm text-[#9b9b9b] mt-1">
+                    Add examples of landing pages you like. AI will learn from these.
+                  </p>
+                </div>
+                <button
+                  onClick={() => addExample('landingPage')}
+                  className="px-4 py-2 bg-[#780817] text-white rounded-md hover:bg-[#4b0f0d] transition-colors text-sm font-semibold"
+                >
+                  + Add Example
+                </button>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Common Objections to Address
-                </label>
-                <textarea
-                  rows={4}
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="What concerns do prospects have? E.g., Is it accredited?, Will my teen be lonely?, How much does it cost?, Can they do sports?"
-                />
-              </div>
+              {instructions.landingPageInstructions.examples.map((example, index) => (
+                <div key={index} className="mb-6 p-4 bg-[#f4f0f0] rounded-lg">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-[#4b0f0d]">Example {index + 1}</h4>
+                    <button
+                      onClick={() => removeExample('landingPage', index)}
+                      className="text-sm text-[#780817] hover:text-[#4b0f0d]"
+                    >
+                      Remove
+                    </button>
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Social Proof Available
-                </label>
-                <textarea
-                  rows={3}
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="What proof points can you use? E.g., Number of students, graduation rates, university acceptance stats, accreditation"
-                />
-              </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Campaign Stage / Template Type</label>
+                      <select
+                        value={example.stage}
+                        onChange={(e) => updateExample('landingPage', index, 'stage', e.target.value as CampaignStage)}
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      >
+                        <option value="tofu">TOFU – quiz/lead magnet</option>
+                        <option value="mofu">MOFU – program overview / comparison</option>
+                        <option value="bofu">BOFU – admissions/apply</option>
+                      </select>
+                    </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Primary Conversion Goal
-                </label>
-                <input
-                  type="text"
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="e.g., Book a free consultation, Schedule a tour, Apply now"
-                />
-              </div>
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Page Headline *</label>
+                      <input
+                        type="text"
+                        value={example.headline || ''}
+                        onChange={(e) => updateExample('landingPage', index, 'headline', e.target.value)}
+                        placeholder="e.g., Flexible Online High School, Real Teachers"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Form Field Preferences
-                </label>
-                <textarea
-                  rows={2}
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="How many form fields? E.g., Keep it simple: Name, Email, Phone. Or detailed: Add student age, current school, interests"
-                />
-              </div>
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Landing Page Copy *</label>
+                      <textarea
+                        value={example.copy}
+                        onChange={(e) => updateExample('landingPage', index, 'copy', e.target.value)}
+                        rows={8}
+                        placeholder="Paste the full landing page copy here. Include hero section, value propositions, social proof, and FAQ sections. The AI will learn from the structure and tone."
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
 
-              <div className="pt-4">
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Primary CTA Used</label>
+                      <input
+                        type="text"
+                        value={example.cta}
+                        onChange={(e) => updateExample('landingPage', index, 'cta', e.target.value)}
+                        placeholder="e.g., Book a Free Consultation, Start Application"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Notes (optional)</label>
+                      <textarea
+                        value={example.notes || ''}
+                        onChange={(e) => updateExample('landingPage', index, 'notes', e.target.value)}
+                        rows={2}
+                        placeholder="Why does this landing page work well? What's the conversion rate? What makes it effective?"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <div className="mt-6 pt-4 border-t border-[#f4f0f0]">
                 <button
                   onClick={handleSave}
                   disabled={saving}
                   className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
                 >
-                  {saving ? 'Saving...' : 'Save Landing Page Instructions'}
+                  {saving ? 'Saving...' : 'Save Landing Page Examples'}
                 </button>
               </div>
             </div>
@@ -789,71 +1012,336 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
         {/* Email Tab */}
         {activeTab === 'email' && (
           <div className="space-y-8">
-            <h2 className="text-2xl font-bold text-[#4b0f0d]">Email Marketing Instructions</h2>
+            <h2 className="text-2xl font-bold text-[#4b0f0d]">Email Marketing Instructions & Examples</h2>
 
-            <div className="bg-[#f4f0f0] rounded-lg p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Sending Schedule Preferences
-                </label>
-                <input
-                  type="text"
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="e.g., Tuesday-Thursday mornings, avoid weekends"
-                />
+            <p className="text-sm text-[#9b9b9b]">
+              Configure instructions for three email types: Invitation, Nurturing Drip, and Email Blast.
+              Each type has different requirements and best practices.
+            </p>
+
+            {/* Shared Email Rules */}
+            <div className="bg-[#f4f0f0] rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-[#4b0f0d] mb-4">Shared Email Rules</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    General Email Requirements
+                    <span className="text-xs text-[#9b9b9b] ml-2">Applied to all email types</span>
+                  </label>
+                  <textarea
+                    rows={5}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] font-mono text-sm"
+                    placeholder="• One CTA only&#10;• Send Tue–Thu 10:00–14:00 local&#10;• [PLACEHOLDER] for unknown facts&#10;• Personalization (+50% opens)&#10;• Single CTA (+371% clicks)&#10;• Mobile-optimized (60%+ open on mobile)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Personalization Tokens Available
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                    placeholder="e.g., First name, Parent name, Student name, Location, Program interest"
+                  />
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
+                  >
+                    {saving ? 'Saving...' : 'Save Shared Rules'}
+                  </button>
+                </div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Personalization Tokens Available
-                </label>
-                <input
-                  type="text"
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="e.g., First name, Parent name, Student name, Location, Program interest"
-                />
-              </div>
+            {/* Invitation Emails */}
+            <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
+              <h3 className="text-lg font-semibold text-[#4b0f0d] mb-2">Invitation Emails</h3>
+              <p className="text-sm text-[#9b9b9b] mb-4">For event invitations, webinars, consultations</p>
 
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Segmentation Criteria
-                </label>
-                <textarea
-                  rows={3}
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="How do you segment your list? E.g., By student age, interest level (cold/warm/hot), location, program type"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Email Sequence Types You Use
-                </label>
-                <textarea
-                  rows={3}
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="e.g., Welcome series (3 emails), Event invitations, Monthly newsletter, Re-engagement campaign"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Unsubscribe Philosophy
-                </label>
-                <textarea
-                  rows={2}
-                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                  placeholder="e.g., Make it easy, offer preferences instead of unsubscribe, include in every email"
-                />
-              </div>
-
-              <div className="pt-4">
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Invitation Email Template Requirements
+                  </label>
+                  <textarea
+                    value={instructions.emailInstructions.invitation.systemPrompt}
+                    onChange={(e) => setInstructions({
+                      ...instructions,
+                      emailInstructions: {
+                        ...instructions.emailInstructions,
+                        invitation: { ...instructions.emailInstructions.invitation, systemPrompt: e.target.value }
+                      }
+                    })}
+                    rows={5}
+                    className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] font-mono text-sm"
+                    placeholder="• Subject: 6–10 words + personalization&#10;• Preview: 40–55 chars&#10;• Body: 110–150 words&#10;• List 3 benefits&#10;• 1 CTA&#10;• P.S. optional"
+                  />
+                </div>
                 <button
                   onClick={handleSave}
                   disabled={saving}
                   className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
                 >
-                  {saving ? 'Saving...' : 'Save Email Instructions'}
+                  {saving ? 'Saving...' : 'Save Invitation Instructions'}
+                </button>
+              </div>
+            </div>
+
+            {/* Nurturing Drip Emails */}
+            <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
+              <h3 className="text-lg font-semibold text-[#4b0f0d] mb-2">Nurturing Drip Emails</h3>
+              <p className="text-sm text-[#9b9b9b] mb-4">For automated sequences, educational content, relationship building</p>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Nurture Email Template Requirements
+                  </label>
+                  <textarea
+                    value={instructions.emailInstructions.nurturingDrip.systemPrompt}
+                    onChange={(e) => setInstructions({
+                      ...instructions,
+                      emailInstructions: {
+                        ...instructions.emailInstructions,
+                        nurturingDrip: { ...instructions.emailInstructions.nurturingDrip, systemPrompt: e.target.value }
+                      }
+                    })}
+                    rows={5}
+                    className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] font-mono text-sm"
+                    placeholder="• Word count: 140–200&#10;• Problem–solution structure&#10;• Social proof quote&#10;• Single soft CTA&#10;• Educational tone&#10;• Build trust, not hard sell"
+                  />
+                </div>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Nurture Instructions'}
+                </button>
+              </div>
+            </div>
+
+            {/* Email Blast */}
+            <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
+              <h3 className="text-lg font-semibold text-[#4b0f0d] mb-2">Email Blasts</h3>
+              <p className="text-sm text-[#9b9b9b] mb-4">For announcements, news, time-sensitive offers</p>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Blast Email Template Requirements
+                  </label>
+                  <textarea
+                    value={instructions.emailInstructions.emailBlast.systemPrompt}
+                    onChange={(e) => setInstructions({
+                      ...instructions,
+                      emailInstructions: {
+                        ...instructions.emailInstructions,
+                        emailBlast: { ...instructions.emailInstructions.emailBlast, systemPrompt: e.target.value }
+                      }
+                    })}
+                    rows={5}
+                    className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] font-mono text-sm"
+                    placeholder="• Lead with news&#10;• Deadline if real (no fake urgency)&#10;• One CTA&#10;• Word count: 110–160&#10;• Clear value proposition&#10;• Time-sensitive language if applicable"
+                  />
+                </div>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Blast Instructions'}
+                </button>
+              </div>
+            </div>
+
+            {/* Email Examples - Unified across all types */}
+            <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-[#4b0f0d]">Email Examples Knowledge Base</h3>
+                  <p className="text-sm text-[#9b9b9b] mt-1">
+                    Add examples of emails you like across all types. AI will learn from these.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    // Add to invitation examples for now
+                    if (!instructions) return;
+                    const newExample: CampaignExample = {
+                      stage: 'mofu',
+                      type: 'email',
+                      headline: '',
+                      copy: '',
+                      cta: '',
+                      notes: ''
+                    };
+                    setInstructions({
+                      ...instructions,
+                      emailInstructions: {
+                        ...instructions.emailInstructions,
+                        invitation: {
+                          ...instructions.emailInstructions.invitation,
+                          examples: [...instructions.emailInstructions.invitation.examples, newExample]
+                        }
+                      }
+                    });
+                  }}
+                  className="px-4 py-2 bg-[#780817] text-white rounded-md hover:bg-[#4b0f0d] transition-colors text-sm font-semibold"
+                >
+                  + Add Example
+                </button>
+              </div>
+
+              {instructions.emailInstructions.invitation.examples.map((example, index) => (
+                <div key={index} className="mb-6 p-4 bg-[#f4f0f0] rounded-lg">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-[#4b0f0d]">Example {index + 1}</h4>
+                    <button
+                      onClick={() => {
+                        if (!instructions) return;
+                        const updatedExamples = instructions.emailInstructions.invitation.examples.filter((_, i) => i !== index);
+                        setInstructions({
+                          ...instructions,
+                          emailInstructions: {
+                            ...instructions.emailInstructions,
+                            invitation: {
+                              ...instructions.emailInstructions.invitation,
+                              examples: updatedExamples
+                            }
+                          }
+                        });
+                      }}
+                      className="text-sm text-[#780817] hover:text-[#4b0f0d]"
+                    >
+                      Remove
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Email Type</label>
+                      <select
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      >
+                        <option value="invitation">Invitation (event, webinar, consultation)</option>
+                        <option value="nurture">Nurturing Drip (educational, relationship-building)</option>
+                        <option value="blast">Email Blast (news, announcements)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Subject Line *</label>
+                      <input
+                        type="text"
+                        value={example.headline || ''}
+                        onChange={(e) => {
+                          const updatedExamples = [...instructions.emailInstructions.invitation.examples];
+                          updatedExamples[index] = { ...updatedExamples[index], headline: e.target.value };
+                          setInstructions({
+                            ...instructions,
+                            emailInstructions: {
+                              ...instructions.emailInstructions,
+                              invitation: {
+                                ...instructions.emailInstructions.invitation,
+                                examples: updatedExamples
+                              }
+                            }
+                          });
+                        }}
+                        placeholder="e.g., [First Name], Ready to Transform Your Teen's Education?"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Email Body *</label>
+                      <textarea
+                        value={example.copy}
+                        onChange={(e) => {
+                          const updatedExamples = [...instructions.emailInstructions.invitation.examples];
+                          updatedExamples[index] = { ...updatedExamples[index], copy: e.target.value };
+                          setInstructions({
+                            ...instructions,
+                            emailInstructions: {
+                              ...instructions.emailInstructions,
+                              invitation: {
+                                ...instructions.emailInstructions.invitation,
+                                examples: updatedExamples
+                              }
+                            }
+                          });
+                        }}
+                        rows={6}
+                        placeholder="Paste the full email body here, including preview text, greeting, body copy, and sign-off. The AI will learn from the tone and structure."
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Call to Action Used</label>
+                      <input
+                        type="text"
+                        value={example.cta}
+                        onChange={(e) => {
+                          const updatedExamples = [...instructions.emailInstructions.invitation.examples];
+                          updatedExamples[index] = { ...updatedExamples[index], cta: e.target.value };
+                          setInstructions({
+                            ...instructions,
+                            emailInstructions: {
+                              ...instructions.emailInstructions,
+                              invitation: {
+                                ...instructions.emailInstructions.invitation,
+                                examples: updatedExamples
+                              }
+                            }
+                          });
+                        }}
+                        placeholder="e.g., Reserve Your Spot, Download the Guide, Schedule a Call"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Notes (optional)</label>
+                      <textarea
+                        value={example.notes || ''}
+                        onChange={(e) => {
+                          const updatedExamples = [...instructions.emailInstructions.invitation.examples];
+                          updatedExamples[index] = { ...updatedExamples[index], notes: e.target.value };
+                          setInstructions({
+                            ...instructions,
+                            emailInstructions: {
+                              ...instructions.emailInstructions,
+                              invitation: {
+                                ...instructions.emailInstructions.invitation,
+                                examples: updatedExamples
+                              }
+                            }
+                          });
+                        }}
+                        rows={2}
+                        placeholder="Why does this email work well? What was the open rate? Click rate?"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <div className="mt-6 pt-4 border-t border-[#f4f0f0]">
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Email Examples'}
                 </button>
               </div>
             </div>
