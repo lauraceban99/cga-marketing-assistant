@@ -42,77 +42,249 @@ export const ASSET_CATEGORY_CONFIG: Record<AssetCategory, AssetCategoryConfig> =
 };
 
 /**
- * Default generation instructions (from n8n workflow)
- */
-export const DEFAULT_COPY_SYSTEM_PROMPT = `You are a senior brand copywriter for a modern online school.
-Write warm, confident, aspirational Facebook ads that speak to thoughtful parents.
-Be specific and human. Show outcomes (confidence, belonging, future readiness) without hype.
-No corporate jargon or 'innovative/world-class'. No exclamation marks or hashtags.
-Headlines should hook emotionally (not literal), ≤ 40 characters.`;
-
-export const DEFAULT_COPY_USER_PROMPT_TEMPLATE = `CONTEXT
-Brand: {{brand}}
-Theme: {{theme}}
-Location: {{location}}
-Audience: {{audience}}
-
-BRAND GUIDELINES (plain text extracted):
-{{brandGuidelines}}
-
-REFERENCE COPY (style cues to emulate):
-{{referenceCopy}}
-
-TONE
-{{tone}}
-
-WRITE ADS
-- Produce 3 ads that feel like the examples in REFERENCE COPY but on-brand.
-- Each ad must include:
-  - "headline": 10-14 words, evocative, include theme or location if relevant.
-  - "primaryText": 90-160 words. Start with a hook ('What if...', 'Imagine...', 'Is your child...?').
-  - "cta": Clear call-to-action (3-5 words).`;
-
-export const DEFAULT_TONE_RULES = `DO:
-- Use warm, conversational language
-- Focus on outcomes and transformation
-- Be specific with examples
-- Show empathy for parent concerns
-- Use "you" and "your child"
-
-DON'T:
-- Use exclamation marks
-- Use hashtags
-- Use corporate jargon ("innovative", "world-class", "cutting-edge")
-- Make unsubstantiated claims
-- Use all caps or aggressive formatting`;
-
-export const DEFAULT_IMAGE_GENERATION_INSTRUCTIONS = `Produce exactly ten diverse text prompts suitable for image generation.
-
-PROMPT REQUIREMENTS:
-- 1:1 aspect ratio (explicitly state '--ar 1:1' at the end)
-- Modern, clean composition; bold focal point; high contrast; clutter-free background
-- Include brief overlay text—≤ 6 words—using or paraphrasing the ad's headline/CTA
-- Vary creative angles: product-in-action, aspirational lifestyle, social-proof scene, emoji-accent, bold typography lock-up, etc.
-- Incorporate brand-relevant colors from brand guidelines
-- Never reference policy, Facebook, or specific AI tools; never include hashtags
-- Use concise, comma-separated descriptors
-- Do not use any kind of quotes in the prompt
-
-OUTPUT: Return only valid JSON with imagePrompts array`;
-
-export const DEFAULT_IMAGE_STYLE_GUIDELINES = `Modern, clean, aspirational imagery. Focus on students engaged, confident, and connected. Use brand colors. High contrast, clutter-free backgrounds.`;
-
-/**
  * Get default instructions for a brand
  */
 export function getDefaultInstructions(brandId: string): BrandInstructions {
   return {
     brandId,
-    copySystemPrompt: DEFAULT_COPY_SYSTEM_PROMPT,
-    copyUserPromptTemplate: DEFAULT_COPY_USER_PROMPT_TEMPLATE,
-    toneRules: DEFAULT_TONE_RULES,
-    imageGenerationInstructions: DEFAULT_IMAGE_GENERATION_INSTRUCTIONS,
-    imageStyleGuidelines: DEFAULT_IMAGE_STYLE_GUIDELINES,
+
+    // General Brand Instructions
+    brandIntroduction: `[PLACEHOLDER: Add comprehensive brand introduction - who you are, what you do, your mission and vision]`,
+
+    personas: [
+      {
+        name: '[PLACEHOLDER: Persona Name]',
+        description: '[PLACEHOLDER: Detailed persona description]',
+        painPoints: [
+          '[PLACEHOLDER: Pain point 1]',
+          '[PLACEHOLDER: Pain point 2]',
+          '[PLACEHOLDER: Pain point 3]'
+        ],
+        solution: '[PLACEHOLDER: How your brand solves these pain points]'
+      }
+    ],
+
+    coreValues: [
+      '[PLACEHOLDER: Core value 1]',
+      '[PLACEHOLDER: Core value 2]',
+      '[PLACEHOLDER: Core value 3]'
+    ],
+
+    toneOfVoice: `[PLACEHOLDER: Describe your brand's tone - e.g., warm, professional, conversational, aspirational]`,
+
+    keyMessaging: [
+      '[PLACEHOLDER: Key message 1]',
+      '[PLACEHOLDER: Key message 2]',
+      '[PLACEHOLDER: Key message 3]'
+    ],
+
+    // Campaign-specific CTAs and messaging
+    campaignInstructions: {
+      tofu: '[PLACEHOLDER: Top of funnel instructions - awareness stage, educational CTAs]',
+      mofu: '[PLACEHOLDER: Middle of funnel instructions - consideration stage, engagement CTAs]',
+      bofu: '[PLACEHOLDER: Bottom of funnel instructions - decision stage, conversion CTAs]'
+    },
+
+    // Ad Copy Instructions
+    adCopyInstructions: {
+      systemPrompt: `You are an expert ad copywriter. Create compelling, conversion-focused ad copy that never fabricates facts.
+
+CRITICAL RULES:
+- NEVER make up statistics, testimonials, or specific claims
+- Use [PLACEHOLDER: specific detail] when information is not provided
+- Focus on emotional benefits and transformation
+- Each ad must have a distinct angle, persona, or approach
+- Not all ads should start with questions - vary the opening hooks`,
+
+      requirements: `For each ad copy request:
+- Generate both SHORT and LONG versions
+- Create multiple variations (minimum 5) with different:
+  * Personas (which target audience segment)
+  * Angles (emotional, logical, social proof, urgency, etc.)
+  * Opening hooks (questions, statements, stories, statistics)
+- Respect specified word/character limits
+- Match the campaign stage (TOFU/MOFU/BOFU) if specified`,
+
+      examples: [
+        {
+          stage: 'tofu',
+          type: 'ad-copy',
+          headline: '[PLACEHOLDER: Example TOFU ad headline]',
+          copy: '[PLACEHOLDER: Example TOFU ad body copy]',
+          cta: '[PLACEHOLDER: Example TOFU CTA]',
+          notes: 'Awareness stage - educational, non-pushy'
+        },
+        {
+          stage: 'mofu',
+          type: 'ad-copy',
+          headline: '[PLACEHOLDER: Example MOFU ad headline]',
+          copy: '[PLACEHOLDER: Example MOFU ad body copy]',
+          cta: '[PLACEHOLDER: Example MOFU CTA]',
+          notes: 'Consideration stage - showing value, building trust'
+        },
+        {
+          stage: 'bofu',
+          type: 'ad-copy',
+          headline: '[PLACEHOLDER: Example BOFU ad headline]',
+          copy: '[PLACEHOLDER: Example BOFU ad body copy]',
+          cta: '[PLACEHOLDER: Example BOFU CTA]',
+          notes: 'Decision stage - clear offer, strong CTA'
+        }
+      ],
+
+      dos: [
+        'Create truly different variations with unique angles',
+        'Use specific, concrete language',
+        'Focus on benefits and transformation',
+        'Vary your opening hooks (not all questions)',
+        'Use placeholders when facts are uncertain',
+        'Match the persona and their pain points',
+        'Align with campaign stage (TOFU/MOFU/BOFU)'
+      ],
+
+      donts: [
+        'Never fabricate statistics or testimonials',
+        'Never use exclamation marks',
+        'Never use hashtags',
+        'Never use corporate jargon',
+        'Never make all ads sound the same',
+        'Never start every ad with a question',
+        'Never exceed specified length limits'
+      ]
+    },
+
+    // Blog Instructions
+    blogInstructions: {
+      systemPrompt: `You are an expert content writer specializing in SEO and AI-optimized blog posts.`,
+
+      requirements: `Create blog posts that are:
+- Optimized for both traditional SEO and AI search engines
+- Well-structured with clear headings (H2, H3)
+- Include natural keyword integration
+- Provide genuine value and insights
+- Never fabricate facts or statistics
+- Use [PLACEHOLDER] for uncertain information`,
+
+      examples: [
+        {
+          stage: 'tofu',
+          type: 'blog',
+          headline: '[PLACEHOLDER: Example educational blog title]',
+          copy: '[PLACEHOLDER: Example blog excerpt with structure]',
+          cta: '[PLACEHOLDER: Soft CTA for awareness]'
+        }
+      ],
+
+      dos: [
+        'Use clear, scannable structure',
+        'Include relevant keywords naturally',
+        'Provide actionable insights',
+        'Use data and sources when available',
+        'Optimize for featured snippets',
+        'Write compelling meta descriptions'
+      ],
+
+      donts: [
+        'Never keyword stuff',
+        'Never fabricate data or sources',
+        'Never use clickbait titles',
+        'Never ignore readability',
+        'Never forget about user intent'
+      ]
+    },
+
+    // Landing Page Instructions
+    landingPageInstructions: {
+      systemPrompt: `You are an expert conversion copywriter specializing in landing pages.`,
+
+      requirements: `Create landing page copy with:
+- Clear value proposition above the fold
+- Structured sections (hero, benefits, features, social proof, CTA)
+- Conversion-focused language
+- Strong, clear CTAs
+- Never fabricate testimonials or claims`,
+
+      examples: [
+        {
+          stage: 'bofu',
+          type: 'landing-page',
+          headline: '[PLACEHOLDER: Example hero headline]',
+          copy: '[PLACEHOLDER: Example landing page structure and sections]',
+          cta: '[PLACEHOLDER: Primary conversion CTA]'
+        }
+      ],
+
+      dos: [
+        'Lead with strongest benefit',
+        'Use clear section structure',
+        'Include multiple CTAs strategically',
+        'Address objections',
+        'Create urgency appropriately',
+        'Use white space effectively'
+      ],
+
+      donts: [
+        'Never fabricate testimonials',
+        'Never make unsubstantiated claims',
+        'Never bury the value proposition',
+        'Never use weak CTAs',
+        'Never ignore mobile readability'
+      ]
+    },
+
+    // Email Instructions
+    emailInstructions: {
+      invitation: {
+        systemPrompt: `You are an expert email copywriter creating event invitation emails.`,
+        requirements: `Event invitation emails should be warm, clear, and compelling.`,
+        examples: [{
+          stage: 'tofu',
+          type: 'email',
+          headline: '[PLACEHOLDER: Invitation subject line]',
+          copy: '[PLACEHOLDER: Invitation email body]',
+          cta: '[PLACEHOLDER: RSVP CTA]'
+        }],
+        dos: ['Be warm and welcoming', 'Clear event details', 'Easy RSVP process'],
+        donts: ['Never be pushy', 'Never omit key details', 'Never use confusing CTAs']
+      },
+
+      nurturingDrip: {
+        systemPrompt: `You are an expert email copywriter creating nurturing drip sequences.`,
+        requirements: `Nurturing emails should build relationships and trust over time.`,
+        examples: [{
+          stage: 'mofu',
+          type: 'email',
+          headline: '[PLACEHOLDER: Nurture email subject]',
+          copy: '[PLACEHOLDER: Nurture email body]',
+          cta: '[PLACEHOLDER: Engagement CTA]'
+        }],
+        dos: ['Build relationship progressively', 'Provide value each email', 'Natural progression'],
+        donts: ['Never hard sell early', 'Never overwhelm', 'Never be repetitive']
+      },
+
+      emailBlast: {
+        systemPrompt: `You are an expert email copywriter creating announcement and news emails.`,
+        requirements: `Email blasts should be timely, newsworthy, and engaging.`,
+        examples: [{
+          stage: 'tofu',
+          type: 'email',
+          headline: '[PLACEHOLDER: Breaking news subject]',
+          copy: '[PLACEHOLDER: News email body]',
+          cta: '[PLACEHOLDER: Learn more CTA]'
+        }],
+        dos: ['Lead with the news', 'Create urgency if appropriate', 'Clear single focus'],
+        donts: ['Never mislead', 'Never bury the lead', 'Never lack clear CTA']
+      }
+    },
+
+    // Reference Materials
+    referenceMaterials: {
+      interviews: '[PLACEHOLDER: Add zoom interview transcripts or customer research notes here. Use these to ensure authentic voice and avoid fabricating testimonials.]',
+      testimonials: '[PLACEHOLDER: Real testimonials and success stories]',
+      otherNotes: '[PLACEHOLDER: Any other reference materials]'
+    },
+
+    // Metadata
     lastUpdatedBy: 'system',
     lastUpdated: new Date(),
     version: 1,

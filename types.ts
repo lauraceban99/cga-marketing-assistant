@@ -18,7 +18,11 @@ export interface Brand {
   inspiration?: string[];
 }
 
-export type TaskType = 'copy' | 'ad' | 'email';
+export type TaskType = 'ad-copy' | 'blog' | 'landing-page' | 'email';
+
+export type EmailType = 'invitation' | 'nurturing-drip' | 'email-blast';
+
+export type CampaignStage = 'tofu' | 'mofu' | 'bofu';
 
 export interface Theme {
   brand: Brand;
@@ -169,22 +173,73 @@ export interface BrandAssetStats {
 }
 
 // Generation Instructions Types
+export interface PersonaDefinition {
+  name: string;
+  description: string;
+  painPoints: string[];
+  solution: string;
+}
+
+export interface CampaignExample {
+  stage: CampaignStage;
+  type: TaskType;
+  headline?: string;
+  copy: string;
+  cta: string;
+  notes?: string;
+}
+
+export interface TypeSpecificInstructions {
+  systemPrompt: string;
+  requirements: string;
+  examples: CampaignExample[];
+  dos: string[];
+  donts: string[];
+}
+
 export interface BrandInstructions {
   brandId: string;
 
-  // Copy Generation
-  copySystemPrompt: string;
-  copyUserPromptTemplate: string;
-  toneRules: string;
+  // General Brand Instructions
+  brandIntroduction: string;
+  personas: PersonaDefinition[];
+  coreValues: string[];
+  toneOfVoice: string;
+  keyMessaging: string[];
 
-  // Image Generation
-  imageGenerationInstructions: string;
-  imageStyleGuidelines: string;
+  // Campaign-specific CTAs and messaging
+  campaignInstructions: {
+    tofu: string;
+    mofu: string;
+    bofu: string;
+  };
+
+  // Type-specific instructions
+  adCopyInstructions: TypeSpecificInstructions;
+  blogInstructions: TypeSpecificInstructions;
+  landingPageInstructions: TypeSpecificInstructions;
+  emailInstructions: {
+    invitation: TypeSpecificInstructions;
+    nurturingDrip: TypeSpecificInstructions;
+    emailBlast: TypeSpecificInstructions;
+  };
+
+  // Reference materials (e.g., zoom interview transcripts)
+  referenceMaterials: {
+    interviews?: string;
+    testimonials?: string;
+    otherNotes?: string;
+  };
 
   // Metadata
   lastUpdatedBy: string;
   lastUpdated: Date;
   version: number;
+}
+
+export interface LengthSpecification {
+  value: number;
+  unit: 'words' | 'characters';
 }
 
 export interface GenerationContext {
@@ -201,5 +256,9 @@ export interface GenerationContext {
     location?: string;
     audience?: string;
     customPrompt?: string;
+    campaignStage?: CampaignStage;
+    emailType?: EmailType;
+    lengthSpec?: LengthSpecification;
+    adVariant?: 'short' | 'long';
   };
 }

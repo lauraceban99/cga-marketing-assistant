@@ -130,20 +130,34 @@ export function validateInstructions(
 ): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
-  if (!instructions.copySystemPrompt || instructions.copySystemPrompt.trim().length === 0) {
-    errors.push('Copy system prompt is required');
+  if (!instructions.brandIntroduction || instructions.brandIntroduction.trim().length === 0) {
+    errors.push('Brand introduction is required');
   }
 
-  if (!instructions.copyUserPromptTemplate || instructions.copyUserPromptTemplate.trim().length === 0) {
-    errors.push('Copy user prompt template is required');
+  if (!instructions.personas || instructions.personas.length === 0) {
+    errors.push('At least one persona is required');
   }
 
-  if (!instructions.toneRules || instructions.toneRules.trim().length === 0) {
-    errors.push('Tone rules are required');
+  if (!instructions.toneOfVoice || instructions.toneOfVoice.trim().length === 0) {
+    errors.push('Tone of voice is required');
   }
 
-  if (!instructions.imageGenerationInstructions || instructions.imageGenerationInstructions.trim().length === 0) {
-    errors.push('Image generation instructions are required');
+  if (!instructions.adCopyInstructions?.systemPrompt) {
+    errors.push('Ad copy instructions are required');
+  }
+
+  if (!instructions.blogInstructions?.systemPrompt) {
+    errors.push('Blog instructions are required');
+  }
+
+  if (!instructions.landingPageInstructions?.systemPrompt) {
+    errors.push('Landing page instructions are required');
+  }
+
+  if (!instructions.emailInstructions?.invitation?.systemPrompt ||
+      !instructions.emailInstructions?.nurturingDrip?.systemPrompt ||
+      !instructions.emailInstructions?.emailBlast?.systemPrompt) {
+    errors.push('All email type instructions are required');
   }
 
   return {

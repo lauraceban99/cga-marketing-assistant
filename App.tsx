@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import Header from './components/Header';
 import BrandSelector from './components/BrandSelector';
 import TaskSelector from './components/TaskSelector';
-import Generator from './components/Generator';
-import ResultsViewer from './components/AdCreativeViewer';
+import TextGenerator from './components/TextGenerator';
+import TextResultsViewer from './components/TextResultsViewer';
 import BrandAssetManager from './components/dam/BrandAssetManager';
 import { BRANDS } from './constants';
-import type { Brand, TaskType, GeneratedCreative } from './types';
+import type { Brand, TaskType } from './types';
+import type { GeneratedContent } from './services/textGenerationService';
 
 type AppState = 'brand_selection' | 'task_selection' | 'generator' | 'results' | 'dam';
 
@@ -16,7 +17,7 @@ const App: React.FC = () => {
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
   const [selectedTask, setSelectedTask] = useState<TaskType | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
-  const [generatedCreative, setGeneratedCreative] = useState<GeneratedCreative | null>(null);
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   
   const handleSelectBrand = (brand: Brand) => {
     setSelectedBrand(brand);
@@ -24,13 +25,13 @@ const App: React.FC = () => {
   };
 
   const handleSelectTask = (taskType: TaskType) => {
-    setGeneratedCreative(null);
+    setGeneratedContent(null);
     setSelectedTask(taskType);
     setAppState('generator');
   };
 
-  const handleAssetGenerated = (creative: GeneratedCreative, prompt: string) => {
-    setGeneratedCreative(creative);
+  const handleContentGenerated = (content: GeneratedContent, prompt: string) => {
+    setGeneratedContent(content);
     setLastPrompt(prompt);
     setAppState('results');
   };
@@ -38,12 +39,12 @@ const App: React.FC = () => {
   const handleBackTo = (state: AppState) => {
     if (state === 'brand_selection') {
       setSelectedBrand(null);
-      setGeneratedCreative(null);
+      setGeneratedContent(null);
       setSelectedTask(null);
       setLastPrompt('');
     }
      if (state === 'task_selection') {
-        setGeneratedCreative(null);
+        setGeneratedContent(null);
         setLastPrompt('');
     }
     setAppState(state);
@@ -54,15 +55,12 @@ const App: React.FC = () => {
       case 'task_selection':
         return <TaskSelector brand={selectedBrand!} onSelectTask={handleSelectTask} onBack={() => handleBackTo('brand_selection')} />;
       case 'generator':
-        return <Generator brand={selectedBrand!} taskType={selectedTask!} onAssetGenerated={handleAssetGenerated} onBack={() => handleBackTo('task_selection')} />;
+        return <TextGenerator brand={selectedBrand!} taskType={selectedTask!} onGenerated={handleContentGenerated} onBack={() => handleBackTo('task_selection')} />;
       case 'results':
-        return <ResultsViewer
-                  brand={selectedBrand!}
-                  initialCreative={generatedCreative!}
+        return <TextResultsViewer
+                  content={generatedContent!}
                   onBack={() => handleBackTo('task_selection')}
-                  taskType={selectedTask!}
-                  initialPrompt={lastPrompt}
-                  onRegenerate={handleAssetGenerated}
+                  onRegenerate={() => handleBackTo('generator')}
                 />;
       case 'dam':
         return <BrandAssetManager onBack={() => handleBackTo('brand_selection')} />;
