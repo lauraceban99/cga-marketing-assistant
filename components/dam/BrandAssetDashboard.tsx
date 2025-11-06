@@ -8,6 +8,7 @@ import AssetSearchBar from './AssetSearchBar';
 import AssetPreviewModal from './AssetPreviewModal';
 import EditAssetModal from './EditAssetModal';
 import InstructionsTab from './instructions/InstructionsTab';
+import BrandInstructionsEditor from './BrandInstructionsEditor';
 import TextCopyInput from './TextCopyInput';
 import TextCopyCard from './TextCopyCard';
 import { ASSET_CATEGORY_CONFIG } from '../../constants/damConfig';
@@ -18,13 +19,14 @@ interface BrandAssetDashboardProps {
   onBack: () => void;
 }
 
-type TabType = AssetCategory | 'instructions';
+type ViewType = 'dashboard' | 'instructions';
 
 const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
   brand,
   onBack,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('brand-guidelines');
+  const [currentView, setCurrentView] = useState<ViewType>('instructions'); // Start with instructions
+  const [activeTab, setActiveTab] = useState<AssetCategory>('brand-guidelines');
   const [showUploader, setShowUploader] = useState(false);
   const [showTextCopyInput, setShowTextCopyInput] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,13 +35,11 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
   const [previewAsset, setPreviewAsset] = useState<BrandAsset | null>(null);
   const [editAsset, setEditAsset] = useState<BrandAsset | null>(null);
 
-  const activeCategory = activeTab === 'instructions' ? 'brand-guidelines' : activeTab;
-
-  const { assets, loading, error, refresh } = useAssetsByCategory(brand.id, activeCategory);
+  const { assets, loading, error, refresh } = useAssetsByCategory(brand.id, activeTab);
   const { stats, refresh: refreshStats } = useBrandAssetStats(brand.id);
   const { deleteAsset } = useAssetActions();
 
-  const categoryConfig = ASSET_CATEGORY_CONFIG[activeCategory];
+  const categoryConfig = ASSET_CATEGORY_CONFIG[activeTab];
 
   // Filter and sort assets
   const filteredAssets = useMemo(() => {
@@ -138,8 +138,13 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
   };
 
   // Determine if we should show grid or list view
-  const isImageCategory = activeCategory === 'competitor-ads' || activeCategory === 'logos';
+  const isImageCategory = activeTab === 'competitor-ads' || activeTab === 'logos';
   const viewMode = isImageCategory ? 'grid' : 'list';
+
+  // Show Instructions Editor if that view is active
+  if (currentView === 'instructions') {
+    return <BrandInstructionsEditor brand={brand} onBack={() => setCurrentView('dashboard')} />;
+  }
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4">
@@ -167,6 +172,12 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
               <h1 className="text-3xl font-bold text-[#4b0f0d]">{brand.name} Asset Library</h1>
             </div>
           </div>
+          <button
+            onClick={() => setCurrentView('instructions')}
+            className="px-6 py-3 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors shadow-md"
+          >
+            📝 Edit Brand Instructions
+          </button>
         </div>
 
         {/* Stats */}
@@ -229,33 +240,13 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
               );
             }
           )}
-
-          {/* Instructions Tab */}
-          <button
-            onClick={() => setActiveTab('instructions')}
-            className={`
-              flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap
-              ${
-                activeTab === 'instructions'
-                  ? 'border-brand-primary text-[#4b0f0d]'
-                  : 'border-transparent text-[#9b9b9b] hover:text-[#4b0f0d]'
-              }
-            `}
-          >
-            <span>🤖</span>
-            <span className="text-sm font-medium">Instructions</span>
-          </button>
         </div>
       </div>
 
       {/* Content */}
       <div className="mt-6">
-        {activeTab === 'instructions' ? (
-          /* Instructions Tab Content */
-          <InstructionsTab brandId={brand.id} brandName={brand.name} />
-        ) : (
-          /* Asset Category Content */
-          <>
+        {/* Asset Category Content */}
+        <>
             {/* Category Info & Upload Button */}
             <div className="flex items-start justify-between mb-6">
               <div>
@@ -264,7 +255,7 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
                 </h2>
                 <p className="text-sm text-[#9b9b9b] mt-1">{categoryConfig.description}</p>
               </div>
-              {activeCategory === 'reference-copy' ? (
+              {activeTab === 'reference-copy' ? (
                 /* Reference Copy: Show both options */
                 <div className="flex gap-2">
                   <button
@@ -334,7 +325,7 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
                   <div className="text-center py-12 bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg">
                     <div className="text-4xl mb-3">{categoryConfig.icon}</div>
                     <p className="text-[#9b9b9b]">No assets in this category yet</p>
-                    {activeCategory === 'reference-copy' ? (
+                    {activeTab === 'reference-copy' ? (
                       <div className="mt-4 flex gap-3 justify-center">
                         <button
                           onClick={() => setShowTextCopyInput(true)}
@@ -388,7 +379,7 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
                         // Check if this is a text-based asset (no file URL)
                         const isTextAsset = !asset.fileUrl || asset.fileUrl === '';
 
-                        if (isTextAsset && activeCategory === 'reference-copy') {
+                        if (isTextAsset && activeTab === 'reference-copy') {
                           return (
                             <TextCopyCard
                               key={asset.id}
@@ -415,7 +406,6 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
               </>
             )}
           </>
-        )}
       </div>
 
       {/* Uploader Modal */}
@@ -423,7 +413,7 @@ const BrandAssetDashboard: React.FC<BrandAssetDashboardProps> = ({
         <AssetUploader
           brandId={brand.id}
           brandName={brand.name}
-          category={activeCategory}
+          category={activeTab}
           onSuccess={handleUploadSuccess}
           onCancel={() => setShowUploader(false)}
         />
