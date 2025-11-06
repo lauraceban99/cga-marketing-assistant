@@ -76,7 +76,7 @@ const App: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-[#4b0f0d]/5 via-transparent to-[#04114a]/5 pointer-events-none"></div>
 
       <div className="relative">
-        <Header />
+        <Header onLogoClick={() => handleBackTo('brand_selection')} />
 
         {/* Admin Access Button (only on brand selection page) */}
         {appState === 'brand_selection' && (

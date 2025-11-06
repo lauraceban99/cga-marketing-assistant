@@ -4,7 +4,11 @@ import React from 'react';
 // Fallback to direct path if environment variable is not set
 const CRIMSON_LOGO_URL = import.meta.env.VITE_CRIMSON_LOGO_URL || '/logos/Crimson%20Academies%20Logo.svg';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onLogoClick?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onLogoClick }) => {
   // Debug logging
   console.log('Header - CRIMSON_LOGO_URL:', CRIMSON_LOGO_URL);
 
@@ -15,7 +19,8 @@ const Header: React.FC = () => {
           <img
             src={CRIMSON_LOGO_URL}
             alt="Crimson Academies"
-            className="h-20 w-auto object-contain mx-auto"
+            className={`h-20 w-auto object-contain mx-auto ${onLogoClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+            onClick={onLogoClick}
             onError={(e) => console.error('Failed to load Crimson logo:', e)}
           />
         )}
