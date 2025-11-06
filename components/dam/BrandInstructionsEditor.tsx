@@ -413,63 +413,8 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                 })}
                 rows={6}
                 className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
-                placeholder="Real testimonials and success stories..."
+                placeholder="Paste actual testimonials from students and parents. These will be used as reference, not fabricated."
               />
-            </div>
-
-            {/* Campaign Stage Instructions */}
-            <div>
-              <h3 className="text-lg font-semibold text-[#4b0f0d] mb-4">Campaign Stage Instructions</h3>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                    TOFU (Top of Funnel - Awareness)
-                  </label>
-                  <textarea
-                    value={instructions.campaignInstructions.tofu}
-                    onChange={(e) => setInstructions({
-                      ...instructions,
-                      campaignInstructions: { ...instructions.campaignInstructions, tofu: e.target.value }
-                    })}
-                    rows={3}
-                    className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                    placeholder="Awareness stage instructions, educational CTAs..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                    MOFU (Middle of Funnel - Consideration)
-                  </label>
-                  <textarea
-                    value={instructions.campaignInstructions.mofu}
-                    onChange={(e) => setInstructions({
-                      ...instructions,
-                      campaignInstructions: { ...instructions.campaignInstructions, mofu: e.target.value }
-                    })}
-                    rows={3}
-                    className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                    placeholder="Consideration stage instructions, engagement CTAs..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                    BOFU (Bottom of Funnel - Decision)
-                  </label>
-                  <textarea
-                    value={instructions.campaignInstructions.bofu}
-                    onChange={(e) => setInstructions({
-                      ...instructions,
-                      campaignInstructions: { ...instructions.campaignInstructions, bofu: e.target.value }
-                    })}
-                    rows={3}
-                    className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                    placeholder="Decision stage instructions, conversion CTAs..."
-                  />
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -477,32 +422,131 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
         {/* Ad Copy Tab */}
         {activeTab === 'ad-copy' && (
           <div className="space-y-8">
-            <h2 className="text-2xl font-bold text-[#4b0f0d]">Ad Copy Instructions</h2>
+            <h2 className="text-2xl font-bold text-[#4b0f0d]">Ad Copy Instructions & Examples</h2>
 
-            <div>
-              <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                Ad Copy Requirements
-              </label>
-              <textarea
-                value={instructions.adCopyInstructions.requirements}
-                onChange={(e) => setInstructions({
-                  ...instructions,
-                  adCopyInstructions: { ...instructions.adCopyInstructions, requirements: e.target.value }
-                })}
-                rows={6}
-                className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                placeholder="Specific requirements for ad copy generation..."
-              />
+            {/* Instructions Section */}
+            <div className="bg-[#f4f0f0] rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-[#4b0f0d] mb-4">Generation Instructions</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Length Guidelines
+                  </label>
+                  <input
+                    type="text"
+                    value={instructions.adCopyInstructions.requirements}
+                    onChange={(e) => setInstructions({
+                      ...instructions,
+                      adCopyInstructions: { ...instructions.adCopyInstructions, requirements: e.target.value }
+                    })}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                    placeholder="e.g., Short: 50-80 words, Long: 120-180 words"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Number of Variations
+                  </label>
+                  <input
+                    type="text"
+                    defaultValue="5 variations minimum"
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                    placeholder="How many ad variations to generate per request"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                    Variation Strategy
+                  </label>
+                  <textarea
+                    rows={3}
+                    className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                    placeholder="e.g., Each variation should target a different persona, use different emotional angles (aspiration, urgency, social proof), and vary opening hooks"
+                  />
+                </div>
+
+                {/* Campaign Stage CTAs */}
+                <div>
+                  <h4 className="text-md font-semibold text-[#4b0f0d] mb-3">Campaign Stage CTAs</h4>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-[#4b0f0d] mb-1">
+                        TOFU - Awareness Stage CTAs
+                      </label>
+                      <input
+                        type="text"
+                        value={instructions.campaignInstructions.tofu}
+                        onChange={(e) => setInstructions({
+                          ...instructions,
+                          campaignInstructions: { ...instructions.campaignInstructions, tofu: e.target.value }
+                        })}
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817]"
+                        placeholder="e.g., Learn More, Explore Programs, Download Guide"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#4b0f0d] mb-1">
+                        MOFU - Consideration Stage CTAs
+                      </label>
+                      <input
+                        type="text"
+                        value={instructions.campaignInstructions.mofu}
+                        onChange={(e) => setInstructions({
+                          ...instructions,
+                          campaignInstructions: { ...instructions.campaignInstructions, mofu: e.target.value }
+                        })}
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817]"
+                        placeholder="e.g., Book a Consultation, Schedule a Tour, Get Started"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#4b0f0d] mb-1">
+                        BOFU - Decision Stage CTAs
+                      </label>
+                      <input
+                        type="text"
+                        value={instructions.campaignInstructions.bofu}
+                        onChange={(e) => setInstructions({
+                          ...instructions,
+                          campaignInstructions: { ...instructions.campaignInstructions, bofu: e.target.value }
+                        })}
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817]"
+                        placeholder="e.g., Apply Now, Enroll Today, Start This Month"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
+                  >
+                    {saving ? 'Saving...' : 'Save Instructions'}
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div>
+            {/* Examples Knowledge Base */}
+            <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
               <div className="flex items-center justify-between mb-4">
-                <label className="block text-sm font-medium text-[#4b0f0d]">
-                  Ad Copy Examples (TOFU/MOFU/BOFU)
-                </label>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#4b0f0d]">Ad Copy Examples Knowledge Base</h3>
+                  <p className="text-sm text-[#9b9b9b] mt-1">
+                    Add examples of ad copies you like. AI will learn from these.
+                  </p>
+                </div>
                 <button
                   onClick={() => addExample('adCopy')}
-                  className="px-4 py-2 bg-[#780817] text-white rounded-md hover:bg-[#4b0f0d] transition-colors"
+                  className="px-4 py-2 bg-[#780817] text-white rounded-md hover:bg-[#4b0f0d] transition-colors text-sm font-semibold"
                 >
                   + Add Example
                 </button>
@@ -521,73 +565,309 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </div>
 
                   <div className="space-y-4">
-                    <select
-                      value={example.stage}
-                      onChange={(e) => updateExample('adCopy', index, 'stage', e.target.value as CampaignStage)}
-                      className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                    >
-                      <option value="tofu">TOFU - Top of Funnel</option>
-                      <option value="mofu">MOFU - Middle of Funnel</option>
-                      <option value="bofu">BOFU - Bottom of Funnel</option>
-                    </select>
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Campaign Stage</label>
+                      <select
+                        value={example.stage}
+                        onChange={(e) => updateExample('adCopy', index, 'stage', e.target.value as CampaignStage)}
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      >
+                        <option value="tofu">TOFU - Awareness (Learn More, Explore)</option>
+                        <option value="mofu">MOFU - Consideration (Book Consultation, Get Started)</option>
+                        <option value="bofu">BOFU - Decision (Apply Now, Enroll Today)</option>
+                      </select>
+                    </div>
 
-                    <input
-                      type="text"
-                      value={example.headline || ''}
-                      onChange={(e) => updateExample('adCopy', index, 'headline', e.target.value)}
-                      placeholder="Headline"
-                      className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                    />
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Headline (optional)</label>
+                      <input
+                        type="text"
+                        value={example.headline || ''}
+                        onChange={(e) => updateExample('adCopy', index, 'headline', e.target.value)}
+                        placeholder="e.g., Where Learning Meets Life"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
 
-                    <textarea
-                      value={example.copy}
-                      onChange={(e) => updateExample('adCopy', index, 'copy', e.target.value)}
-                      rows={4}
-                      placeholder="Ad copy body..."
-                      className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                    />
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Ad Copy Body *</label>
+                      <textarea
+                        value={example.copy}
+                        onChange={(e) => updateExample('adCopy', index, 'copy', e.target.value)}
+                        rows={5}
+                        placeholder="Paste the full ad copy here. This is the main body text that will be shown to your audience."
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
 
-                    <input
-                      type="text"
-                      value={example.cta}
-                      onChange={(e) => updateExample('adCopy', index, 'cta', e.target.value)}
-                      placeholder="Call to Action"
-                      className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                    />
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Call to Action *</label>
+                      <input
+                        type="text"
+                        value={example.cta}
+                        onChange={(e) => updateExample('adCopy', index, 'cta', e.target.value)}
+                        placeholder="e.g., Book Free Consultation"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                      />
+                    </div>
 
-                    <textarea
-                      value={example.notes || ''}
-                      onChange={(e) => updateExample('adCopy', index, 'notes', e.target.value)}
-                      rows={2}
-                      placeholder="Notes about this example..."
-                      className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] text-sm"
-                    />
+                    <div>
+                      <label className="block text-xs text-[#9b9b9b] mb-1">Notes (optional)</label>
+                      <textarea
+                        value={example.notes || ''}
+                        onChange={(e) => updateExample('adCopy', index, 'notes', e.target.value)}
+                        rows={2}
+                        placeholder="Why does this ad work well? What makes it effective?"
+                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] text-sm"
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
+
+              <div className="mt-6 pt-4 border-t border-[#f4f0f0]">
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Examples'}
+                </button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Similar tabs for Blog, Landing Page, Email... */}
-        {/* I'll implement these similarly but keeping response concise */}
+        {/* Blog Tab */}
+        {activeTab === 'blog' && (
+          <div className="space-y-8">
+            <h2 className="text-2xl font-bold text-[#4b0f0d]">Blog Post Instructions</h2>
+
+            <div className="bg-[#f4f0f0] rounded-lg p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Target Word Count Range
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="e.g., 2,000-3,000 words for comprehensive posts"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  SEO Keywords to Target
+                </label>
+                <textarea
+                  rows={3}
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="List your primary keywords and topics you want to rank for. E.g., online high school, flexible education, homeschooling alternatives"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Internal Linking Strategy
+                </label>
+                <textarea
+                  rows={2}
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="Which pages should blog posts link to? E.g., Always link to enrollment page, program pages, testimonials"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Topics to Cover
+                </label>
+                <textarea
+                  rows={3}
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="What topics align with your brand? E.g., study tips, university pathways, student success stories, parent guides"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Topics to Avoid
+                </label>
+                <textarea
+                  rows={2}
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="Any sensitive topics or areas to avoid?"
+                />
+              </div>
+
+              <div className="pt-4">
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Blog Instructions'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Landing Page Tab */}
+        {activeTab === 'landing-page' && (
+          <div className="space-y-8">
+            <h2 className="text-2xl font-bold text-[#4b0f0d]">Landing Page Instructions</h2>
+
+            <div className="bg-[#f4f0f0] rounded-lg p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Primary Value Propositions
+                </label>
+                <textarea
+                  rows={3}
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="What are your strongest value propositions? E.g., Study on your schedule, Expert 1-on-1 support, Global community, University pathways"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Common Objections to Address
+                </label>
+                <textarea
+                  rows={4}
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="What concerns do prospects have? E.g., Is it accredited?, Will my teen be lonely?, How much does it cost?, Can they do sports?"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Social Proof Available
+                </label>
+                <textarea
+                  rows={3}
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="What proof points can you use? E.g., Number of students, graduation rates, university acceptance stats, accreditation"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Primary Conversion Goal
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="e.g., Book a free consultation, Schedule a tour, Apply now"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Form Field Preferences
+                </label>
+                <textarea
+                  rows={2}
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="How many form fields? E.g., Keep it simple: Name, Email, Phone. Or detailed: Add student age, current school, interests"
+                />
+              </div>
+
+              <div className="pt-4">
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Landing Page Instructions'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Email Tab */}
+        {activeTab === 'email' && (
+          <div className="space-y-8">
+            <h2 className="text-2xl font-bold text-[#4b0f0d]">Email Marketing Instructions</h2>
+
+            <div className="bg-[#f4f0f0] rounded-lg p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Sending Schedule Preferences
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="e.g., Tuesday-Thursday mornings, avoid weekends"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Personalization Tokens Available
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="e.g., First name, Parent name, Student name, Location, Program interest"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Segmentation Criteria
+                </label>
+                <textarea
+                  rows={3}
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="How do you segment your list? E.g., By student age, interest level (cold/warm/hot), location, program type"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Email Sequence Types You Use
+                </label>
+                <textarea
+                  rows={3}
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="e.g., Welcome series (3 emails), Event invitations, Monthly newsletter, Re-engagement campaign"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                  Unsubscribe Philosophy
+                </label>
+                <textarea
+                  rows={2}
+                  className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
+                  placeholder="e.g., Make it easy, offer preferences instead of unsubscribe, include in every email"
+                />
+              </div>
+
+              <div className="pt-4">
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Email Instructions'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
 
-      {/* Save Button */}
-      <div className="mt-8 flex items-center justify-between">
-        {successMessage && (
+      {/* Global Success Message */}
+      {successMessage && (
+        <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
           <div className="text-green-600 font-medium">{successMessage}</div>
-        )}
-        <div className="ml-auto">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-8 py-3 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors shadow-md hover:shadow-lg disabled:opacity-50"
-          >
-            {saving ? 'Saving...' : 'Save Instructions'}
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 };
