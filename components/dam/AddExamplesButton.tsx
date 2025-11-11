@@ -1086,10 +1086,10 @@ Tone: Reassuring, detailed, parent-focused`,
     <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-[#4b0f0d] mb-2">
-          🚀 Quick Setup: Add High-Performing Examples
+          🚀 Quick Setup: Populate Knowledge Base Below
         </h3>
         <p className="text-sm text-[#9b9b9b] mb-3">
-          Add 14 proven landing page examples from real campaigns with performance data covering all markets and platforms:
+          Click the button below to add 14 high-performing landing page examples to the organized knowledge base. They'll appear in the Platform → Market grid below, ready for the AI to learn from:
         </p>
         <div className="grid grid-cols-2 gap-2 text-sm text-[#4b0f0d] mb-4">
           <div>
@@ -1112,23 +1112,34 @@ Tone: Reassuring, detailed, parent-focused`,
         </div>
       </div>
 
-      <button
-        onClick={addExamples}
-        disabled={adding}
-        className="px-6 py-3 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {adding ? 'Adding Examples...' : '✨ Add All Examples Now'}
-      </button>
+      <div className="flex flex-col items-center">
+        <button
+          onClick={addExamples}
+          disabled={adding}
+          className="px-6 py-3 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {adding ? 'Adding Examples...' : '✨ Add All Examples Now'}
+        </button>
 
-      {status && (
-        <div className={`mt-4 p-3 rounded-md ${
-          status.includes('✅') ? 'bg-green-50 text-green-700' :
-          status.includes('❌') ? 'bg-red-50 text-red-700' :
-          'bg-blue-50 text-blue-700'
-        }`}>
-          {status}
-        </div>
-      )}
+        {!adding && !status && (
+          <div className="mt-4 flex flex-col items-center text-[#9b9b9b]">
+            <svg className="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+            <span className="text-xs mt-1">Examples will appear in the Knowledge Base below</span>
+          </div>
+        )}
+
+        {status && (
+          <div className={`mt-4 p-3 rounded-md ${
+            status.includes('✅') ? 'bg-green-50 text-green-700' :
+            status.includes('❌') ? 'bg-red-50 text-red-700' :
+            'bg-blue-50 text-blue-700'
+          }`}>
+            {status}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

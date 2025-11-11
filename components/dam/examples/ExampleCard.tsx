@@ -155,43 +155,49 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
           </select>
         </div>
 
-        {/* Market selector for landing pages and ad copies */}
-        {(example.type === 'landing-page' || example.type === 'ad-copy') && (
-          <div>
-            <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
-              Target Market
-            </label>
-            <select
-              value={example.market || 'EMEA'}
-              onChange={(e) => onUpdate('market', e.target.value as Market)}
-              className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
-            >
-              <option value="ASIA">ASIA (Singapore, Hong Kong, Vietnam)</option>
-              <option value="EMEA">EMEA (UAE, Middle East, Europe)</option>
-              <option value="ANZ">ANZ (Australia, New Zealand)</option>
-              <option value="Japan">Japan</option>
-            </select>
-          </div>
-        )}
+        {/* Market selector - ENABLED FOR ALL CONTENT TYPES */}
+        <div>
+          <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
+            Target Market {example.type === 'blog' || example.type === 'email' ? '(optional)' : ''}
+          </label>
+          <select
+            value={example.market || 'EMEA'}
+            onChange={(e) => onUpdate('market', e.target.value as Market)}
+            className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
+          >
+            <option value="ASIA">ASIA (Singapore, Hong Kong, Vietnam)</option>
+            <option value="EMEA">EMEA (UAE, Middle East, Europe)</option>
+            <option value="ANZ">ANZ (Australia, New Zealand)</option>
+            <option value="Japan">Japan</option>
+          </select>
+          {(example.type === 'blog' || example.type === 'email') && (
+            <p className="text-xs text-[#9b9b9b] mt-1">
+              💡 Tag with market to enable AI learning from this example
+            </p>
+          )}
+        </div>
 
-        {/* Platform selector for landing pages and ad copies */}
-        {(example.type === 'landing-page' || example.type === 'ad-copy') && (
-          <div>
-            <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
-              Traffic Source / Platform
-            </label>
-            <select
-              value={example.platform || 'META'}
-              onChange={(e) => onUpdate('platform', e.target.value as Platform)}
-              className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
-            >
-              <option value="META">META (Facebook, Instagram)</option>
-              <option value="GOOGLE">GOOGLE (Search, Display)</option>
-              <option value="ORGANIC">ORGANIC (SEO, Direct)</option>
-              <option value="EMAIL">EMAIL (Campaigns)</option>
-            </select>
-          </div>
-        )}
+        {/* Platform selector - ENABLED FOR ALL CONTENT TYPES */}
+        <div>
+          <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
+            Traffic Source / Platform {example.type === 'blog' || example.type === 'email' ? '(optional)' : ''}
+          </label>
+          <select
+            value={example.platform || 'META'}
+            onChange={(e) => onUpdate('platform', e.target.value as Platform)}
+            className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
+          >
+            <option value="META">META (Facebook, Instagram)</option>
+            <option value="GOOGLE">GOOGLE (Search, Display)</option>
+            <option value="ORGANIC">ORGANIC (SEO, Direct)</option>
+            <option value="EMAIL">EMAIL (Campaigns)</option>
+          </select>
+          {(example.type === 'blog' || example.type === 'email') && (
+            <p className="text-xs text-[#9b9b9b] mt-1">
+              💡 Tag with platform to enable AI learning from this example
+            </p>
+          )}
+        </div>
 
         <div>
           <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
