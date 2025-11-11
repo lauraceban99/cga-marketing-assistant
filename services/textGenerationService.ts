@@ -5,7 +5,8 @@ import type {
   EmailType,
   CampaignStage,
   LengthSpecification,
-  TypeSpecificInstructions
+  TypeSpecificInstructions,
+  Market
 } from '../types';
 
 export interface AdCopyVariation {
@@ -37,7 +38,8 @@ export interface GeneratedContent {
 function buildSystemPrompt(
   contentType: TaskType,
   emailType: EmailType | undefined,
-  brandInstructions: BrandInstructions
+  brandInstructions: BrandInstructions,
+  market?: Market
 ): string {
   let typeInstructions: TypeSpecificInstructions;
 
@@ -94,9 +96,17 @@ ${typeInstructions.dos.map(d => `- ${d}`).join('\n')}
 DON'Ts:
 ${typeInstructions.donts.map(d => `- ${d}`).join('\n')}
 
-REFERENCE EXAMPLES:
-${typeInstructions.examples.map((ex, i) => `
-Example ${i + 1} (${ex.stage.toUpperCase()}):
+REFERENCE EXAMPLES${market && contentType === 'landing-page' ? ` (${market} Market)` : ''}:
+${typeInstructions.examples
+  .filter(ex => {
+    // For landing pages, filter by market if specified
+    if (contentType === 'landing-page' && market) {
+      return ex.market === market || !ex.market; // Include examples without market specified
+    }
+    return true;
+  })
+  .map((ex, i) => `
+Example ${i + 1} (${ex.stage.toUpperCase()}${ex.market ? ` - ${ex.market} Market` : ''}):
 ${ex.headline ? `Headline: ${ex.headline}\n` : ''}Body: ${ex.copy}
 CTA: ${ex.cta}
 ${ex.notes ? `Notes: ${ex.notes}` : ''}
@@ -263,6 +273,7 @@ export async function generateTextContent(
     campaignStage?: CampaignStage;
     emailType?: EmailType;
     adVariant?: 'short' | 'long';
+    market?: Market;
   }
 ): Promise<GeneratedContent> {
   console.log(`🎯 Generating ${contentType} with OpenAI...`);
@@ -273,7 +284,7 @@ export async function generateTextContent(
   }
 
   // Build prompts
-  const systemPrompt = buildSystemPrompt(contentType, options.emailType, brandInstructions);
+  const systemPrompt = buildSystemPrompt(contentType, options.emailType, brandInstructions, options.market);
   const userPrompt = buildUserPrompt(
     contentType,
     userRequest,

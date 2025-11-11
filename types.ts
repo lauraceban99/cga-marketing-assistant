@@ -180,9 +180,12 @@ export interface PersonaDefinition {
   solution: string;
 }
 
+export type Market = 'ASIA' | 'EMEA' | 'ANZ' | 'Japan';
+
 export interface CampaignExample {
   stage: CampaignStage;
   type: TaskType;
+  market?: Market; // Target market for this example
   headline?: string;
   copy: string;
   cta: string;
@@ -260,5 +263,6 @@ export interface GenerationContext {
     emailType?: EmailType;
     lengthSpec?: LengthSpecification;
     adVariant?: 'short' | 'long';
+    market?: Market;
   };
 }

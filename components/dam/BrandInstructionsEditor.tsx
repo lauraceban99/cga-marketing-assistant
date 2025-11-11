@@ -5,11 +5,13 @@ import type {
   PersonaDefinition,
   CampaignExample,
   TaskType,
-  CampaignStage
+  CampaignStage,
+  Market
 } from '../../types';
 import { getBrandInstructions, saveBrandInstructions } from '../../services/instructionsService';
 import LoadingSpinner from '../LoadingSpinner';
 import ExamplesKnowledgeBase from './examples/ExamplesKnowledgeBase';
+import LandingPageExamplesKnowledgeBase from './examples/LandingPageExamplesKnowledgeBase';
 
 interface BrandInstructionsEditorProps {
   brand: Brand;
@@ -99,7 +101,11 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     setInstructions({ ...instructions, personas: updatedPersonas });
   };
 
-  const addExample = (type: 'adCopy' | 'blog' | 'landingPage', stage: CampaignStage = 'mofu') => {
+  const addExample = (
+    type: 'adCopy' | 'blog' | 'landingPage',
+    stage: CampaignStage = 'mofu',
+    market?: Market
+  ) => {
     if (!instructions) return;
     const newExample: CampaignExample = {
       stage: stage,
@@ -107,7 +113,8 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
       headline: '',
       copy: '',
       cta: '',
-      notes: ''
+      notes: '',
+      ...(market && { market }) // Add market if provided (for landing pages)
     };
 
     const fieldMap = {
@@ -727,12 +734,12 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               </div>
             </div>
 
-            {/* Examples Knowledge Base */}
-            <ExamplesKnowledgeBase
+            {/* Examples Knowledge Base - Organized by Market */}
+            <LandingPageExamplesKnowledgeBase
               title="Landing Page Examples Knowledge Base"
-              description="Add examples AI will learn from"
+              description="Add examples organized by market. AI will learn market-specific patterns."
               examples={instructions.landingPageInstructions.examples}
-              onAddExample={(stage) => addExample('landingPage', stage)}
+              onAddExample={(stage, market) => addExample('landingPage', stage, market)}
               onUpdateExample={(index, field, value) => updateExample('landingPage', index, field, value)}
               onDeleteExample={(index) => removeExample('landingPage', index)}
               onSave={handleSave}

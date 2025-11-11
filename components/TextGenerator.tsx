@@ -5,7 +5,8 @@ import type {
   EmailType,
   CampaignStage,
   LengthSpecification,
-  BrandInstructions
+  BrandInstructions,
+  Market
 } from '../types';
 import { getBrandInstructions } from '../services/instructionsService';
 import { generateTextContent, type AdCopyVariation, type GeneratedContent } from '../services/textGenerationService';
@@ -29,6 +30,7 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
   const [campaignStage, setCampaignStage] = useState<CampaignStage>('mofu');
   const [lengthValue, setLengthValue] = useState<number>(150);
   const [lengthUnit, setLengthUnit] = useState<'words' | 'characters'>('words');
+  const [market, setMarket] = useState<Market>('EMEA');
 
   useEffect(() => {
     const loadInstructions = async () => {
@@ -102,7 +104,8 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
         {
           lengthSpec,
           campaignStage,
-          emailType: taskType === 'email' ? emailType : undefined
+          emailType: taskType === 'email' ? emailType : undefined,
+          market: taskType === 'landing-page' ? market : undefined
         }
       );
 
@@ -189,6 +192,29 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
               </select>
               <p className="text-xs text-[#9b9b9b] mt-2">
                 Different email types follow different best practices and tone.
+              </p>
+            </div>
+          )}
+
+          {/* Market selector (only for landing pages) */}
+          {taskType === 'landing-page' && (
+            <div>
+              <label htmlFor="market" className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                Target Market
+              </label>
+              <select
+                id="market"
+                value={market}
+                onChange={(e) => setMarket(e.target.value as Market)}
+                className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
+              >
+                <option value="ASIA">ASIA (Singapore, Hong Kong, Vietnam)</option>
+                <option value="EMEA">EMEA (UAE, Middle East, Europe)</option>
+                <option value="ANZ">ANZ (Australia, New Zealand)</option>
+                <option value="Japan">Japan</option>
+              </select>
+              <p className="text-xs text-[#9b9b9b] mt-2">
+                Different markets respond to different messaging strategies. AI will adapt the landing page copy based on market-specific patterns.
               </p>
             </div>
           )}

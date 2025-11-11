@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { CampaignExample, CampaignStage } from '../../../types';
+import type { CampaignExample, CampaignStage, Market } from '../../../types';
 
 interface ExampleCardProps {
   example: CampaignExample;
@@ -113,6 +113,25 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
             <option value="bofu">BOFU - Decision</option>
           </select>
         </div>
+
+        {/* Market selector for landing pages */}
+        {example.type === 'landing-page' && (
+          <div>
+            <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
+              Target Market
+            </label>
+            <select
+              value={example.market || 'EMEA'}
+              onChange={(e) => onUpdate('market', e.target.value as Market)}
+              className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
+            >
+              <option value="ASIA">ASIA (Singapore, Hong Kong, Vietnam)</option>
+              <option value="EMEA">EMEA (UAE, Middle East, Europe)</option>
+              <option value="ANZ">ANZ (Australia, New Zealand)</option>
+              <option value="Japan">Japan</option>
+            </select>
+          </div>
+        )}
 
         <div>
           <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
