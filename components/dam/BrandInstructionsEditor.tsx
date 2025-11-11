@@ -293,7 +293,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
           { id: 'blog', label: 'Blogs' },
           { id: 'landing-page', label: 'Landing Pages' },
           { id: 'email', label: 'Emails' },
-          { id: 'ai-learning', label: '🧠 AI Learning' }
+          { id: 'ai-learning', label: 'Advanced', subtle: true }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -301,7 +301,9 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             className={`px-6 py-3 font-medium transition-colors ${
               activeTab === tab.id
                 ? 'text-[#780817] border-b-2 border-[#780817]'
-                : 'text-[#9b9b9b] hover:text-[#4b0f0d]'
+                : tab.subtle
+                  ? 'text-[#c0c0c0] hover:text-[#9b9b9b] text-sm'
+                  : 'text-[#9b9b9b] hover:text-[#4b0f0d]'
             }`}
           >
             {tab.label}
@@ -1169,10 +1171,35 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
         {activeTab === 'ai-learning' && (
           <div className="space-y-6">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-[#4b0f0d] mb-2">AI Learning Knowledge Base</h2>
-              <p className="text-[#9b9b9b]">
-                The AI automatically extracts patterns from your examples. These patterns are used when generating content.
-                You can view auto-extracted patterns and add your own manual insights.
+              <h2 className="text-2xl font-bold text-[#4b0f0d] mb-2">🧠 AI Learning System (Advanced)</h2>
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-4">
+                <h3 className="text-sm font-semibold text-blue-900 mb-2">How the AI Learning System Works</h3>
+                <div className="text-sm text-blue-800 space-y-2">
+                  <p>
+                    <strong>Automatic Pattern Extraction:</strong> When you save examples, the AI automatically analyzes them
+                    and extracts patterns based on <strong>Platform × Market × Content Type</strong>.
+                  </p>
+                  <p className="text-xs bg-blue-100 p-2 rounded">
+                    <strong>Example:</strong> META + EMEA + Landing Page = Learns "urgency tactics, scrolling banners, social proof stacking"<br/>
+                    GOOGLE + ANZ + Landing Page = Learns "benefit-focused bullets, low-friction CTAs, humble tone"
+                  </p>
+                  <p>
+                    <strong>Granular Learning:</strong> The system learns separately for each combination, so it knows:
+                  </p>
+                  <ul className="list-disc ml-6 text-xs space-y-1">
+                    <li>META ASIA landing pages use contrarian positioning and university prestige</li>
+                    <li>GOOGLE EMEA landing pages emphasize trust signals and accreditations</li>
+                    <li>META ANZ landing pages use gentle challenges and flexibility focus</li>
+                  </ul>
+                  <p>
+                    <strong>When You Generate Content:</strong> The AI retrieves the exact pattern knowledge for your
+                    selected Platform + Market + Content Type and applies those learnings.
+                  </p>
+                </div>
+              </div>
+              <p className="text-[#9b9b9b] text-sm">
+                💡 <strong>Tip:</strong> You rarely need to view this page. The AI learning happens automatically
+                when you save examples. This page is only for advanced debugging or manual pattern review.
               </p>
             </div>
 

@@ -35,6 +35,21 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
     return text.substring(0, maxLength) + '...';
   };
 
+  // Platform and market badge styles
+  const platformBadgeStyles = {
+    META: 'bg-blue-100 text-blue-700 border-blue-300',
+    GOOGLE: 'bg-green-100 text-green-700 border-green-300',
+    ORGANIC: 'bg-purple-100 text-purple-700 border-purple-300',
+    EMAIL: 'bg-orange-100 text-orange-700 border-orange-300',
+  };
+
+  const platformIcons = {
+    META: '📱',
+    GOOGLE: '🔍',
+    ORGANIC: '🌐',
+    EMAIL: '📧',
+  };
+
   // Locked state (default)
   if (!isEditing) {
     return (
@@ -52,6 +67,25 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
           )}
         </div>
 
+        {/* Platform and Market Badges */}
+        <div className="flex gap-2 mb-3">
+          {example.platform && (
+            <span className={`px-2 py-1 text-xs font-semibold rounded border ${platformBadgeStyles[example.platform]}`}>
+              {platformIcons[example.platform]} {example.platform}
+            </span>
+          )}
+          {example.market && (
+            <span className="px-2 py-1 text-xs font-semibold rounded bg-amber-100 text-amber-700 border border-amber-300">
+              {example.market}
+            </span>
+          )}
+          {example.stage && (
+            <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-700 border border-gray-300 uppercase">
+              {example.stage}
+            </span>
+          )}
+        </div>
+
         {/* Content Preview */}
         <div className="pr-16">
           {example.headline && (
@@ -64,7 +98,14 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
           </p>
           {example.cta && (
             <div className="inline-block px-3 py-1 bg-[#780817] text-white text-xs rounded-full mb-3">
-              {example.cta}
+              CTA: {example.cta}
+            </div>
+          )}
+          {example.whatWorks && (
+            <div className="mt-2 pt-2 border-t border-[#f4f0f0]">
+              <p className="text-xs text-[#9b9b9b] italic">
+                💡 {truncate(example.whatWorks, 80)}
+              </p>
             </div>
           )}
         </div>
