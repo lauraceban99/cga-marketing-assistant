@@ -18,6 +18,9 @@ import {
 import { db, storage } from '../config/firebase';
 import type { BrandGuideline } from '../types';
 
+// Re-export db and storage for other services
+export { db, storage };
+
 const COLLECTION_NAME = 'brandGuidelines';
 const STORAGE_PATH = 'brand-guidelines';
 

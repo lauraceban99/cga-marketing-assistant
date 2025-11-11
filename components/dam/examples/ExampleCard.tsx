@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { CampaignExample, CampaignStage, Market } from '../../../types';
+import type { CampaignExample, CampaignStage, Market, Platform } from '../../../types';
 
 interface ExampleCardProps {
   example: CampaignExample;
@@ -114,8 +114,8 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
           </select>
         </div>
 
-        {/* Market selector for landing pages */}
-        {example.type === 'landing-page' && (
+        {/* Market selector for landing pages and ad copies */}
+        {(example.type === 'landing-page' || example.type === 'ad-copy') && (
           <div>
             <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
               Target Market
@@ -129,6 +129,25 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
               <option value="EMEA">EMEA (UAE, Middle East, Europe)</option>
               <option value="ANZ">ANZ (Australia, New Zealand)</option>
               <option value="Japan">Japan</option>
+            </select>
+          </div>
+        )}
+
+        {/* Platform selector for landing pages and ad copies */}
+        {(example.type === 'landing-page' || example.type === 'ad-copy') && (
+          <div>
+            <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
+              Traffic Source / Platform
+            </label>
+            <select
+              value={example.platform || 'META'}
+              onChange={(e) => onUpdate('platform', e.target.value as Platform)}
+              className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
+            >
+              <option value="META">META (Facebook, Instagram)</option>
+              <option value="GOOGLE">GOOGLE (Search, Display)</option>
+              <option value="ORGANIC">ORGANIC (SEO, Direct)</option>
+              <option value="EMAIL">EMAIL (Campaigns)</option>
             </select>
           </div>
         )}
@@ -180,9 +199,25 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
             value={example.notes || ''}
             onChange={(e) => onUpdate('notes', e.target.value)}
             rows={2}
-            placeholder="Why does this work well? What makes it effective?"
+            placeholder="General notes about this example"
             className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
           />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
+            What Works (Marketer Insights) 💡
+          </label>
+          <textarea
+            value={example.whatWorks || ''}
+            onChange={(e) => onUpdate('whatWorks', e.target.value)}
+            rows={4}
+            placeholder="Why does this example convert well? What specific techniques make it effective? (e.g., 'Contrarian positioning questions popular beliefs', 'Urgency banner repeated 4x creates FOMO')"
+            className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
+          />
+          <p className="text-xs text-[#9b9b9b] mt-1">
+            ⚡ These insights will be used by AI to extract patterns and improve future content generation.
+          </p>
         </div>
       </div>
 

@@ -182,14 +182,18 @@ export interface PersonaDefinition {
 
 export type Market = 'ASIA' | 'EMEA' | 'ANZ' | 'Japan';
 
+export type Platform = 'META' | 'GOOGLE' | 'ORGANIC' | 'EMAIL';
+
 export interface CampaignExample {
   stage: CampaignStage;
   type: TaskType;
   market?: Market; // Target market for this example
+  platform?: Platform; // Traffic source for this example
   headline?: string;
   copy: string;
   cta: string;
   notes?: string;
+  whatWorks?: string; // Manual learnings from marketers about why this example converts
 }
 
 export interface TypeSpecificInstructions {
@@ -238,6 +242,53 @@ export interface BrandInstructions {
   lastUpdatedBy: string;
   lastUpdated: Date;
   version: number;
+
+  // Pattern Knowledge Base (Dynamic Learning System)
+  patternKnowledgeBase?: PatternKnowledgeBase[];
+}
+
+/**
+ * Pattern Knowledge Base: Dynamic learning system that extracts patterns from examples
+ * Organized by market + platform + content type
+ * Used alongside static instructions during generation
+ */
+export interface PatternKnowledgeBase {
+  id: string;
+  brandId: string;
+  market: Market;
+  platform: Platform;
+  contentType: TaskType;
+
+  // Auto-extracted patterns by AI
+  patterns: {
+    headlineStyles: string[]; // e.g., "Question-based challengers", "Direct value propositions"
+    structurePatterns: string[]; // e.g., "Problem-agitate-solve", "Trust signals upfront"
+    toneCharacteristics: string[]; // e.g., "Urgent but supportive", "Intellectual and data-driven"
+    ctaStrategies: string[]; // e.g., "Single CTA repeated 6x", "Low-friction webinar registration"
+    conversionTechniques: string[]; // e.g., "Contrarian positioning", "Scarcity with urgency banner"
+    socialProofApproaches: string[]; // e.g., "Student testimonials", "University logos"
+  };
+
+  // Manual learnings from marketers
+  manualLearnings: string;
+
+  // AI-extracted insights (generated when examples are added)
+  autoExtractedInsights: string;
+
+  // Reference to examples that contributed to these patterns
+  exampleIds: string[];
+
+  // Performance summary
+  performanceSummary?: {
+    averageConversionRate?: number;
+    bestConversionRate?: number;
+    lowestCPC?: number;
+    totalExamples: number;
+  };
+
+  // Metadata
+  lastUpdated: Date;
+  createdAt: Date;
 }
 
 export interface LengthSpecification {
@@ -264,5 +315,9 @@ export interface GenerationContext {
     lengthSpec?: LengthSpecification;
     adVariant?: 'short' | 'long';
     market?: Market;
+    platform?: Platform;
   };
+
+  // Dynamic pattern knowledge (loaded based on market + platform + content type)
+  dynamicPatterns?: PatternKnowledgeBase;
 }

@@ -93,9 +93,6 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({ brands, onSelectBrand }) 
 
                 {/* Brand Name */}
                 <h3 className="text-2xl font-bold text-[#4b0f0d] leading-tight">{brand.name}</h3>
-
-                {/* Brand Code */}
-                <p className="text-xs text-[#9b9b9b] -mt-3">{brand.id}</p>
               </div>
             </button>
           );

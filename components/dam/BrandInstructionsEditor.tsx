@@ -6,9 +6,11 @@ import type {
   CampaignExample,
   TaskType,
   CampaignStage,
-  Market
+  Market,
+  Platform
 } from '../../types';
 import { getBrandInstructions, saveBrandInstructions } from '../../services/instructionsService';
+import { updatePatternKnowledge } from '../../services/patternKnowledgeService';
 import LoadingSpinner from '../LoadingSpinner';
 import ExamplesKnowledgeBase from './examples/ExamplesKnowledgeBase';
 import LandingPageExamplesKnowledgeBase from './examples/LandingPageExamplesKnowledgeBase';
@@ -43,7 +45,12 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     setSuccessMessage('');
     try {
       await saveBrandInstructions(brand.id, instructions, 'admin');
-      setSuccessMessage('Instructions saved successfully!');
+
+      // Auto-extract patterns from examples
+      console.log('🤖 Extracting patterns from examples...');
+      await extractPatternsFromExamples();
+
+      setSuccessMessage('Instructions saved and patterns extracted successfully!');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error saving instructions:', error);
@@ -51,6 +58,68 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     } finally {
       setSaving(false);
     }
+  };
+
+  /**
+   * Extract patterns from examples after saving
+   * Groups examples by market + platform + type and calls pattern extraction
+   */
+  const extractPatternsFromExamples = async () => {
+    if (!instructions) return;
+
+    // Collect all examples from all content types
+    const allExamples: CampaignExample[] = [
+      ...instructions.adCopyInstructions.examples,
+      ...instructions.blogInstructions.examples,
+      ...instructions.landingPageInstructions.examples,
+      ...instructions.emailInstructions.invitation.examples,
+      ...instructions.emailInstructions.nurturingDrip.examples,
+      ...instructions.emailInstructions.emailBlast.examples,
+    ];
+
+    // Group examples by market + platform + type
+    const groupedExamples = new Map<string, { market: Market; platform: Platform; type: TaskType; examples: CampaignExample[] }>();
+
+    allExamples.forEach((example) => {
+      // Only process examples that have market and platform specified
+      if (example.market && example.platform) {
+        const key = `${example.market}-${example.platform}-${example.type}`;
+
+        if (!groupedExamples.has(key)) {
+          groupedExamples.set(key, {
+            market: example.market,
+            platform: example.platform,
+            type: example.type,
+            examples: [],
+          });
+        }
+
+        groupedExamples.get(key)!.examples.push(example);
+      }
+    });
+
+    // Extract patterns for each group
+    const extractionPromises = Array.from(groupedExamples.values()).map(async (group) => {
+      if (group.examples.length > 0) {
+        console.log(`📊 Extracting patterns for ${group.market} + ${group.platform} + ${group.type} (${group.examples.length} examples)`);
+        try {
+          await updatePatternKnowledge(
+            brand.id,
+            group.market,
+            group.platform,
+            group.type,
+            group.examples,
+            '' // Manual learnings are stored in the example whatWorks field
+          );
+          console.log(`✅ Patterns extracted for ${group.market} + ${group.platform} + ${group.type}`);
+        } catch (error) {
+          console.error(`❌ Failed to extract patterns for ${group.market} + ${group.platform} + ${group.type}:`, error);
+        }
+      }
+    });
+
+    await Promise.all(extractionPromises);
+    console.log('✅ Pattern extraction complete');
   };
 
   const addPersona = () => {

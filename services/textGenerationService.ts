@@ -6,8 +6,11 @@ import type {
   CampaignStage,
   LengthSpecification,
   TypeSpecificInstructions,
-  Market
+  Market,
+  Platform,
+  PatternKnowledgeBase
 } from '../types';
+import { getPatternKnowledge, getGeneralPatterns } from './patternKnowledgeService';
 
 export interface AdCopyVariation {
   id: string;
@@ -34,12 +37,14 @@ export interface GeneratedContent {
 
 /**
  * Build the system prompt based on content type and brand instructions
+ * Includes dynamic pattern knowledge when available
  */
 function buildSystemPrompt(
   contentType: TaskType,
   emailType: EmailType | undefined,
   brandInstructions: BrandInstructions,
-  market?: Market
+  market?: Market,
+  dynamicPatterns?: PatternKnowledgeBase
 ): string {
   let typeInstructions: TypeSpecificInstructions;
 
@@ -95,6 +100,40 @@ ${typeInstructions.dos.map(d => `- ${d}`).join('\n')}
 
 DON'Ts:
 ${typeInstructions.donts.map(d => `- ${d}`).join('\n')}
+
+${dynamicPatterns ? `
+🎯 DYNAMIC PATTERN KNOWLEDGE (${dynamicPatterns.market} Market - ${dynamicPatterns.platform} Platform):
+
+This section contains patterns automatically extracted from high-performing ${contentType} examples.
+Apply these patterns to maximize conversion rates for this specific market and platform.
+
+HEADLINE STYLES THAT WORK:
+${dynamicPatterns.patterns.headlineStyles.map(s => `- ${s}`).join('\n')}
+
+STRUCTURE PATTERNS:
+${dynamicPatterns.patterns.structurePatterns.map(s => `- ${s}`).join('\n')}
+
+TONE CHARACTERISTICS:
+${dynamicPatterns.patterns.toneCharacteristics.map(s => `- ${s}`).join('\n')}
+
+CTA STRATEGIES:
+${dynamicPatterns.patterns.ctaStrategies.map(s => `- ${s}`).join('\n')}
+
+CONVERSION TECHNIQUES:
+${dynamicPatterns.patterns.conversionTechniques.map(s => `- ${s}`).join('\n')}
+
+SOCIAL PROOF APPROACHES:
+${dynamicPatterns.patterns.socialProofApproaches.map(s => `- ${s}`).join('\n')}
+
+AI-EXTRACTED INSIGHTS:
+${dynamicPatterns.autoExtractedInsights}
+
+${dynamicPatterns.manualLearnings ? `MARKETER INSIGHTS:
+${dynamicPatterns.manualLearnings}` : ''}
+
+CRITICAL: These patterns are derived from actual high-performing content.
+Prioritize these patterns over general best practices when they conflict.
+` : ''}
 
 REFERENCE EXAMPLES${market && contentType === 'landing-page' ? ` (${market} Market)` : ''}:
 ${typeInstructions.examples
@@ -274,6 +313,7 @@ export async function generateTextContent(
     emailType?: EmailType;
     adVariant?: 'short' | 'long';
     market?: Market;
+    platform?: Platform;
   }
 ): Promise<GeneratedContent> {
   console.log(`🎯 Generating ${contentType} with OpenAI...`);
@@ -283,8 +323,36 @@ export async function generateTextContent(
     throw new Error('VITE_OPENAI_API_KEY environment variable not set');
   }
 
+  // Load dynamic pattern knowledge if market + platform specified
+  let dynamicPatterns: PatternKnowledgeBase | null = null;
+  if (options.market && options.platform) {
+    console.log(`📚 Loading pattern knowledge for ${options.market} + ${options.platform}...`);
+    dynamicPatterns = await getPatternKnowledge(
+      brand.id,
+      options.market,
+      options.platform,
+      contentType
+    );
+
+    // Fallback to general patterns if market-specific not found
+    if (!dynamicPatterns) {
+      console.log(`📚 Market-specific patterns not found, loading general patterns...`);
+      dynamicPatterns = await getGeneralPatterns(brand.id, options.platform, contentType);
+    }
+
+    if (dynamicPatterns) {
+      console.log(`✅ Loaded ${dynamicPatterns.performanceSummary?.totalExamples || 0} example patterns`);
+    }
+  }
+
   // Build prompts
-  const systemPrompt = buildSystemPrompt(contentType, options.emailType, brandInstructions, options.market);
+  const systemPrompt = buildSystemPrompt(
+    contentType,
+    options.emailType,
+    brandInstructions,
+    options.market,
+    dynamicPatterns || undefined
+  );
   const userPrompt = buildUserPrompt(
     contentType,
     userRequest,
