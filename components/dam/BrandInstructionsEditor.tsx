@@ -14,6 +14,9 @@ import { updatePatternKnowledge } from '../../services/patternKnowledgeService';
 import LoadingSpinner from '../LoadingSpinner';
 import ExamplesKnowledgeBase from './examples/ExamplesKnowledgeBase';
 import LandingPageExamplesKnowledgeBase from './examples/LandingPageExamplesKnowledgeBase';
+import UnifiedExamplesKnowledgeBase from './examples/UnifiedExamplesKnowledgeBase';
+import PatternKnowledgeViewer from './PatternKnowledgeViewer';
+import AddExamplesButton from './AddExamplesButton';
 
 interface BrandInstructionsEditorProps {
   brand: Brand;
@@ -24,7 +27,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [instructions, setInstructions] = useState<BrandInstructions | null>(null);
-  const [activeTab, setActiveTab] = useState<'general' | 'ad-copy' | 'blog' | 'landing-page' | 'email'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'ad-copy' | 'blog' | 'landing-page' | 'email' | 'ai-learning'>('general');
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
@@ -172,12 +175,12 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
 
   const addExample = (
     type: 'adCopy' | 'blog' | 'landingPage',
-    stage: CampaignStage = 'mofu',
+    stage?: CampaignStage,
     market?: Market
   ) => {
     if (!instructions) return;
     const newExample: CampaignExample = {
-      stage: stage,
+      stage: stage || 'mofu', // Default stage if not provided
       type: type === 'adCopy' ? 'ad-copy' : type === 'blog' ? 'blog' : 'landing-page',
       headline: '',
       copy: '',
@@ -289,7 +292,8 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
           { id: 'ad-copy', label: 'Ad Copies' },
           { id: 'blog', label: 'Blogs' },
           { id: 'landing-page', label: 'Landing Pages' },
-          { id: 'email', label: 'Emails' }
+          { id: 'email', label: 'Emails' },
+          { id: 'ai-learning', label: '🧠 AI Learning' }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -703,11 +707,11 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             </div>
 
             {/* Examples Knowledge Base */}
-            <ExamplesKnowledgeBase
+            <UnifiedExamplesKnowledgeBase
               title="Blog Examples Knowledge Base"
-              description="Add examples AI will learn from"
+              description="Add examples AI will learn from. Stage categorization removed - blogs are organized by topic and quality, not funnel stage."
               examples={instructions.blogInstructions.examples}
-              onAddExample={(stage) => addExample('blog', stage)}
+              onAddExample={() => addExample('blog')}
               onUpdateExample={(index, field, value) => updateExample('blog', index, field, value)}
               onDeleteExample={(index) => removeExample('blog', index)}
               onSave={handleSave}
@@ -802,6 +806,12 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                 </div>
               </div>
             </div>
+
+            {/* Quick Setup: Add Example Button */}
+            <AddExamplesButton
+              brandId={brand.id}
+              onComplete={loadInstructions}
+            />
 
             {/* Examples Knowledge Base - Organized by Market */}
             <LandingPageExamplesKnowledgeBase
@@ -974,7 +984,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                 <div>
                   <h3 className="text-lg font-semibold text-[#4b0f0d]">Email Examples Knowledge Base</h3>
                   <p className="text-sm text-[#9b9b9b] mt-1">
-                    Add examples of emails you like across all types. AI will learn from these.
+                    Add examples of emails you like across all types. Organized by email type, not funnel stage.
                   </p>
                 </div>
                 <button
@@ -982,7 +992,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     // Add to invitation examples for now
                     if (!instructions) return;
                     const newExample: CampaignExample = {
-                      stage: 'mofu',
+                      stage: 'mofu', // Default stage (not used for organization)
                       type: 'email',
                       headline: '',
                       copy: '',
@@ -1152,6 +1162,21 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* AI Learning Tab */}
+        {activeTab === 'ai-learning' && (
+          <div className="space-y-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-[#4b0f0d] mb-2">AI Learning Knowledge Base</h2>
+              <p className="text-[#9b9b9b]">
+                The AI automatically extracts patterns from your examples. These patterns are used when generating content.
+                You can view auto-extracted patterns and add your own manual insights.
+              </p>
+            </div>
+
+            <PatternKnowledgeViewer brandId={brand.id} />
           </div>
         )}
 

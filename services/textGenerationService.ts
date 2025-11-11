@@ -145,9 +145,10 @@ ${typeInstructions.examples
     return true;
   })
   .map((ex, i) => `
-Example ${i + 1} (${ex.stage.toUpperCase()}${ex.market ? ` - ${ex.market} Market` : ''}):
+Example ${i + 1} (${ex.stage.toUpperCase()}${ex.market ? ` - ${ex.market} Market` : ''}${ex.platform ? ` - ${ex.platform} Platform` : ''}):
 ${ex.headline ? `Headline: ${ex.headline}\n` : ''}Body: ${ex.copy}
 CTA: ${ex.cta}
+${ex.whatWorks ? `\n💡 WHY THIS WORKS (Marketer Insights):\n${ex.whatWorks}\n` : ''}
 ${ex.notes ? `Notes: ${ex.notes}` : ''}
 `).join('\n')}
 
@@ -155,6 +156,40 @@ ${brandInstructions.referenceMaterials.interviews ? `
 INTERVIEW TRANSCRIPTS (Use for authentic voice, don't fabricate):
 ${brandInstructions.referenceMaterials.interviews}
 ` : ''}
+
+═══════════════════════════════════════════════════════════════════
+🎯 CRITICAL GENERATION INSTRUCTIONS - READ CAREFULLY:
+═══════════════════════════════════════════════════════════════════
+
+You have been provided with:
+1. ✅ Brand-specific instructions and requirements
+2. ✅ Target personas and their pain points
+3. ✅ ${typeInstructions.examples.length} reference examples with actual content
+${dynamicPatterns ? `4. ✅ Auto-extracted patterns from ${dynamicPatterns.performanceSummary?.totalExamples || 0} high-performing examples
+5. ✅ Market-specific insights (${dynamicPatterns.market} + ${dynamicPatterns.platform})` : ''}
+
+YOUR TASK:
+Generate content that THOROUGHLY applies ALL of the above learnings.
+
+This means:
+- Study the reference examples carefully - understand their structure, tone, and approach
+- Apply the dynamic patterns (headline styles, structure, CTAs, conversion techniques)
+- Incorporate marketer insights from the "WHY THIS WORKS" sections
+- Match the tone and style that has proven to work
+- Use similar sentence structures, opening hooks, and closing techniques
+- Adapt successful elements to the new context, don't copy verbatim
+
+DO NOT:
+- Generate generic content that ignores the examples
+- Skip applying the dynamic patterns
+- Ignore the "WHY THIS WORKS" insights
+- Use patterns that contradict the successful examples
+
+REMEMBER:
+- The examples provided are REAL, high-performing content
+- The patterns were extracted from content that actually converted
+- Your goal is to create content AS GOOD AS or BETTER than the examples
+- When in doubt, follow the examples more closely rather than less
 
 CRITICAL: Never fabricate facts, statistics, or testimonials. Use [PLACEHOLDER: description] when information is not available.`;
 
@@ -372,12 +407,12 @@ export async function generateTextContent(
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o', // Using gpt-4o for better quality and thorough application of patterns
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      temperature: 0.8,
+      temperature: 0.7, // Slightly lower temperature for more consistent pattern application
       response_format: { type: 'json_object' }
     })
   });
