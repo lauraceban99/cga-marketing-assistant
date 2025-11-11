@@ -70,13 +70,19 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({ brands, onSelectBrand }) 
               </div>
 
               <div className="flex flex-col items-center gap-5">
-                {/* Logo Container with fixed dimensions for uniform appearance */}
-                <div className="flex items-center justify-center h-24 w-32">
+                {/* Logo Container - standardized dimensions */}
+                <div className="flex items-center justify-center" style={{ width: '120px', height: '120px' }}>
                   {brand.logoUrl ? (
                     <img
                       src={brand.logoUrl}
                       alt={`${brand.name} logo`}
-                      className="max-h-24 max-w-32 w-auto h-auto object-contain"
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        width: 'auto',
+                        height: 'auto',
+                        objectFit: 'contain'
+                      }}
                     />
                   ) : (
                     <span className={`h-20 w-20 rounded-full flex-shrink-0 ${brand.color} flex items-center justify-center`}>
@@ -87,12 +93,10 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({ brands, onSelectBrand }) 
 
                 {/* Brand Name */}
                 <h3 className="text-2xl font-bold text-[#4b0f0d] leading-tight">{brand.name}</h3>
-              </div>
 
-              {/* Description */}
-              <p className="mt-4 text-[#9b9b9b] leading-relaxed">
-                Click to generate marketing assets using the {brand.name} brand guidelines.
-              </p>
+                {/* Brand Code */}
+                <p className="text-xs text-[#9b9b9b] -mt-3">{brand.id}</p>
+              </div>
             </button>
           );
         })}

@@ -9,6 +9,7 @@ import type {
 } from '../../types';
 import { getBrandInstructions, saveBrandInstructions } from '../../services/instructionsService';
 import LoadingSpinner from '../LoadingSpinner';
+import ExamplesKnowledgeBase from './examples/ExamplesKnowledgeBase';
 
 interface BrandInstructionsEditorProps {
   brand: Brand;
@@ -98,10 +99,10 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     setInstructions({ ...instructions, personas: updatedPersonas });
   };
 
-  const addExample = (type: 'adCopy' | 'blog' | 'landingPage') => {
+  const addExample = (type: 'adCopy' | 'blog' | 'landingPage', stage: CampaignStage = 'mofu') => {
     if (!instructions) return;
     const newExample: CampaignExample = {
-      stage: 'mofu',
+      stage: stage,
       type: type === 'adCopy' ? 'ad-copy' : type === 'blog' ? 'blog' : 'landing-page',
       headline: '',
       copy: '',
@@ -536,105 +537,15 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             </div>
 
             {/* Examples Knowledge Base */}
-            <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-[#4b0f0d]">Ad Copy Examples Knowledge Base</h3>
-                  <p className="text-sm text-[#9b9b9b] mt-1">
-                    Add examples of ad copies you like. AI will learn from these.
-                  </p>
-                </div>
-                <button
-                  onClick={() => addExample('adCopy')}
-                  className="px-4 py-2 bg-[#780817] text-white rounded-md hover:bg-[#4b0f0d] transition-colors text-sm font-semibold"
-                >
-                  + Add Example
-                </button>
-              </div>
-
-              {instructions.adCopyInstructions.examples.map((example, index) => (
-                <div key={index} className="mb-6 p-4 bg-[#f4f0f0] rounded-lg">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-semibold text-[#4b0f0d]">Example {index + 1}</h4>
-                    <button
-                      onClick={() => removeExample('adCopy', index)}
-                      className="text-sm text-[#780817] hover:text-[#4b0f0d]"
-                    >
-                      Remove
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Campaign Stage</label>
-                      <select
-                        value={example.stage}
-                        onChange={(e) => updateExample('adCopy', index, 'stage', e.target.value as CampaignStage)}
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      >
-                        <option value="tofu">TOFU - Awareness (Learn More, Explore)</option>
-                        <option value="mofu">MOFU - Consideration (Book Consultation, Get Started)</option>
-                        <option value="bofu">BOFU - Decision (Apply Now, Enroll Today)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Headline (optional)</label>
-                      <input
-                        type="text"
-                        value={example.headline || ''}
-                        onChange={(e) => updateExample('adCopy', index, 'headline', e.target.value)}
-                        placeholder="e.g., Where Learning Meets Life"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Ad Copy Body *</label>
-                      <textarea
-                        value={example.copy}
-                        onChange={(e) => updateExample('adCopy', index, 'copy', e.target.value)}
-                        rows={5}
-                        placeholder="Paste the full ad copy here. This is the main body text that will be shown to your audience."
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Call to Action *</label>
-                      <input
-                        type="text"
-                        value={example.cta}
-                        onChange={(e) => updateExample('adCopy', index, 'cta', e.target.value)}
-                        placeholder="e.g., Book Free Consultation"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Notes (optional)</label>
-                      <textarea
-                        value={example.notes || ''}
-                        onChange={(e) => updateExample('adCopy', index, 'notes', e.target.value)}
-                        rows={2}
-                        placeholder="Why does this ad work well? What makes it effective?"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <div className="mt-6 pt-4 border-t border-[#f4f0f0]">
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save Examples'}
-                </button>
-              </div>
-            </div>
+            <ExamplesKnowledgeBase
+              title="Ad Copy Examples Knowledge Base"
+              description="Add examples AI will learn from"
+              examples={instructions.adCopyInstructions.examples}
+              onAddExample={(stage) => addExample('adCopy', stage)}
+              onUpdateExample={(index, field, value) => updateExample('adCopy', index, field, value)}
+              onDeleteExample={(index) => removeExample('adCopy', index)}
+              onSave={handleSave}
+            />
           </div>
         )}
 
@@ -716,105 +627,15 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             </div>
 
             {/* Examples Knowledge Base */}
-            <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-[#4b0f0d]">Blog Examples Knowledge Base</h3>
-                  <p className="text-sm text-[#9b9b9b] mt-1">
-                    Add examples of blog posts you like. AI will learn from these.
-                  </p>
-                </div>
-                <button
-                  onClick={() => addExample('blog')}
-                  className="px-4 py-2 bg-[#780817] text-white rounded-md hover:bg-[#4b0f0d] transition-colors text-sm font-semibold"
-                >
-                  + Add Example
-                </button>
-              </div>
-
-              {instructions.blogInstructions.examples.map((example, index) => (
-                <div key={index} className="mb-6 p-4 bg-[#f4f0f0] rounded-lg">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-semibold text-[#4b0f0d]">Example {index + 1}</h4>
-                    <button
-                      onClick={() => removeExample('blog', index)}
-                      className="text-sm text-[#780817] hover:text-[#4b0f0d]"
-                    >
-                      Remove
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Campaign Stage</label>
-                      <select
-                        value={example.stage}
-                        onChange={(e) => updateExample('blog', index, 'stage', e.target.value as CampaignStage)}
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      >
-                        <option value="tofu">TOFU - Awareness (e.g., "Online High School vs Traditional")</option>
-                        <option value="mofu">MOFU - Consideration (e.g., "Flexible Schedules for Athletes")</option>
-                        <option value="bofu">BOFU - Decision (e.g., "Admissions & Accreditation Explained")</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Blog Title/Headline *</label>
-                      <input
-                        type="text"
-                        value={example.headline || ''}
-                        onChange={(e) => updateExample('blog', index, 'headline', e.target.value)}
-                        placeholder="e.g., Online High School vs Traditional: Which Works Better?"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Blog Content/Excerpt *</label>
-                      <textarea
-                        value={example.copy}
-                        onChange={(e) => updateExample('blog', index, 'copy', e.target.value)}
-                        rows={6}
-                        placeholder="Paste the full blog post or a representative excerpt here. Include the structure, tone, and key sections you want the AI to learn from."
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Call to Action Used</label>
-                      <input
-                        type="text"
-                        value={example.cta}
-                        onChange={(e) => updateExample('blog', index, 'cta', e.target.value)}
-                        placeholder="e.g., Take the Fit Quiz, See Timetable & Fees, Book Consultation"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Notes (optional)</label>
-                      <textarea
-                        value={example.notes || ''}
-                        onChange={(e) => updateExample('blog', index, 'notes', e.target.value)}
-                        rows={2}
-                        placeholder="Why does this blog work well? What makes it effective for SEO or engagement?"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <div className="mt-6 pt-4 border-t border-[#f4f0f0]">
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save Blog Examples'}
-                </button>
-              </div>
-            </div>
+            <ExamplesKnowledgeBase
+              title="Blog Examples Knowledge Base"
+              description="Add examples AI will learn from"
+              examples={instructions.blogInstructions.examples}
+              onAddExample={(stage) => addExample('blog', stage)}
+              onUpdateExample={(index, field, value) => updateExample('blog', index, field, value)}
+              onDeleteExample={(index) => removeExample('blog', index)}
+              onSave={handleSave}
+            />
           </div>
         )}
 
@@ -907,105 +728,15 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             </div>
 
             {/* Examples Knowledge Base */}
-            <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-[#4b0f0d]">Landing Page Examples Knowledge Base</h3>
-                  <p className="text-sm text-[#9b9b9b] mt-1">
-                    Add examples of landing pages you like. AI will learn from these.
-                  </p>
-                </div>
-                <button
-                  onClick={() => addExample('landingPage')}
-                  className="px-4 py-2 bg-[#780817] text-white rounded-md hover:bg-[#4b0f0d] transition-colors text-sm font-semibold"
-                >
-                  + Add Example
-                </button>
-              </div>
-
-              {instructions.landingPageInstructions.examples.map((example, index) => (
-                <div key={index} className="mb-6 p-4 bg-[#f4f0f0] rounded-lg">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-semibold text-[#4b0f0d]">Example {index + 1}</h4>
-                    <button
-                      onClick={() => removeExample('landingPage', index)}
-                      className="text-sm text-[#780817] hover:text-[#4b0f0d]"
-                    >
-                      Remove
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Campaign Stage / Template Type</label>
-                      <select
-                        value={example.stage}
-                        onChange={(e) => updateExample('landingPage', index, 'stage', e.target.value as CampaignStage)}
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      >
-                        <option value="tofu">TOFU – quiz/lead magnet</option>
-                        <option value="mofu">MOFU – program overview / comparison</option>
-                        <option value="bofu">BOFU – admissions/apply</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Page Headline *</label>
-                      <input
-                        type="text"
-                        value={example.headline || ''}
-                        onChange={(e) => updateExample('landingPage', index, 'headline', e.target.value)}
-                        placeholder="e.g., Flexible Online High School, Real Teachers"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Landing Page Copy *</label>
-                      <textarea
-                        value={example.copy}
-                        onChange={(e) => updateExample('landingPage', index, 'copy', e.target.value)}
-                        rows={8}
-                        placeholder="Paste the full landing page copy here. Include hero section, value propositions, social proof, and FAQ sections. The AI will learn from the structure and tone."
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Primary CTA Used</label>
-                      <input
-                        type="text"
-                        value={example.cta}
-                        onChange={(e) => updateExample('landingPage', index, 'cta', e.target.value)}
-                        placeholder="e.g., Book a Free Consultation, Start Application"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Notes (optional)</label>
-                      <textarea
-                        value={example.notes || ''}
-                        onChange={(e) => updateExample('landingPage', index, 'notes', e.target.value)}
-                        rows={2}
-                        placeholder="Why does this landing page work well? What's the conversion rate? What makes it effective?"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <div className="mt-6 pt-4 border-t border-[#f4f0f0]">
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save Landing Page Examples'}
-                </button>
-              </div>
-            </div>
+            <ExamplesKnowledgeBase
+              title="Landing Page Examples Knowledge Base"
+              description="Add examples AI will learn from"
+              examples={instructions.landingPageInstructions.examples}
+              onAddExample={(stage) => addExample('landingPage', stage)}
+              onUpdateExample={(index, field, value) => updateExample('landingPage', index, field, value)}
+              onDeleteExample={(index) => removeExample('landingPage', index)}
+              onSave={handleSave}
+            />
           </div>
         )}
 
@@ -1026,13 +757,13 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                    General Email Requirements
+                    Content Requirements
                     <span className="text-xs text-[#9b9b9b] ml-2">Applied to all email types</span>
                   </label>
                   <textarea
-                    rows={5}
+                    rows={6}
                     className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] font-mono text-sm"
-                    placeholder="• One CTA only&#10;• Send Tue–Thu 10:00–14:00 local&#10;• [PLACEHOLDER] for unknown facts&#10;• Personalization (+50% opens)&#10;• Single CTA (+371% clicks)&#10;• Mobile-optimized (60%+ open on mobile)"
+                    placeholder="• One CTA only (+371% click improvement)&#10;• Personalization tokens required (+50% open rate)&#10;• Mobile-optimized (60%+ opens on mobile)&#10;• Use [PLACEHOLDER] for unknown information&#10;• Power words: exclusive, limited, you, free, new&#10;• Subject line emojis (test for audience)&#10;• Clear value proposition&#10;• Conversational tone"
                   />
                 </div>
 
@@ -1062,12 +793,12 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             {/* Invitation Emails */}
             <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
               <h3 className="text-lg font-semibold text-[#4b0f0d] mb-2">Invitation Emails</h3>
-              <p className="text-sm text-[#9b9b9b] mb-4">For event invitations, webinars, consultations</p>
+              <p className="text-sm text-[#9b9b9b] mb-4">For events, webinars, consultations</p>
 
               <div className="space-y-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                    Invitation Email Template Requirements
+                    Psychology & Structure
                   </label>
                   <textarea
                     value={instructions.emailInstructions.invitation.systemPrompt}
@@ -1078,9 +809,9 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                         invitation: { ...instructions.emailInstructions.invitation, systemPrompt: e.target.value }
                       }
                     })}
-                    rows={5}
+                    rows={8}
                     className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] font-mono text-sm"
-                    placeholder="• Subject: 6–10 words + personalization&#10;• Preview: 40–55 chars&#10;• Body: 110–150 words&#10;• List 3 benefits&#10;• 1 CTA&#10;• P.S. optional"
+                    placeholder="Psychology:&#10;• Create exclusivity (limited seating, you're invited)&#10;• Make it personal (address by name, reference interests)&#10;• Remove friction (easy RSVP, calendar link, clear logistics)&#10;• Social proof (testimonials, past success)&#10;&#10;Required Elements:&#10;• Clear event details (date, time, format)&#10;• What attendees will learn/gain&#10;• Easy registration CTA&#10;• Optional: Can't attend alternative"
                   />
                 </div>
                 <button
@@ -1096,12 +827,12 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             {/* Nurturing Drip Emails */}
             <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
               <h3 className="text-lg font-semibold text-[#4b0f0d] mb-2">Nurturing Drip Emails</h3>
-              <p className="text-sm text-[#9b9b9b] mb-4">For automated sequences, educational content, relationship building</p>
+              <p className="text-sm text-[#9b9b9b] mb-4">For automated sequences, education, relationship building</p>
 
               <div className="space-y-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                    Nurture Email Template Requirements
+                    Psychology & Structure
                   </label>
                   <textarea
                     value={instructions.emailInstructions.nurturingDrip.systemPrompt}
@@ -1112,9 +843,9 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                         nurturingDrip: { ...instructions.emailInstructions.nurturingDrip, systemPrompt: e.target.value }
                       }
                     })}
-                    rows={5}
+                    rows={8}
                     className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] font-mono text-sm"
-                    placeholder="• Word count: 140–200&#10;• Problem–solution structure&#10;• Social proof quote&#10;• Single soft CTA&#10;• Educational tone&#10;• Build trust, not hard sell"
+                    placeholder="Psychology:&#10;• Provide value before asking for commitment&#10;• Use AIDA model (Attention, Interest, Desire, Action)&#10;• Educational content builds trust&#10;• Progress from awareness → consideration → decision&#10;&#10;Required Elements:&#10;• One key insight or value point&#10;• Connection to previous emails (if part of sequence)&#10;• Soft CTA (educational resources, not sales)&#10;• Next step preview (optional)"
                   />
                 </div>
                 <button
@@ -1135,7 +866,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               <div className="space-y-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                    Blast Email Template Requirements
+                    Psychology & Structure
                   </label>
                   <textarea
                     value={instructions.emailInstructions.emailBlast.systemPrompt}
@@ -1146,9 +877,9 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                         emailBlast: { ...instructions.emailInstructions.emailBlast, systemPrompt: e.target.value }
                       }
                     })}
-                    rows={5}
+                    rows={8}
                     className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] font-mono text-sm"
-                    placeholder="• Lead with news&#10;• Deadline if real (no fake urgency)&#10;• One CTA&#10;• Word count: 110–160&#10;• Clear value proposition&#10;• Time-sensitive language if applicable"
+                    placeholder="Psychology:&#10;• Lead with the news (don't bury the lede)&#10;• Create appropriate urgency (deadline, limited availability)&#10;• Single focus (one message per email)&#10;• Newsworthy subject lines outperform clever ones&#10;&#10;Required Elements:&#10;• Clear announcement in first paragraph&#10;• Why it matters (benefit/impact)&#10;• Strong CTA aligned with announcement&#10;• Deadline or urgency element (if applicable)"
                   />
                 </div>
                 <button
