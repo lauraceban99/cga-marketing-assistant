@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import type { CampaignExample, Market, CampaignStage } from '../../../types';
+import type { CampaignExample, Market } from '../../../types';
 import ExampleCard from './ExampleCard';
 
 interface LandingPageExamplesKnowledgeBaseProps {
   title: string;
   description: string;
   examples: CampaignExample[];
-  onAddExample: (stage: CampaignStage, market: Market) => void;
+  onAddExample: (market: Market) => void;
   onUpdateExample: (index: number, field: keyof CampaignExample, value: any) => void;
   onDeleteExample: (index: number) => void;
   onSave: () => void;
@@ -22,7 +22,6 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
   onSave,
 }) => {
   const [activeMarket, setActiveMarket] = useState<Market>('EMEA');
-  const [activeStage, setActiveStage] = useState<CampaignStage>('mofu');
 
   // Filter examples by active market
   const filteredExamples = examples.filter((ex) => ex.market === activeMarket);
@@ -56,20 +55,6 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
     },
   };
 
-  const stageConfig = {
-    tofu: {
-      label: 'TOFU',
-      fullName: 'Top of Funnel - Awareness',
-    },
-    mofu: {
-      label: 'MOFU',
-      fullName: 'Middle of Funnel - Consideration',
-    },
-    bofu: {
-      label: 'BOFU',
-      fullName: 'Bottom of Funnel - Decision',
-    },
-  };
 
   return (
     <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
@@ -125,28 +110,6 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
         </p>
       </div>
 
-      {/* Stage Selector for Adding */}
-      <div className="mb-4 p-3 bg-[#f4f0f0] rounded-md">
-        <label className="block text-xs font-medium text-[#4b0f0d] mb-2">
-          Select Funnel Stage for New Example:
-        </label>
-        <div className="flex gap-2">
-          {(['tofu', 'mofu', 'bofu'] as CampaignStage[]).map((stage) => (
-            <button
-              key={stage}
-              onClick={() => setActiveStage(stage)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeStage === stage
-                  ? 'bg-[#780817] text-white'
-                  : 'bg-white text-[#4b0f0d] hover:bg-[#780817] hover:text-white'
-              }`}
-            >
-              {stageConfig[stage].label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Examples Grid */}
       {filteredExamples.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
@@ -175,10 +138,10 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
 
       {/* Add Example Button */}
       <button
-        onClick={() => onAddExample(activeStage, activeMarket)}
+        onClick={() => onAddExample(activeMarket)}
         className="w-full px-4 py-3 bg-[#f4f0f0] text-[#780817] border-2 border-dashed border-[#780817] rounded-lg hover:bg-[#780817] hover:text-white transition-colors font-semibold"
       >
-        + Add {stageConfig[activeStage].label} Example to {marketConfig[activeMarket].label}
+        + Add Example to {marketConfig[activeMarket].label}
       </button>
 
       {/* Save Button */}

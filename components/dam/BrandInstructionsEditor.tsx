@@ -808,7 +808,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               title="Landing Page Examples Knowledge Base"
               description="Add examples organized by market. AI will learn market-specific patterns."
               examples={instructions.landingPageInstructions.examples}
-              onAddExample={(stage, market) => addExample('landingPage', stage, market)}
+              onAddExample={(market) => addExample('landingPage', 'mofu', market)}
               onUpdateExample={(index, field, value) => updateExample('landingPage', index, field, value)}
               onDeleteExample={(index) => removeExample('landingPage', index)}
               onSave={handleSave}

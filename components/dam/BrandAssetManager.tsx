@@ -70,13 +70,7 @@ const BrandAssetManager: React.FC<BrandAssetManagerProps> = ({ onBack }) => {
             {/* Brand Name */}
             <div className="text-center mb-2">
               <h3 className="text-xl font-bold text-[#4b0f0d]">{brand.name}</h3>
-              <p className="text-sm text-[#9b9b9b]">{brand.id}</p>
             </div>
-
-            {/* Description */}
-            <p className="text-sm text-[#9b9b9b] text-center mt-2">
-              Edit instructions and examples
-            </p>
 
             {/* Arrow */}
             <div className="mt-4 text-[#9b9b9b] group-hover:text-[#780817] transition-colors flex items-center justify-center gap-1 text-sm">
