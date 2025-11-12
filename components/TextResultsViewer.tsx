@@ -629,6 +629,109 @@ const TextResultsViewer: React.FC<TextResultsViewerProps> = ({ content, brand, u
                   />
                 </div>
               </div>
+            ) : content.type === 'landing-page' && parsedContent ? (
+              <div className="space-y-8">
+                {/* Hero Section */}
+                {parsedContent.hero && (
+                  <div className="bg-gradient-to-br from-[#780817]/10 to-[#04114a]/10 border-2 border-[#780817]/20 rounded-lg p-8 text-center">
+                    <h1 className="text-5xl font-bold text-[#4b0f0d] mb-4">{parsedContent.hero.headline}</h1>
+                    <p className="text-xl text-[#780817] font-medium">{parsedContent.hero.subheadline}</p>
+                  </div>
+                )}
+
+                {/* Value Proposition */}
+                {parsedContent.valueProposition && (
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-lg">
+                    <p className="text-xs text-[#9b9b9b] font-semibold mb-2">VALUE PROPOSITION</p>
+                    <p className="text-lg text-[#4b0f0d] leading-relaxed">{parsedContent.valueProposition}</p>
+                  </div>
+                )}
+
+                {/* Benefits */}
+                {parsedContent.benefits && parsedContent.benefits.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-[#780817] mb-4">Key Benefits</h2>
+                    <div className="space-y-3">
+                      {parsedContent.benefits.map((benefit: string, i: number) => (
+                        <div key={i} className="flex gap-3 items-start">
+                          <span className="text-green-600 text-xl font-bold">✓</span>
+                          <p className="text-[#4b0f0d] leading-relaxed flex-1">{benefit}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Features */}
+                {parsedContent.features && parsedContent.features.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-[#04114a] mb-4">Features</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {parsedContent.features.map((feature: string, i: number) => (
+                        <div key={i} className="bg-[#f4f0f0] border border-[#9b9b9b]/20 rounded-lg p-4">
+                          <p className="text-[#4b0f0d]">{feature}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Social Proof */}
+                {parsedContent.socialProof && (
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg p-6">
+                    <p className="text-xs text-[#9b9b9b] font-semibold mb-3">SOCIAL PROOF</p>
+                    <p className="text-[#4b0f0d] leading-relaxed italic">{parsedContent.socialProof}</p>
+                  </div>
+                )}
+
+                {/* CTA */}
+                {parsedContent.cta && (
+                  <div className="bg-[#780817] text-white rounded-lg p-8 text-center">
+                    <h2 className="text-3xl font-bold mb-3">{parsedContent.cta.headline}</h2>
+                    <p className="text-lg mb-6 opacity-90">{parsedContent.cta.body}</p>
+                    <button className="bg-white text-[#780817] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#f4f0f0] transition-colors">
+                      {parsedContent.cta.buttonText}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : content.type === 'email' && parsedContent ? (
+              <div className="space-y-6">
+                {/* Email Header */}
+                <div className="border-b-2 border-[#f4f0f0] pb-4">
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs text-[#9b9b9b] font-semibold mb-1">SUBJECT LINE</p>
+                      <p className="text-2xl font-bold text-[#4b0f0d]">{parsedContent.subject}</p>
+                    </div>
+                    {parsedContent.previewText && (
+                      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                        <p className="text-xs text-[#9b9b9b] font-semibold mb-1">PREVIEW TEXT</p>
+                        <p className="text-sm text-[#4b0f0d]">{parsedContent.previewText}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Email Body */}
+                <div className="bg-white border-2 border-[#f4f0f0] rounded-lg p-8">
+                  <div
+                    className="prose prose-lg max-w-none"
+                    dangerouslySetInnerHTML={{
+                      __html: marked(parsedContent.body || '')
+                    }}
+                  />
+                </div>
+
+                {/* CTA */}
+                {parsedContent.cta && (
+                  <div className="bg-[#780817] text-white rounded-lg p-6 text-center">
+                    <button className="bg-white text-[#780817] px-8 py-3 rounded-lg font-bold text-lg hover:bg-[#f4f0f0] transition-colors">
+                      {parsedContent.cta}
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <pre className="whitespace-pre-wrap font-sans text-[#4b0f0d] leading-relaxed">
                 {editedContent['main'] || content.content}
