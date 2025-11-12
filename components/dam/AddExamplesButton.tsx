@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseService';
 import type { CampaignExample } from '../../types';
 
@@ -1056,35 +1056,50 @@ Tone: Reassuring, detailed, parent-focused`,
       const brandDocRef = doc(db, 'brandInstructions', brandId);
       const brandDoc = await getDoc(brandDocRef);
 
+      let currentExamples = [];
+
       if (!brandDoc.exists()) {
-        throw new Error('Brand instructions not found. Please save your brand instructions first.');
+        // Create brand instructions document if it doesn't exist
+        setStatus('Creating brand instructions structure...');
+        const minimalInstructions = {
+          brandId,
+          landingPageInstructions: {
+            examples: landingPageExamples
+          },
+          createdAt: new Date(),
+          lastUpdated: new Date(),
+          version: 1
+        };
+
+        await setDoc(brandDocRef, minimalInstructions);
+        setStatus(`✅ Success! Created brand instructions and added ${landingPageExamples.length} landing page examples.`);
+      } else {
+        const instructions = brandDoc.data();
+        currentExamples = instructions.landingPageInstructions?.examples || [];
+
+        // Prevent adding duplicates
+        if (currentExamples.length >= 14) {
+          setStatus('⚠️ Examples already added. No changes made.');
+          setTimeout(() => setAdding(false), 2000);
+          return;
+        }
+
+        // Add new examples
+        const updatedExamples = [...currentExamples, ...landingPageExamples];
+
+        await updateDoc(brandDocRef, {
+          'landingPageInstructions.examples': updatedExamples
+        });
+
+        setStatus(`✅ Success! Added ${landingPageExamples.length} landing page examples.`);
       }
-
-      const instructions = brandDoc.data();
-      const currentExamples = instructions.landingPageInstructions?.examples || [];
-
-      // Prevent adding duplicates
-      if (currentExamples.length >= 14) {
-        setStatus('⚠️ Examples already added. No changes made.');
-        setTimeout(() => setAdding(false), 2000);
-        return;
-      }
-
-      // Add new examples
-      const updatedExamples = [...currentExamples, ...landingPageExamples];
-
-      await updateDoc(brandDocRef, {
-        'landingPageInstructions.examples': updatedExamples
-      });
-
-      setStatus(`✅ Success! Added ${landingPageExamples.length} landing page examples.`);
 
       setTimeout(() => {
         onComplete();
       }, 2000);
     } catch (error) {
       console.error('Error adding examples:', error);
-      setStatus(`❌ Error: ${error.message}`);
+      setStatus(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
     } finally {
       setAdding(false);
     }
