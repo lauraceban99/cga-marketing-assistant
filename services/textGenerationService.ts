@@ -407,7 +407,9 @@ export async function generateTextContent(
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'gpt-4o', // Using gpt-4o for better quality and thorough application of patterns
+      model: contentType === 'ad-copy' || contentType === 'email'
+        ? 'gpt-4.1-mini' // Faster and cheaper for structured content (ad copies, emails)
+        : 'gpt-4.1', // Better instruction-following for complex content (blogs, landing pages)
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }

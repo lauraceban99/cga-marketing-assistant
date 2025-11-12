@@ -325,7 +325,7 @@ function validateVariation(variation: AdVariation, specs: ContentSpecs): { isVal
 }
 
 /**
- * Generate ad copy variations using OpenAI GPT-4o-mini
+ * Generate ad copy variations using OpenAI GPT-4.1-mini
  */
 export async function generateAdCopyWithOpenAI(
   prompt: string,
@@ -334,7 +334,7 @@ export async function generateAdCopyWithOpenAI(
   brandInstructions?: BrandInstructions | null,
   pdfGuidelinesText?: string
 ): Promise<AdVariation[]> {
-  console.log('🎯 Generating ad copy with OpenAI GPT-4o-mini...');
+  console.log('🎯 Generating ad copy with OpenAI GPT-4.1-mini...');
 
   // Check API key
   if (!import.meta.env.VITE_OPENAI_API_KEY) {
@@ -368,7 +368,7 @@ export async function generateAdCopyWithOpenAI(
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini', // Updated to latest model (April 2025)
       messages: [
         { role: 'system', content: system },
         { role: 'user', content: user }
