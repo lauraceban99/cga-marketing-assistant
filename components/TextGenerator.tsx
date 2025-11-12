@@ -107,7 +107,7 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
           lengthSpec,
           campaignStage,
           emailType: taskType === 'email' ? emailType : undefined,
-          market: taskType === 'landing-page' || taskType === 'ad-copy' ? market : undefined,
+          market: taskType === 'landing-page' ? market : undefined, // Only landing pages need market
           platform: taskType === 'landing-page' || taskType === 'ad-copy' ? platform : undefined
         }
       );
@@ -199,49 +199,54 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
             </div>
           )}
 
-          {/* Market & Platform selectors (for landing pages and ad copies) */}
-          {(taskType === 'landing-page' || taskType === 'ad-copy') && (
-            <>
-              <div>
-                <label htmlFor="market" className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Target Market
-                </label>
-                <select
-                  id="market"
-                  value={market}
-                  onChange={(e) => setMarket(e.target.value as Market)}
-                  className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
-                >
-                  <option value="ASIA">ASIA (Singapore, Hong Kong, Vietnam)</option>
-                  <option value="EMEA">EMEA (UAE, Middle East, Europe)</option>
-                  <option value="ANZ">ANZ (Australia, New Zealand)</option>
-                  <option value="Japan">Japan</option>
-                </select>
-                <p className="text-xs text-[#9b9b9b] mt-2">
-                  Different markets respond to different messaging strategies.
-                </p>
-              </div>
+          {/* Market selector (for landing pages only) */}
+          {taskType === 'landing-page' && (
+            <div>
+              <label htmlFor="market" className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                Target Market
+              </label>
+              <select
+                id="market"
+                value={market}
+                onChange={(e) => setMarket(e.target.value as Market)}
+                className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
+              >
+                <option value="ASIA">ASIA (Singapore, Hong Kong, Vietnam)</option>
+                <option value="EMEA">EMEA (UAE, Middle East, Europe)</option>
+                <option value="ANZ">ANZ (Australia, New Zealand)</option>
+                <option value="Japan">Japan</option>
+              </select>
+              <p className="text-xs text-[#9b9b9b] mt-2">
+                Different markets respond to different messaging strategies.
+              </p>
+            </div>
+          )}
 
-              <div>
-                <label htmlFor="platform" className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                  Traffic Source / Platform
-                </label>
-                <select
-                  id="platform"
-                  value={platform}
-                  onChange={(e) => setPlatform(e.target.value as Platform)}
-                  className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
-                >
-                  <option value="META">META (Facebook, Instagram)</option>
-                  <option value="GOOGLE">GOOGLE (Search, Display)</option>
-                  <option value="ORGANIC">ORGANIC (SEO, Direct)</option>
-                  <option value="EMAIL">EMAIL (Campaigns)</option>
-                </select>
-                <p className="text-xs text-[#9b9b9b] mt-2">
-                  AI will apply platform-specific patterns. META: emotional, long-form. GOOGLE: direct, trust-focused.
-                </p>
-              </div>
-            </>
+          {/* Platform selector (for landing pages and ad copies) */}
+          {(taskType === 'landing-page' || taskType === 'ad-copy') && (
+            <div>
+              <label htmlFor="platform" className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                Traffic Source / Platform
+              </label>
+              <select
+                id="platform"
+                value={platform}
+                onChange={(e) => setPlatform(e.target.value as Platform)}
+                className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
+              >
+                <option value="META">META (Facebook, Instagram)</option>
+                <option value="GOOGLE">GOOGLE (Search, Display)</option>
+                {taskType === 'landing-page' && (
+                  <>
+                    <option value="ORGANIC">ORGANIC (SEO, Direct)</option>
+                    <option value="EMAIL">EMAIL (Campaigns)</option>
+                  </>
+                )}
+              </select>
+              <p className="text-xs text-[#9b9b9b] mt-2">
+                AI will apply platform-specific patterns. META: emotional, long-form. GOOGLE: direct, trust-focused.
+              </p>
+            </div>
           )}
 
           {/* Campaign stage */}

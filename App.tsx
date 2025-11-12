@@ -4,6 +4,7 @@ import Header from './components/Header';
 import BrandSelector from './components/BrandSelector';
 import TaskSelector from './components/TaskSelector';
 import TextGenerator from './components/TextGenerator';
+import VoiceoverGenerator from './components/VoiceoverGenerator';
 import TextResultsViewer from './components/TextResultsViewer';
 import BrandAssetManager from './components/dam/BrandAssetManager';
 import { BRANDS } from './constants';
@@ -55,7 +56,9 @@ const App: React.FC = () => {
       case 'task_selection':
         return <TaskSelector brand={selectedBrand!} onSelectTask={handleSelectTask} onBack={() => handleBackTo('brand_selection')} />;
       case 'generator':
-        return <TextGenerator brand={selectedBrand!} taskType={selectedTask!} onGenerated={handleContentGenerated} onBack={() => handleBackTo('task_selection')} />;
+        return selectedTask === 'voiceover'
+          ? <VoiceoverGenerator brand={selectedBrand!} onBack={() => handleBackTo('task_selection')} />
+          : <TextGenerator brand={selectedBrand!} taskType={selectedTask!} onGenerated={handleContentGenerated} onBack={() => handleBackTo('task_selection')} />;
       case 'results':
         return <TextResultsViewer
                   content={generatedContent!}

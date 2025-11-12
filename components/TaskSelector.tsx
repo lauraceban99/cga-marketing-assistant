@@ -17,7 +17,7 @@ const TaskSelector: React.FC<TaskSelectorProps> = ({ brand, onSelectTask, onBack
           </button>
         <h2 className="text-2xl font-semibold text-[#4b0f0d]">2. What would you like to generate for <span className="text-brand-primary">{brand.name}</span>?</h2>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         <button
           onClick={() => onSelectTask('ad-copy')}
           className="group p-8 text-center bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg hover:border-brand-primary transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-brand-primary"
@@ -56,6 +56,16 @@ const TaskSelector: React.FC<TaskSelectorProps> = ({ brand, onSelectTask, onBack
          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-[#9b9b9b] group-hover:text-brand-primary transition-colors mb-4"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
           <h3 className="text-2xl font-bold text-[#4b0f0d]">Emails</h3>
           <p className="mt-2 text-[#9b9b9b]">Invitations, nurturing drips, or email blasts</p>
+        </button>
+
+        <button
+          onClick={() => onSelectTask('voiceover')}
+          className="group p-8 text-center bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg hover:border-brand-primary transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-brand-primary"
+          aria-label="Generate Voiceover"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-[#9b9b9b] group-hover:text-brand-primary transition-colors mb-4"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+          <h3 className="text-2xl font-bold text-[#4b0f0d]">Voiceovers</h3>
+          <p className="mt-2 text-[#9b9b9b]">AI voice-cloned audio with captions for video ads</p>
         </button>
       </div>
     </div>

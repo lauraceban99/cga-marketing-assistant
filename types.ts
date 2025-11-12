@@ -18,11 +18,22 @@ export interface Brand {
   inspiration?: string[];
 }
 
-export type TaskType = 'ad-copy' | 'blog' | 'landing-page' | 'email';
+export type TaskType = 'ad-copy' | 'blog' | 'landing-page' | 'email' | 'voiceover';
 
 export type EmailType = 'invitation' | 'nurturing-drip' | 'email-blast';
 
 export type CampaignStage = 'tofu' | 'mofu' | 'bofu';
+
+export type VoiceOption = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
+
+export type VoiceTone = 'professional' | 'friendly' | 'neutral';
+
+export interface VoiceoverOptions {
+  voice: VoiceOption;
+  tone: VoiceTone;
+  speed: number; // 0.9-1.05
+  targetLength: number; // in seconds (15 or 30)
+}
 
 export interface Theme {
   brand: Brand;
