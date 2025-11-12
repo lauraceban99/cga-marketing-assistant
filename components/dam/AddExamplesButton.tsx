@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../services/firebaseService';
 import type { CampaignExample } from '../../types';
 
@@ -1066,8 +1066,8 @@ Tone: Reassuring, detailed, parent-focused`,
           landingPageInstructions: {
             examples: landingPageExamples
           },
-          createdAt: new Date(),
-          lastUpdated: new Date(),
+          createdAt: Timestamp.now(),
+          lastUpdated: Timestamp.now(),
           version: 1
         };
 
