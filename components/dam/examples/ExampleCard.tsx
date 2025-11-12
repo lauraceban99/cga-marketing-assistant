@@ -7,6 +7,7 @@ interface ExampleCardProps {
   onUpdate: (field: keyof CampaignExample, value: any) => void;
   onDelete: () => void;
   onSave: () => void;
+  isNew?: boolean; // Flag to indicate this is a newly added example
 }
 
 const ExampleCard: React.FC<ExampleCardProps> = ({
@@ -15,8 +16,9 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
   onUpdate,
   onDelete,
   onSave,
+  isNew = false,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(isNew); // Start in editing mode if new
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSave = () => {
@@ -27,7 +29,12 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
   };
 
   const handleCancel = () => {
-    setIsEditing(false);
+    // If this is a new example that hasn't been filled out, delete it
+    if (isNew && !example.copy) {
+      onDelete();
+    } else {
+      setIsEditing(false);
+    }
   };
 
   const truncate = (text: string, maxLength: number) => {
@@ -58,14 +65,12 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
           ? 'bg-green-50 border-green-200'
           : 'bg-white border-[#f4f0f0]'
       }`}>
-        {/* Lock/Success indicator */}
-        <div className="absolute top-3 right-3">
-          {showSuccess ? (
+        {/* Success indicator */}
+        {showSuccess && (
+          <div className="absolute top-3 right-3">
             <span className="text-green-600 text-sm font-medium">✓ Saved</span>
-          ) : (
-            <span className="text-[#9b9b9b] text-lg">🔒</span>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Platform and Market Badges */}
         <div className="flex gap-2 mb-3">
@@ -140,116 +145,132 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
 
       {/* Form fields */}
       <div className="space-y-3">
-        <div>
-          <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
-            Campaign Stage
-          </label>
-          <select
-            value={example.stage}
-            onChange={(e) => onUpdate('stage', e.target.value as CampaignStage)}
-            className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
-          >
-            <option value="tofu">TOFU - Awareness</option>
-            <option value="mofu">MOFU - Consideration</option>
-            <option value="bofu">BOFU - Decision</option>
-          </select>
-        </div>
+        {/* Campaign Stage - Hide for blogs */}
+        {example.type !== 'blog' && (
+          <div>
+            <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
+              Campaign Stage
+            </label>
+            <select
+              value={example.stage}
+              onChange={(e) => onUpdate('stage', e.target.value as CampaignStage)}
+              className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
+            >
+              <option value="tofu">TOFU - Awareness</option>
+              <option value="mofu">MOFU - Consideration</option>
+              <option value="bofu">BOFU - Decision</option>
+            </select>
+          </div>
+        )}
 
-        {/* Market selector - ENABLED FOR ALL CONTENT TYPES */}
-        <div>
-          <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
-            Target Market {example.type === 'blog' || example.type === 'email' ? '(optional)' : ''}
-          </label>
-          <select
-            value={example.market || 'EMEA'}
-            onChange={(e) => onUpdate('market', e.target.value as Market)}
-            className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
-          >
-            <option value="ASIA">ASIA (Singapore, Hong Kong, Vietnam)</option>
-            <option value="EMEA">EMEA (UAE, Middle East, Europe)</option>
-            <option value="ANZ">ANZ (Australia, New Zealand)</option>
-            <option value="Japan">Japan</option>
-          </select>
-          {(example.type === 'blog' || example.type === 'email') && (
-            <p className="text-xs text-[#9b9b9b] mt-1">
-              💡 Tag with market to enable AI learning from this example
-            </p>
-          )}
-        </div>
+        {/* Market and Platform selectors - Hide for blogs */}
+        {example.type !== 'blog' && (
+          <>
+            {/* Market selector */}
+            <div>
+              <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
+                Target Market {example.type === 'email' ? '(optional)' : ''}
+              </label>
+              <select
+                value={example.market || 'EMEA'}
+                onChange={(e) => onUpdate('market', e.target.value as Market)}
+                className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
+              >
+                <option value="ASIA">ASIA (Singapore, Hong Kong, Vietnam)</option>
+                <option value="EMEA">EMEA (UAE, Middle East, Europe)</option>
+                <option value="ANZ">ANZ (Australia, New Zealand)</option>
+                <option value="Japan">Japan</option>
+              </select>
+              {example.type === 'email' && (
+                <p className="text-xs text-[#9b9b9b] mt-1">
+                  💡 Tag with market to enable AI learning from this example
+                </p>
+              )}
+            </div>
 
-        {/* Platform selector - ENABLED FOR ALL CONTENT TYPES */}
-        <div>
-          <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
-            Traffic Source / Platform {example.type === 'blog' || example.type === 'email' ? '(optional)' : ''}
-          </label>
-          <select
-            value={example.platform || 'META'}
-            onChange={(e) => onUpdate('platform', e.target.value as Platform)}
-            className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
-          >
-            <option value="META">META (Facebook, Instagram)</option>
-            <option value="GOOGLE">GOOGLE (Search, Display)</option>
-            <option value="ORGANIC">ORGANIC (SEO, Direct)</option>
-            <option value="EMAIL">EMAIL (Campaigns)</option>
-          </select>
-          {(example.type === 'blog' || example.type === 'email') && (
-            <p className="text-xs text-[#9b9b9b] mt-1">
-              💡 Tag with platform to enable AI learning from this example
-            </p>
-          )}
-        </div>
+            {/* Platform selector */}
+            <div>
+              <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
+                Traffic Source / Platform {example.type === 'email' ? '(optional)' : ''}
+              </label>
+              <select
+                value={example.platform || 'META'}
+                onChange={(e) => onUpdate('platform', e.target.value as Platform)}
+                className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
+              >
+                <option value="META">META (Facebook, Instagram)</option>
+                <option value="GOOGLE">GOOGLE (Search, Display)</option>
+                <option value="ORGANIC">ORGANIC (SEO, Direct)</option>
+                <option value="EMAIL">EMAIL (Campaigns)</option>
+              </select>
+              {example.type === 'email' && (
+                <p className="text-xs text-[#9b9b9b] mt-1">
+                  💡 Tag with platform to enable AI learning from this example
+                </p>
+              )}
+            </div>
+          </>
+        )}
 
+        {/* Title/Headline - Different label for blogs */}
         <div>
           <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
-            Headline (optional)
+            {example.type === 'blog' ? 'Blog Title *' : 'Headline (optional)'}
           </label>
           <input
             type="text"
             value={example.headline || ''}
             onChange={(e) => onUpdate('headline', e.target.value)}
-            placeholder="e.g., Where Learning Meets Life"
+            placeholder={example.type === 'blog' ? 'Enter the blog post title' : 'e.g., Where Learning Meets Life'}
             className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
           />
         </div>
 
+        {/* Body/Content - Different label for blogs */}
         <div>
           <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
-            Body Copy *
+            {example.type === 'blog' ? 'Blog Body/Content *' : 'Body Copy *'}
           </label>
           <textarea
             value={example.copy}
             onChange={(e) => onUpdate('copy', e.target.value)}
-            rows={5}
-            placeholder="Paste the full copy here..."
+            rows={example.type === 'blog' ? 10 : 5}
+            placeholder={example.type === 'blog' ? 'Paste the full blog post text' : 'Paste the full copy here...'}
             className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
           />
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
-            Call to Action *
-          </label>
-          <input
-            type="text"
-            value={example.cta}
-            onChange={(e) => onUpdate('cta', e.target.value)}
-            placeholder="e.g., Book Free Consultation"
-            className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
-          />
-        </div>
+        {/* CTA - Hide for blogs */}
+        {example.type !== 'blog' && (
+          <div>
+            <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
+              Call to Action *
+            </label>
+            <input
+              type="text"
+              value={example.cta}
+              onChange={(e) => onUpdate('cta', e.target.value)}
+              placeholder="e.g., Book Free Consultation"
+              className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
+            />
+          </div>
+        )}
 
-        <div>
-          <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
-            Notes (optional)
-          </label>
-          <textarea
-            value={example.notes || ''}
-            onChange={(e) => onUpdate('notes', e.target.value)}
-            rows={2}
-            placeholder="General notes about this example"
-            className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
-          />
-        </div>
+        {/* Notes - Hide for blogs */}
+        {example.type !== 'blog' && (
+          <div>
+            <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
+              Notes (optional)
+            </label>
+            <textarea
+              value={example.notes || ''}
+              onChange={(e) => onUpdate('notes', e.target.value)}
+              rows={2}
+              placeholder="General notes about this example"
+              className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
+            />
+          </div>
+        )}
 
         <div>
           <label className="block text-xs font-medium text-[#4b0f0d] mb-1">

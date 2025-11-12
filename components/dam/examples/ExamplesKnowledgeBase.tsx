@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { CampaignExample, CampaignStage, TaskType } from '../../../types';
 import ExampleCard from './ExampleCard';
 
@@ -22,6 +22,32 @@ const ExamplesKnowledgeBase: React.FC<ExamplesKnowledgeBaseProps> = ({
   onSave,
 }) => {
   const [activeStage, setActiveStage] = useState<CampaignStage>('tofu');
+  const [newExampleIndices, setNewExampleIndices] = useState<Set<number>>(new Set());
+  const previousExampleCount = useRef(examples.length);
+
+  // Track when new examples are added
+  useEffect(() => {
+    if (examples.length > previousExampleCount.current) {
+      const newIndices = new Set(newExampleIndices);
+      for (let i = previousExampleCount.current; i < examples.length; i++) {
+        newIndices.add(i);
+      }
+      setNewExampleIndices(newIndices);
+    }
+    previousExampleCount.current = examples.length;
+  }, [examples.length]);
+
+  const handleSave = () => {
+    onSave();
+    setNewExampleIndices(new Set());
+  };
+
+  const handleDelete = (index: number) => {
+    onDeleteExample(index);
+    const newIndices = new Set(newExampleIndices);
+    newIndices.delete(index);
+    setNewExampleIndices(newIndices);
+  };
 
   // Filter examples by active stage
   const filteredExamples = examples.filter((ex) => ex.stage === activeStage);
@@ -115,8 +141,9 @@ const ExamplesKnowledgeBase: React.FC<ExamplesKnowledgeBaseProps> = ({
                 example={example}
                 index={originalIndex}
                 onUpdate={(field, value) => onUpdateExample(originalIndex, field, value)}
-                onDelete={() => onDeleteExample(originalIndex)}
-                onSave={onSave}
+                onDelete={() => handleDelete(originalIndex)}
+                onSave={handleSave}
+                isNew={newExampleIndices.has(originalIndex)}
               />
             );
           })}
@@ -141,7 +168,7 @@ const ExamplesKnowledgeBase: React.FC<ExamplesKnowledgeBaseProps> = ({
       {/* Save Button */}
       <div className="mt-6 pt-4 border-t border-[#f4f0f0]">
         <button
-          onClick={onSave}
+          onClick={handleSave}
           className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors"
         >
           Save All Changes
