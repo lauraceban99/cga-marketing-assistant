@@ -10,20 +10,30 @@ interface VoiceoverGeneratorProps {
 
 const VoiceoverGenerator: React.FC<VoiceoverGeneratorProps> = ({ brand, onBack }) => {
   const [text, setText] = useState('');
-  const [voice, setVoice] = useState<VoiceOption>('nova'); // Default to Nova (more natural female voice)
-  const [speed, setSpeed] = useState(1.0);
+  const [voice, setVoice] = useState<VoiceOption>('shimmer'); // Default to Shimmer - ideal for parents on Meta
+  const [speed, setSpeed] = useState(0.97); // Default speed optimized for parent-focused Meta ads
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [srtContent, setSrtContent] = useState<string | null>(null);
 
   const voiceDescriptions: Record<VoiceOption, string> = {
-    nova: 'Female, bright, engaging (most natural)',
-    shimmer: 'Female, soft, friendly (most natural)',
+    shimmer: 'Female, warm, trustworthy ⭐ Best for Parents',
+    nova: 'Female, bright, engaging',
     echo: 'Male, confident, conversational',
     fable: 'British male, warm, expressive',
     onyx: 'Deep male, authoritative',
     alloy: 'Neutral, versatile'
+  };
+
+  // Speed scale labels for marketers
+  const getSpeedLabel = (speedValue: number): string => {
+    if (speedValue <= 0.88) return 'Calm & Thoughtful';
+    if (speedValue <= 0.93) return 'Soothing & Trustworthy';
+    if (speedValue <= 0.99) return 'Natural & Relatable ⭐';
+    if (speedValue <= 1.05) return 'Confident & Clear';
+    if (speedValue <= 1.10) return 'Energetic & Upbeat';
+    return 'Dynamic & Exciting';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,8 +157,17 @@ const VoiceoverGenerator: React.FC<VoiceoverGeneratorProps> = ({ brand, onBack }
           {/* Speed Control */}
           <div>
             <label htmlFor="speed" className="block text-sm font-medium text-[#4b0f0d] mb-2">
-              Playback Speed: {speed.toFixed(2)}x
+              Voice Pacing: {speed.toFixed(2)}x
             </label>
+            <div className="mb-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+              <p className="text-sm font-semibold text-[#780817]">{getSpeedLabel(speed)}</p>
+              <p className="text-xs text-[#9b9b9b] mt-1">
+                {speed <= 0.93 ? 'Best for emotional, trust-building content' :
+                 speed <= 0.99 ? 'Perfect for parent-focused Meta ads - builds connection without rushing' :
+                 speed <= 1.05 ? 'Great for informational content and direct messaging' :
+                 'Ideal for energetic, action-oriented content'}
+              </p>
+            </div>
             <input
               id="speed"
               type="range"
@@ -159,14 +178,13 @@ const VoiceoverGenerator: React.FC<VoiceoverGeneratorProps> = ({ brand, onBack }
               onChange={(e) => setSpeed(parseFloat(e.target.value))}
               className="w-full accent-[#780817]"
             />
-            <div className="flex justify-between text-xs text-[#9b9b9b] mt-1">
-              <span>Slower (0.85x)</span>
-              <span>Natural (1.0x)</span>
-              <span>Faster (1.15x)</span>
+            <div className="flex justify-between text-xs text-[#9b9b9b] mt-2">
+              <span>0.85x<br/>Calm</span>
+              <span>0.90x<br/>Soothing</span>
+              <span className="text-[#780817] font-semibold">0.97x<br/>⭐ Ideal</span>
+              <span>1.05x<br/>Confident</span>
+              <span>1.15x<br/>Energetic</span>
             </div>
-            <p className="text-xs text-[#9b9b9b] mt-2">
-              💡 Tip: Slightly slower speeds (0.95x-1.0x) often sound more natural
-            </p>
           </div>
 
           {error && (

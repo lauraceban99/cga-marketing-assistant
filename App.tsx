@@ -19,6 +19,7 @@ const App: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<TaskType | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
+  const [regenerationFeedback, setRegenerationFeedback] = useState<string>('');
   
   const handleSelectBrand = (brand: Brand) => {
     setSelectedBrand(brand);
@@ -43,12 +44,19 @@ const App: React.FC = () => {
       setGeneratedContent(null);
       setSelectedTask(null);
       setLastPrompt('');
+      setRegenerationFeedback('');
     }
      if (state === 'task_selection') {
         setGeneratedContent(null);
         setLastPrompt('');
+        setRegenerationFeedback('');
     }
     setAppState(state);
+  };
+
+  const handleRegenerateWithFeedback = (feedback: string) => {
+    setRegenerationFeedback(feedback);
+    setAppState('generator');
   };
   
   const renderContent = () => {
@@ -58,12 +66,21 @@ const App: React.FC = () => {
       case 'generator':
         return selectedTask === 'voiceover'
           ? <VoiceoverGenerator brand={selectedBrand!} onBack={() => handleBackTo('task_selection')} />
-          : <TextGenerator brand={selectedBrand!} taskType={selectedTask!} onGenerated={handleContentGenerated} onBack={() => handleBackTo('task_selection')} />;
+          : <TextGenerator
+              brand={selectedBrand!}
+              taskType={selectedTask!}
+              onGenerated={handleContentGenerated}
+              onBack={() => handleBackTo('task_selection')}
+              regenerationFeedback={regenerationFeedback}
+              initialPrompt={lastPrompt}
+            />;
       case 'results':
         return <TextResultsViewer
                   content={generatedContent!}
+                  brand={selectedBrand!}
+                  userPrompt={lastPrompt}
                   onBack={() => handleBackTo('task_selection')}
-                  onRegenerate={() => handleBackTo('generator')}
+                  onRegenerate={handleRegenerateWithFeedback}
                 />;
       case 'dam':
         return <BrandAssetManager onBack={() => handleBackTo('brand_selection')} />;

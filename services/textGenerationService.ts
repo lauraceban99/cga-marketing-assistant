@@ -349,7 +349,8 @@ export async function generateTextContent(
     adVariant?: 'short' | 'long';
     market?: Market;
     platform?: Platform;
-  }
+  },
+  regenerationFeedback?: string
 ): Promise<GeneratedContent> {
   console.log(`🎯 Generating ${contentType} with OpenAI...`);
 
@@ -388,7 +389,7 @@ export async function generateTextContent(
     options.market,
     dynamicPatterns || undefined
   );
-  const userPrompt = buildUserPrompt(
+  let userPrompt = buildUserPrompt(
     contentType,
     userRequest,
     options.lengthSpec,
@@ -396,6 +397,17 @@ export async function generateTextContent(
     brandInstructions,
     options.adVariant
   );
+
+  // Add regeneration feedback if provided
+  if (regenerationFeedback && regenerationFeedback.trim()) {
+    userPrompt = `⚠️ REGENERATION REQUEST - USER FEEDBACK ON PREVIOUS VERSION:
+"${regenerationFeedback}"
+
+IMPORTANT: The previous generation was not satisfactory. Apply the user's feedback above to improve the content.
+Focus on addressing their specific concerns and requests.
+
+${userPrompt}`;
+  }
 
   console.log('🚀 Calling OpenAI API...');
 

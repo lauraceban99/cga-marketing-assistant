@@ -18,10 +18,12 @@ interface TextGeneratorProps {
   taskType: TaskType;
   onBack: () => void;
   onGenerated: (content: GeneratedContent, prompt: string) => void;
+  regenerationFeedback?: string;
+  initialPrompt?: string;
 }
 
-const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, onGenerated }) => {
-  const [prompt, setPrompt] = useState('');
+const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, onGenerated, regenerationFeedback, initialPrompt }) => {
+  const [prompt, setPrompt] = useState(initialPrompt || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [brandInstructions, setBrandInstructions] = useState<BrandInstructions | null>(null);
@@ -109,7 +111,8 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
           emailType: taskType === 'email' ? emailType : undefined,
           market: taskType === 'landing-page' ? market : undefined, // Only landing pages need market
           platform: taskType === 'landing-page' || taskType === 'ad-copy' ? platform : undefined
-        }
+        },
+        regenerationFeedback
       );
 
       onGenerated(generatedContent, prompt);
