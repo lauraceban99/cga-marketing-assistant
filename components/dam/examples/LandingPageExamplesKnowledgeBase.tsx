@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { CampaignExample, Market, Platform } from '../../../types';
 import ExampleCard from './ExampleCard';
+import AddExamplesButton from '../AddExamplesButton';
 
 interface LandingPageExamplesKnowledgeBaseProps {
   title: string;
@@ -10,6 +11,8 @@ interface LandingPageExamplesKnowledgeBaseProps {
   onUpdateExample: (index: number, field: keyof CampaignExample, value: any) => void;
   onDeleteExample: (index: number) => void;
   onSave: () => void;
+  brandId: string;
+  onComplete: () => void;
 }
 
 const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBaseProps> = ({
@@ -20,6 +23,8 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
   onUpdateExample,
   onDeleteExample,
   onSave,
+  brandId,
+  onComplete,
 }) => {
   const [activePlatform, setActivePlatform] = useState<Platform>('META');
   const [activeMarket, setActiveMarket] = useState<Market>('EMEA');
@@ -89,6 +94,14 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
         </h3>
         <p className="text-sm text-[#9b9b9b] mt-1">{description}</p>
       </div>
+
+      {/* Quick Setup Button - Only show when no examples exist */}
+      {examples.length === 0 && (
+        <AddExamplesButton
+          brandId={brandId}
+          onComplete={onComplete}
+        />
+      )}
 
       {/* Platform Tabs - PRIMARY */}
       <div className="flex gap-3 mb-6">

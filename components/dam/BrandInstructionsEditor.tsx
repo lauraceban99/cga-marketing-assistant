@@ -16,7 +16,6 @@ import ExamplesKnowledgeBase from './examples/ExamplesKnowledgeBase';
 import LandingPageExamplesKnowledgeBase from './examples/LandingPageExamplesKnowledgeBase';
 import UnifiedExamplesKnowledgeBase from './examples/UnifiedExamplesKnowledgeBase';
 import PatternKnowledgeViewer from './PatternKnowledgeViewer';
-import AddExamplesButton from './AddExamplesButton';
 
 interface BrandInstructionsEditorProps {
   brand: Brand;
@@ -809,12 +808,6 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               </div>
             </div>
 
-            {/* Quick Setup: Add Example Button */}
-            <AddExamplesButton
-              brandId={brand.id}
-              onComplete={loadInstructions}
-            />
-
             {/* Examples Knowledge Base - Organized by Market */}
             <LandingPageExamplesKnowledgeBase
               title="Landing Page Examples Knowledge Base"
@@ -824,6 +817,8 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               onUpdateExample={(index, field, value) => updateExample('landingPage', index, field, value)}
               onDeleteExample={(index) => removeExample('landingPage', index)}
               onSave={handleSave}
+              brandId={brand.id}
+              onComplete={loadInstructions}
             />
           </div>
         )}
