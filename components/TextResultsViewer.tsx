@@ -216,42 +216,116 @@ const TextResultsViewer: React.FC<TextResultsViewerProps> = ({ content, brand, u
                     <div className="border-2 border-[#04114a]/20 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-sm font-bold text-[#04114a]">SHORT VERSION</h3>
-                        <button
-                          onClick={() =>
-                            handleCopy(
-                              `${shortVersion.headline}\n\n${shortVersion.body}\n\n${shortVersion.cta}`,
-                              `${id}-short`
-                            )
-                          }
-                          className="text-xs text-[#780817] hover:text-[#4b0f0d] transition-colors"
-                        >
-                          {copiedId === `${id}-short` ? '✓ Copied' : '📋 Copy'}
-                        </button>
-                      </div>
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-xs text-[#9b9b9b] mb-1">
-                            Headline ({shortVersion.headline.length} chars)
-                          </p>
-                          <p className="text-lg font-bold text-[#4b0f0d]">
-                            {shortVersion.headline}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-[#9b9b9b] mb-1">
-                            Body ({shortVersion.body.split(/\s+/).length} words)
-                          </p>
-                          <p className="text-sm text-[#4b0f0d] leading-relaxed">
-                            {shortVersion.body}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-[#9b9b9b] mb-1">CTA</p>
-                          <p className="text-md font-semibold text-[#780817]">
-                            {shortVersion.cta}
-                          </p>
+                        <div className="flex gap-2">
+                          {editingId !== `${id}-short` && (
+                            <button
+                              onClick={() => handleEdit(`${id}-short`, shortVersion)}
+                              className="text-xs text-[#04114a] hover:text-[#780817] transition-colors"
+                            >
+                              ✏️ Edit
+                            </button>
+                          )}
+                          <button
+                            onClick={() =>
+                              handleCopy(
+                                `${shortVersion.headline}\n\n${shortVersion.body}\n\n${shortVersion.cta}`,
+                                `${id}-short`
+                              )
+                            }
+                            className="text-xs text-[#780817] hover:text-[#4b0f0d] transition-colors"
+                          >
+                            {copiedId === `${id}-short` ? '✓ Copied' : '📋 Copy'}
+                          </button>
                         </div>
                       </div>
+                      {editingId === `${id}-short` ? (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-xs text-[#9b9b9b] mb-1 block">Headline</label>
+                            <input
+                              type="text"
+                              value={editedContent[`${id}-short`]?.headline || shortVersion.headline}
+                              onChange={(e) => setEditedContent({
+                                ...editedContent,
+                                [`${id}-short`]: {
+                                  ...(editedContent[`${id}-short`] || shortVersion),
+                                  headline: e.target.value
+                                }
+                              })}
+                              className="w-full p-2 border-2 border-[#780817] rounded-md text-[#4b0f0d] font-bold"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-[#9b9b9b] mb-1 block">Body</label>
+                            <textarea
+                              value={editedContent[`${id}-short`]?.body || shortVersion.body}
+                              onChange={(e) => setEditedContent({
+                                ...editedContent,
+                                [`${id}-short`]: {
+                                  ...(editedContent[`${id}-short`] || shortVersion),
+                                  body: e.target.value
+                                }
+                              })}
+                              rows={6}
+                              className="w-full p-2 border-2 border-[#780817] rounded-md text-[#4b0f0d]"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-[#9b9b9b] mb-1 block">CTA</label>
+                            <input
+                              type="text"
+                              value={editedContent[`${id}-short`]?.cta || shortVersion.cta}
+                              onChange={(e) => setEditedContent({
+                                ...editedContent,
+                                [`${id}-short`]: {
+                                  ...(editedContent[`${id}-short`] || shortVersion),
+                                  cta: e.target.value
+                                }
+                              })}
+                              className="w-full p-2 border-2 border-[#780817] rounded-md text-[#780817] font-semibold"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleSaveEdit(`${id}-short`)}
+                              className="flex-1 px-3 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700 transition-colors"
+                            >
+                              ✓ Save
+                            </button>
+                            <button
+                              onClick={() => handleCancelEdit(`${id}-short`)}
+                              className="flex-1 px-3 py-2 bg-gray-400 text-white text-sm font-semibold rounded-md hover:bg-gray-500 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div>
+                            <p className="text-xs text-[#9b9b9b] mb-1">
+                              Headline ({(editedContent[`${id}-short`]?.headline || shortVersion.headline).length} chars)
+                            </p>
+                            <p className="text-lg font-bold text-[#4b0f0d]">
+                              {editedContent[`${id}-short`]?.headline || shortVersion.headline}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-[#9b9b9b] mb-1">
+                              Body ({(editedContent[`${id}-short`]?.body || shortVersion.body).split(/\s+/).length} words)
+                            </p>
+                            <p className="text-sm text-[#4b0f0d] leading-relaxed">
+                              {editedContent[`${id}-short`]?.body || shortVersion.body}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-[#9b9b9b] mb-1">CTA</p>
+                            <p className="text-md font-semibold text-[#780817]">
+                              {editedContent[`${id}-short`]?.cta || shortVersion.cta}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -260,42 +334,116 @@ const TextResultsViewer: React.FC<TextResultsViewerProps> = ({ content, brand, u
                     <div className="border-2 border-[#780817]/20 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-sm font-bold text-[#780817]">LONG VERSION</h3>
-                        <button
-                          onClick={() =>
-                            handleCopy(
-                              `${longVersion.headline}\n\n${longVersion.body}\n\n${longVersion.cta}`,
-                              `${id}-long`
-                            )
-                          }
-                          className="text-xs text-[#780817] hover:text-[#4b0f0d] transition-colors"
-                        >
-                          {copiedId === `${id}-long` ? '✓ Copied' : '📋 Copy'}
-                        </button>
-                      </div>
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-xs text-[#9b9b9b] mb-1">
-                            Headline ({longVersion.headline.length} chars)
-                          </p>
-                          <p className="text-lg font-bold text-[#4b0f0d]">
-                            {longVersion.headline}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-[#9b9b9b] mb-1">
-                            Body ({longVersion.body.split(/\s+/).length} words)
-                          </p>
-                          <p className="text-sm text-[#4b0f0d] leading-relaxed">
-                            {longVersion.body}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-[#9b9b9b] mb-1">CTA</p>
-                          <p className="text-md font-semibold text-[#780817]">
-                            {longVersion.cta}
-                          </p>
+                        <div className="flex gap-2">
+                          {editingId !== `${id}-long` && (
+                            <button
+                              onClick={() => handleEdit(`${id}-long`, longVersion)}
+                              className="text-xs text-[#780817] hover:text-[#4b0f0d] transition-colors"
+                            >
+                              ✏️ Edit
+                            </button>
+                          )}
+                          <button
+                            onClick={() =>
+                              handleCopy(
+                                `${longVersion.headline}\n\n${longVersion.body}\n\n${longVersion.cta}`,
+                                `${id}-long`
+                              )
+                            }
+                            className="text-xs text-[#780817] hover:text-[#4b0f0d] transition-colors"
+                          >
+                            {copiedId === `${id}-long` ? '✓ Copied' : '📋 Copy'}
+                          </button>
                         </div>
                       </div>
+                      {editingId === `${id}-long` ? (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-xs text-[#9b9b9b] mb-1 block">Headline</label>
+                            <input
+                              type="text"
+                              value={editedContent[`${id}-long`]?.headline || longVersion.headline}
+                              onChange={(e) => setEditedContent({
+                                ...editedContent,
+                                [`${id}-long`]: {
+                                  ...(editedContent[`${id}-long`] || longVersion),
+                                  headline: e.target.value
+                                }
+                              })}
+                              className="w-full p-2 border-2 border-[#780817] rounded-md text-[#4b0f0d] font-bold"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-[#9b9b9b] mb-1 block">Body</label>
+                            <textarea
+                              value={editedContent[`${id}-long`]?.body || longVersion.body}
+                              onChange={(e) => setEditedContent({
+                                ...editedContent,
+                                [`${id}-long`]: {
+                                  ...(editedContent[`${id}-long`] || longVersion),
+                                  body: e.target.value
+                                }
+                              })}
+                              rows={8}
+                              className="w-full p-2 border-2 border-[#780817] rounded-md text-[#4b0f0d]"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-[#9b9b9b] mb-1 block">CTA</label>
+                            <input
+                              type="text"
+                              value={editedContent[`${id}-long`]?.cta || longVersion.cta}
+                              onChange={(e) => setEditedContent({
+                                ...editedContent,
+                                [`${id}-long`]: {
+                                  ...(editedContent[`${id}-long`] || longVersion),
+                                  cta: e.target.value
+                                }
+                              })}
+                              className="w-full p-2 border-2 border-[#780817] rounded-md text-[#780817] font-semibold"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleSaveEdit(`${id}-long`)}
+                              className="flex-1 px-3 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700 transition-colors"
+                            >
+                              ✓ Save
+                            </button>
+                            <button
+                              onClick={() => handleCancelEdit(`${id}-long`)}
+                              className="flex-1 px-3 py-2 bg-gray-400 text-white text-sm font-semibold rounded-md hover:bg-gray-500 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div>
+                            <p className="text-xs text-[#9b9b9b] mb-1">
+                              Headline ({(editedContent[`${id}-long`]?.headline || longVersion.headline).length} chars)
+                            </p>
+                            <p className="text-lg font-bold text-[#4b0f0d]">
+                              {editedContent[`${id}-long`]?.headline || longVersion.headline}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-[#9b9b9b] mb-1">
+                              Body ({(editedContent[`${id}-long`]?.body || longVersion.body).split(/\s+/).length} words)
+                            </p>
+                            <p className="text-sm text-[#4b0f0d] leading-relaxed">
+                              {editedContent[`${id}-long`]?.body || longVersion.body}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-[#9b9b9b] mb-1">CTA</p>
+                            <p className="text-md font-semibold text-[#780817]">
+                              {editedContent[`${id}-long`]?.cta || longVersion.cta}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

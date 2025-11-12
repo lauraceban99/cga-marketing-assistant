@@ -107,7 +107,7 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
         brandInstructions,
         {
           lengthSpec,
-          campaignStage,
+          campaignStage: taskType !== 'blog' ? campaignStage : undefined, // Blogs don't have campaign stages
           emailType: taskType === 'email' ? emailType : undefined,
           market: taskType === 'landing-page' ? market : undefined, // Only landing pages need market
           platform: taskType === 'landing-page' || taskType === 'ad-copy' ? platform : undefined
@@ -252,25 +252,27 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
             </div>
           )}
 
-          {/* Campaign stage */}
-          <div>
-            <label htmlFor="campaignStage" className="block text-sm font-medium text-[#4b0f0d] mb-2">
-              Campaign Stage (optional)
-            </label>
-            <select
-              id="campaignStage"
-              value={campaignStage}
-              onChange={(e) => setCampaignStage(e.target.value as CampaignStage)}
-              className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
-            >
-              <option value="tofu">TOFU - Top of Funnel (Awareness)</option>
-              <option value="mofu">MOFU - Middle of Funnel (Consideration)</option>
-              <option value="bofu">BOFU - Bottom of Funnel (Decision)</option>
-            </select>
-            <p className="text-xs text-[#9b9b9b] mt-2">
-              This determines the appropriate CTA and messaging approach.
-            </p>
-          </div>
+          {/* Campaign stage (not for blogs) */}
+          {taskType !== 'blog' && (
+            <div>
+              <label htmlFor="campaignStage" className="block text-sm font-medium text-[#4b0f0d] mb-2">
+                Campaign Stage (optional)
+              </label>
+              <select
+                id="campaignStage"
+                value={campaignStage}
+                onChange={(e) => setCampaignStage(e.target.value as CampaignStage)}
+                className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
+              >
+                <option value="tofu">TOFU - Top of Funnel (Awareness)</option>
+                <option value="mofu">MOFU - Middle of Funnel (Consideration)</option>
+                <option value="bofu">BOFU - Bottom of Funnel (Decision)</option>
+              </select>
+              <p className="text-xs text-[#9b9b9b] mt-2">
+                This determines the appropriate CTA and messaging approach.
+              </p>
+            </div>
+          )}
 
           {/* Length specification */}
           <div>
