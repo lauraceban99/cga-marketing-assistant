@@ -1,7 +1,10 @@
 import { db } from '../config/firebase';
 import { collection, addDoc, getDocs, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
 import type { AdVariation } from './openaiService';
+import type { GeneratedContent, AdCopyVariation } from './textGenerationService';
+import type { TaskType } from '../types';
 
+// Legacy format (for backward compatibility)
 export interface ApprovedContent {
   id?: string;
   brandId: string;
@@ -11,6 +14,23 @@ export interface ApprovedContent {
   contentType: string;
   approvedAt: Date;
   imageUrl?: string;
+}
+
+// New unified format for all content types
+export interface ApprovedGeneratedContent {
+  id?: string;
+  brandId: string;
+  brandName: string;
+  content: any; // Can be AdCopyVariation, blog content, landing page, or email
+  contentType: TaskType;
+  userPrompt: string;
+  approvedAt: Date;
+  metadata?: {
+    market?: string;
+    platform?: string;
+    campaignStage?: string;
+    emailType?: string;
+  };
 }
 
 /**
@@ -43,6 +63,47 @@ export async function saveApprovedContent(
     }
 
     const docRef = await addDoc(collection(db, 'approvedContent'), docData);
+
+    console.log('✅ Approved content saved with ID:', docRef.id);
+  } catch (error) {
+    console.error('❌ Error saving approved content:', error);
+    throw new Error('Failed to save approved content');
+  }
+}
+
+/**
+ * Save approved generated content (new unified format for all content types)
+ */
+export async function saveApprovedGeneratedContent(
+  brandId: string,
+  brandName: string,
+  content: any,
+  contentType: TaskType,
+  userPrompt: string,
+  metadata?: {
+    market?: string;
+    platform?: string;
+    campaignStage?: string;
+    emailType?: string;
+  }
+): Promise<void> {
+  try {
+    console.log(`💾 Saving approved ${contentType} content to knowledge base...`);
+
+    const docData: any = {
+      brandId,
+      brandName,
+      content,
+      contentType,
+      userPrompt,
+      approvedAt: Timestamp.now()
+    };
+
+    if (metadata) {
+      docData.metadata = metadata;
+    }
+
+    const docRef = await addDoc(collection(db, 'approvedGeneratedContent'), docData);
 
     console.log('✅ Approved content saved with ID:', docRef.id);
   } catch (error) {
