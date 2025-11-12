@@ -1,32 +1,6 @@
 import type { VoiceoverOptions } from '../types';
 
 /**
- * Trim and optimize text for voiceover (target ~150 words per minute)
- */
-function optimizeTextForVoiceover(text: string, targetSeconds: number): string {
-  const targetWords = Math.floor((targetSeconds / 60) * 150);
-  const words = text.trim().split(/\s+/);
-
-  if (words.length <= targetWords) {
-    return text.trim();
-  }
-
-  // Truncate to target words, ending at sentence boundary if possible
-  const truncated = words.slice(0, targetWords).join(' ');
-  const lastPeriod = truncated.lastIndexOf('.');
-  const lastQuestion = truncated.lastIndexOf('?');
-  const lastExclamation = truncated.lastIndexOf('!');
-
-  const lastSentenceEnd = Math.max(lastPeriod, lastQuestion, lastExclamation);
-
-  if (lastSentenceEnd > truncated.length * 0.7) {
-    return truncated.substring(0, lastSentenceEnd + 1).trim();
-  }
-
-  return truncated + '...';
-}
-
-/**
  * Build SRT (SubRip) captions from text
  */
 function buildSRT(text: string, wpm: number = 150): string {
@@ -72,11 +46,10 @@ function formatTimestamp(seconds: number): string {
 export async function generateVoiceover(
   text: string,
   options: VoiceoverOptions
-): Promise<{ audioBlob: Blob; srt: string; optimizedText: string }> {
-  // Optimize text for target length
-  const optimizedText = optimizeTextForVoiceover(text, options.targetLength);
+): Promise<{ audioBlob: Blob; srt: string }> {
+  const cleanText = text.trim();
 
-  console.log(`🎙️ Generating voiceover with voice: ${options.voice}, speed: ${options.speed}`);
+  console.log(`🎙️ Generating voiceover with voice: ${options.voice}, speed: ${options.speed}x`);
 
   // Call OpenAI TTS API
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
@@ -93,7 +66,7 @@ export async function generateVoiceover(
     },
     body: JSON.stringify({
       model: 'tts-1-hd', // Use HD model for better quality
-      input: optimizedText,
+      input: cleanText,
       voice: options.voice,
       speed: options.speed,
       response_format: 'wav'
@@ -110,13 +83,12 @@ export async function generateVoiceover(
 
   // Generate SRT captions
   const wpm = 150 / options.speed; // Adjust words per minute based on speed
-  const srt = buildSRT(optimizedText, wpm);
+  const srt = buildSRT(cleanText, wpm);
 
   console.log('✅ Voiceover generated successfully');
 
   return {
     audioBlob,
-    srt,
-    optimizedText
+    srt
   };
 }

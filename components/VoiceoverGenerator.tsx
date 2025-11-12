@@ -10,22 +10,20 @@ interface VoiceoverGeneratorProps {
 
 const VoiceoverGenerator: React.FC<VoiceoverGeneratorProps> = ({ brand, onBack }) => {
   const [text, setText] = useState('');
-  const [voice, setVoice] = useState<VoiceOption>('alloy');
-  const [tone, setTone] = useState<VoiceTone>('professional');
+  const [voice, setVoice] = useState<VoiceOption>('nova'); // Default to Nova (more natural female voice)
   const [speed, setSpeed] = useState(1.0);
-  const [targetLength, setTargetLength] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [srtContent, setSrtContent] = useState<string | null>(null);
 
   const voiceDescriptions: Record<VoiceOption, string> = {
-    alloy: 'Neutral, clear, versatile',
-    echo: 'Male, confident, clear',
+    nova: 'Female, bright, engaging (most natural)',
+    shimmer: 'Female, soft, friendly (most natural)',
+    echo: 'Male, confident, conversational',
     fable: 'British male, warm, expressive',
     onyx: 'Deep male, authoritative',
-    nova: 'Female, bright, engaging',
-    shimmer: 'Female, soft, friendly'
+    alloy: 'Neutral, versatile'
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,14 +40,7 @@ const VoiceoverGenerator: React.FC<VoiceoverGeneratorProps> = ({ brand, onBack }
     setSrtContent(null);
 
     try {
-      const options: VoiceoverOptions = {
-        voice,
-        tone,
-        speed: tone === 'professional' ? 0.98 : tone === 'friendly' ? 1.02 : speed,
-        targetLength
-      };
-
-      const result = await generateVoiceover(text, options);
+      const result = await generateVoiceover(text, { voice, speed });
 
       // Create object URL for audio playback
       const url = URL.createObjectURL(result.audioBlob);
@@ -153,62 +144,28 @@ const VoiceoverGenerator: React.FC<VoiceoverGeneratorProps> = ({ brand, onBack }
             </select>
           </div>
 
-          {/* Tone Selection */}
+          {/* Speed Control */}
           <div>
-            <label htmlFor="tone" className="block text-sm font-medium text-[#4b0f0d] mb-2">
-              Tone
+            <label htmlFor="speed" className="block text-sm font-medium text-[#4b0f0d] mb-2">
+              Playback Speed: {speed.toFixed(2)}x
             </label>
-            <select
-              id="tone"
-              value={tone}
-              onChange={(e) => setTone(e.target.value as VoiceTone)}
-              className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
-            >
-              <option value="professional">Professional (speed: 0.98x)</option>
-              <option value="friendly">Friendly (speed: 1.02x)</option>
-              <option value="neutral">Neutral (custom speed)</option>
-            </select>
-          </div>
-
-          {/* Speed Control (only for neutral tone) */}
-          {tone === 'neutral' && (
-            <div>
-              <label htmlFor="speed" className="block text-sm font-medium text-[#4b0f0d] mb-2">
-                Speed: {speed.toFixed(2)}x
-              </label>
-              <input
-                id="speed"
-                type="range"
-                min="0.9"
-                max="1.05"
-                step="0.01"
-                value={speed}
-                onChange={(e) => setSpeed(parseFloat(e.target.value))}
-                className="w-full"
-              />
-              <p className="text-xs text-[#9b9b9b] mt-2">
-                Adjust playback speed (0.90 = slower, 1.05 = faster)
-              </p>
+            <input
+              id="speed"
+              type="range"
+              min="0.85"
+              max="1.15"
+              step="0.01"
+              value={speed}
+              onChange={(e) => setSpeed(parseFloat(e.target.value))}
+              className="w-full accent-[#780817]"
+            />
+            <div className="flex justify-between text-xs text-[#9b9b9b] mt-1">
+              <span>Slower (0.85x)</span>
+              <span>Natural (1.0x)</span>
+              <span>Faster (1.15x)</span>
             </div>
-          )}
-
-          {/* Target Length */}
-          <div>
-            <label htmlFor="targetLength" className="block text-sm font-medium text-[#4b0f0d] mb-2">
-              Target Length
-            </label>
-            <select
-              id="targetLength"
-              value={targetLength}
-              onChange={(e) => setTargetLength(parseInt(e.target.value))}
-              className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
-            >
-              <option value="15">15 seconds (~35-40 words)</option>
-              <option value="30">30 seconds (~70-80 words)</option>
-              <option value="60">60 seconds (~140-160 words)</option>
-            </select>
             <p className="text-xs text-[#9b9b9b] mt-2">
-              This is a target guideline. Actual length depends on your script.
+              💡 Tip: Slightly slower speeds (0.95x-1.0x) often sound more natural
             </p>
           </div>
 

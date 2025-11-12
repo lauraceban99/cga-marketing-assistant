@@ -26,13 +26,9 @@ export type CampaignStage = 'tofu' | 'mofu' | 'bofu';
 
 export type VoiceOption = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
 
-export type VoiceTone = 'professional' | 'friendly' | 'neutral';
-
 export interface VoiceoverOptions {
   voice: VoiceOption;
-  tone: VoiceTone;
-  speed: number; // 0.9-1.05
-  targetLength: number; // in seconds (15 or 30)
+  speed: number; // 0.85-1.15 (slower speeds often sound more natural)
 }
 
 export interface Theme {
