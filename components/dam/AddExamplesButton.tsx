@@ -1052,15 +1052,23 @@ Tone: Reassuring, detailed, parent-focused`,
     setStatus('Adding examples...');
 
     try {
-      const brandDocRef = doc(db, 'brands', brandId, 'instructions', 'main');
+      // Use correct Firebase path: brandInstructions/{brandId}
+      const brandDocRef = doc(db, 'brandInstructions', brandId);
       const brandDoc = await getDoc(brandDocRef);
 
       if (!brandDoc.exists()) {
-        throw new Error('Brand instructions not found');
+        throw new Error('Brand instructions not found. Please save your brand instructions first.');
       }
 
       const instructions = brandDoc.data();
       const currentExamples = instructions.landingPageInstructions?.examples || [];
+
+      // Prevent adding duplicates
+      if (currentExamples.length >= 14) {
+        setStatus('⚠️ Examples already added. No changes made.');
+        setTimeout(() => setAdding(false), 2000);
+        return;
+      }
 
       // Add new examples
       const updatedExamples = [...currentExamples, ...landingPageExamples];

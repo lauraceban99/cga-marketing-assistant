@@ -95,8 +95,8 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
         <p className="text-sm text-[#9b9b9b] mt-1">{description}</p>
       </div>
 
-      {/* Quick Setup Button - Only show when no examples exist */}
-      {examples.length === 0 && (
+      {/* Quick Setup Button - Show when fewer than 14 examples (template has 14) */}
+      {examples.length < 14 && (
         <AddExamplesButton
           brandId={brandId}
           onComplete={onComplete}
