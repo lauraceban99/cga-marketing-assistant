@@ -175,7 +175,8 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
   const addExample = (
     type: 'adCopy' | 'blog' | 'landingPage',
     stage?: CampaignStage,
-    market?: Market
+    market?: Market,
+    platform?: Platform
   ) => {
     if (!instructions) return;
     const newExample: CampaignExample = {
@@ -185,7 +186,8 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
       copy: '',
       cta: '',
       notes: '',
-      ...(market && { market }) // Add market if provided (for landing pages)
+      ...(market && { market }), // Add market if provided (for landing pages)
+      ...(platform && { platform }) // Add platform if provided (for landing pages)
     };
 
     const fieldMap = {
@@ -246,6 +248,60 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
       [field]: {
         ...instructions[field],
         examples: updatedExamples
+      }
+    });
+  };
+
+  // Email example helpers
+  const addEmailExample = () => {
+    if (!instructions) return;
+    const newExample: CampaignExample = {
+      stage: 'mofu',
+      type: 'email',
+      headline: '',
+      copy: '',
+      cta: '',
+      notes: ''
+    };
+    setInstructions({
+      ...instructions,
+      emailInstructions: {
+        ...instructions.emailInstructions,
+        invitation: {
+          ...instructions.emailInstructions.invitation,
+          examples: [...instructions.emailInstructions.invitation.examples, newExample]
+        }
+      }
+    });
+  };
+
+  const updateEmailExample = (index: number, field: keyof CampaignExample, value: any) => {
+    if (!instructions) return;
+    const updatedExamples = [...instructions.emailInstructions.invitation.examples];
+    updatedExamples[index] = { ...updatedExamples[index], [field]: value };
+    setInstructions({
+      ...instructions,
+      emailInstructions: {
+        ...instructions.emailInstructions,
+        invitation: {
+          ...instructions.emailInstructions.invitation,
+          examples: updatedExamples
+        }
+      }
+    });
+  };
+
+  const removeEmailExample = (index: number) => {
+    if (!instructions) return;
+    const updatedExamples = instructions.emailInstructions.invitation.examples.filter((_, i) => i !== index);
+    setInstructions({
+      ...instructions,
+      emailInstructions: {
+        ...instructions.emailInstructions,
+        invitation: {
+          ...instructions.emailInstructions.invitation,
+          examples: updatedExamples
+        }
       }
     });
   };
@@ -813,7 +869,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               title="Landing Page Examples Knowledge Base"
               description="Add examples organized by market. AI will learn market-specific patterns."
               examples={instructions.landingPageInstructions.examples}
-              onAddExample={(market) => addExample('landingPage', 'mofu', market)}
+              onAddExample={(market, platform) => addExample('landingPage', 'mofu', market, platform)}
               onUpdateExample={(index, field, value) => updateExample('landingPage', index, field, value)}
               onDeleteExample={(index) => removeExample('landingPage', index)}
               onSave={handleSave}
@@ -976,189 +1032,15 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             </div>
 
             {/* Email Examples - Unified across all types */}
-            <div className="bg-white rounded-lg border-2 border-[#f4f0f0] p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-[#4b0f0d]">Email Examples Knowledge Base</h3>
-                  <p className="text-sm text-[#9b9b9b] mt-1">
-                    Add examples of emails you like across all types. Organized by email type, not funnel stage.
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    // Add to invitation examples for now
-                    if (!instructions) return;
-                    const newExample: CampaignExample = {
-                      stage: 'mofu', // Default stage (not used for organization)
-                      type: 'email',
-                      headline: '',
-                      copy: '',
-                      cta: '',
-                      notes: ''
-                    };
-                    setInstructions({
-                      ...instructions,
-                      emailInstructions: {
-                        ...instructions.emailInstructions,
-                        invitation: {
-                          ...instructions.emailInstructions.invitation,
-                          examples: [...instructions.emailInstructions.invitation.examples, newExample]
-                        }
-                      }
-                    });
-                  }}
-                  className="px-4 py-2 bg-[#780817] text-white rounded-md hover:bg-[#4b0f0d] transition-colors text-sm font-semibold"
-                >
-                  + Add Example
-                </button>
-              </div>
-
-              {instructions.emailInstructions.invitation.examples.map((example, index) => (
-                <div key={index} className="mb-6 p-4 bg-[#f4f0f0] rounded-lg">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-semibold text-[#4b0f0d]">Example {index + 1}</h4>
-                    <button
-                      onClick={() => {
-                        if (!instructions) return;
-                        const updatedExamples = instructions.emailInstructions.invitation.examples.filter((_, i) => i !== index);
-                        setInstructions({
-                          ...instructions,
-                          emailInstructions: {
-                            ...instructions.emailInstructions,
-                            invitation: {
-                              ...instructions.emailInstructions.invitation,
-                              examples: updatedExamples
-                            }
-                          }
-                        });
-                      }}
-                      className="text-sm text-[#780817] hover:text-[#4b0f0d]"
-                    >
-                      Remove
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Email Type</label>
-                      <select
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      >
-                        <option value="invitation">Invitation (event, webinar, consultation)</option>
-                        <option value="nurture">Nurturing Drip (educational, relationship-building)</option>
-                        <option value="blast">Email Blast (news, announcements)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Subject Line *</label>
-                      <input
-                        type="text"
-                        value={example.headline || ''}
-                        onChange={(e) => {
-                          const updatedExamples = [...instructions.emailInstructions.invitation.examples];
-                          updatedExamples[index] = { ...updatedExamples[index], headline: e.target.value };
-                          setInstructions({
-                            ...instructions,
-                            emailInstructions: {
-                              ...instructions.emailInstructions,
-                              invitation: {
-                                ...instructions.emailInstructions.invitation,
-                                examples: updatedExamples
-                              }
-                            }
-                          });
-                        }}
-                        placeholder="e.g., [First Name], Ready to Transform Your Teen's Education?"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Email Body *</label>
-                      <textarea
-                        value={example.copy}
-                        onChange={(e) => {
-                          const updatedExamples = [...instructions.emailInstructions.invitation.examples];
-                          updatedExamples[index] = { ...updatedExamples[index], copy: e.target.value };
-                          setInstructions({
-                            ...instructions,
-                            emailInstructions: {
-                              ...instructions.emailInstructions,
-                              invitation: {
-                                ...instructions.emailInstructions.invitation,
-                                examples: updatedExamples
-                              }
-                            }
-                          });
-                        }}
-                        rows={6}
-                        placeholder="Paste the full email body here, including preview text, greeting, body copy, and sign-off. The AI will learn from the tone and structure."
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Call to Action Used</label>
-                      <input
-                        type="text"
-                        value={example.cta}
-                        onChange={(e) => {
-                          const updatedExamples = [...instructions.emailInstructions.invitation.examples];
-                          updatedExamples[index] = { ...updatedExamples[index], cta: e.target.value };
-                          setInstructions({
-                            ...instructions,
-                            emailInstructions: {
-                              ...instructions.emailInstructions,
-                              invitation: {
-                                ...instructions.emailInstructions.invitation,
-                                examples: updatedExamples
-                              }
-                            }
-                          });
-                        }}
-                        placeholder="e.g., Reserve Your Spot, Download the Guide, Schedule a Call"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-[#9b9b9b] mb-1">Notes (optional)</label>
-                      <textarea
-                        value={example.notes || ''}
-                        onChange={(e) => {
-                          const updatedExamples = [...instructions.emailInstructions.invitation.examples];
-                          updatedExamples[index] = { ...updatedExamples[index], notes: e.target.value };
-                          setInstructions({
-                            ...instructions,
-                            emailInstructions: {
-                              ...instructions.emailInstructions,
-                              invitation: {
-                                ...instructions.emailInstructions.invitation,
-                                examples: updatedExamples
-                              }
-                            }
-                          });
-                        }}
-                        rows={2}
-                        placeholder="Why does this email work well? What was the open rate? Click rate?"
-                        className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <div className="mt-6 pt-4 border-t border-[#f4f0f0]">
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save Email Examples'}
-                </button>
-              </div>
-            </div>
+            <UnifiedExamplesKnowledgeBase
+              title="Email Examples Knowledge Base"
+              description="Add examples of emails you like across all types. Organized by email type, not funnel stage."
+              examples={instructions.emailInstructions.invitation.examples}
+              onAddExample={addEmailExample}
+              onUpdateExample={updateEmailExample}
+              onDeleteExample={removeEmailExample}
+              onSave={handleSave}
+            />
           </div>
         )}
 

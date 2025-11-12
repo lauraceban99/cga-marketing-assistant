@@ -7,7 +7,7 @@ interface LandingPageExamplesKnowledgeBaseProps {
   title: string;
   description: string;
   examples: CampaignExample[];
-  onAddExample: (market: Market) => void;
+  onAddExample: (market: Market, platform: Platform) => void;
   onUpdateExample: (index: number, field: keyof CampaignExample, value: any) => void;
   onDeleteExample: (index: number) => void;
   onSave: () => void;
@@ -228,7 +228,7 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
 
       {/* Add Example Button */}
       <button
-        onClick={() => onAddExample(activeMarket)}
+        onClick={() => onAddExample(activeMarket, activePlatform)}
         className="w-full px-4 py-3 bg-[#f4f0f0] text-[#780817] border-2 border-dashed border-[#780817] rounded-lg hover:bg-[#780817] hover:text-white transition-colors font-semibold"
       >
         + Add {platformConfig[activePlatform].label} Example for {marketConfig[activeMarket].label}

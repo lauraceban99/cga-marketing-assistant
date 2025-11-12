@@ -212,30 +212,42 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
           </>
         )}
 
-        {/* Title/Headline - Different label for blogs */}
+        {/* Title/Headline - Different label for blogs and emails */}
         <div>
           <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
-            {example.type === 'blog' ? 'Blog Title *' : 'Headline (optional)'}
+            {example.type === 'blog' ? 'Blog Title *' :
+             example.type === 'email' ? 'Subject Line *' :
+             'Headline (optional)'}
           </label>
           <input
             type="text"
             value={example.headline || ''}
             onChange={(e) => onUpdate('headline', e.target.value)}
-            placeholder={example.type === 'blog' ? 'Enter the blog post title' : 'e.g., Where Learning Meets Life'}
+            placeholder={
+              example.type === 'blog' ? 'Enter the blog post title' :
+              example.type === 'email' ? 'e.g., [First Name], Ready to Transform Your Teen\'s Education?' :
+              'e.g., Where Learning Meets Life'
+            }
             className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
           />
         </div>
 
-        {/* Body/Content - Different label for blogs */}
+        {/* Body/Content - Different label for blogs and emails */}
         <div>
           <label className="block text-xs font-medium text-[#4b0f0d] mb-1">
-            {example.type === 'blog' ? 'Blog Body/Content *' : 'Body Copy *'}
+            {example.type === 'blog' ? 'Blog Body/Content *' :
+             example.type === 'email' ? 'Email Body *' :
+             'Body Copy *'}
           </label>
           <textarea
             value={example.copy}
             onChange={(e) => onUpdate('copy', e.target.value)}
-            rows={example.type === 'blog' ? 10 : 5}
-            placeholder={example.type === 'blog' ? 'Paste the full blog post text' : 'Paste the full copy here...'}
+            rows={example.type === 'blog' ? 10 : example.type === 'email' ? 8 : 5}
+            placeholder={
+              example.type === 'blog' ? 'Paste the full blog post text' :
+              example.type === 'email' ? 'Paste the full email body here, including preview text, greeting, body copy, and sign-off. The AI will learn from the tone and structure.' :
+              'Paste the full copy here...'
+            }
             className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
           />
         </div>
