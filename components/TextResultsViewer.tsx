@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { marked } from 'marked';
 import type { GeneratedContent } from '../services/textGenerationService';
 import type { AdCopyVariation } from '../services/textGenerationService';
 import { saveApprovedGeneratedContent } from '../services/feedbackService';
@@ -466,6 +467,17 @@ const TextResultsViewer: React.FC<TextResultsViewerProps> = ({ content, brand, u
     );
   }
 
+  // Parse and render formatted content for blog, landing page, email
+  const parseContent = () => {
+    try {
+      return JSON.parse(editedContent['main'] || content.content || '{}');
+    } catch {
+      return null;
+    }
+  };
+
+  const parsedContent = parseContent();
+
   // Render other content types (blog, landing page, email)
   return (
     <div className="max-w-4xl mx-auto py-8">
@@ -497,7 +509,7 @@ const TextResultsViewer: React.FC<TextResultsViewerProps> = ({ content, brand, u
             </h2>
             <p className="text-sm text-[#9b9b9b]">
               {content.metadata.wordCount} words • {content.metadata.characterCount} characters
-              {content.metadata.campaignStage && ` • ${content.metadata.campaignStage.toUpperCase()}`}
+              {content.metadata.campaignStage && content.type !== 'blog' && ` • ${content.metadata.campaignStage.toUpperCase()}`}
               {content.metadata.emailType && ` • ${content.metadata.emailType}`}
             </p>
           </div>
@@ -510,36 +522,120 @@ const TextResultsViewer: React.FC<TextResultsViewerProps> = ({ content, brand, u
         </div>
 
         {/* Content Display or Editor */}
-        <div className="prose max-w-none">
-          {editingId === 'main' ? (
-            <div className="space-y-4">
-              <textarea
-                value={editedContent['main'] || content.content}
-                onChange={(e) => setEditedContent({ ...editedContent, main: e.target.value })}
-                rows={20}
-                className="w-full p-4 border-2 border-[#780817] rounded-lg font-sans text-[#4b0f0d] leading-relaxed focus:ring-2 focus:ring-[#780817]"
-              />
-              <div className="flex gap-4">
-                <button
-                  onClick={() => handleSaveEdit('main')}
-                  className="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors"
-                >
-                  ✓ Save Changes
-                </button>
-                <button
-                  onClick={() => handleCancelEdit('main')}
-                  className="px-6 py-2 bg-gray-400 text-white font-semibold rounded-md hover:bg-gray-500 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
+        {editingId === 'main' ? (
+          <div className="space-y-4">
+            <textarea
+              value={editedContent['main'] || content.content}
+              onChange={(e) => setEditedContent({ ...editedContent, main: e.target.value })}
+              rows={20}
+              className="w-full p-4 border-2 border-[#780817] rounded-lg font-sans text-[#4b0f0d] leading-relaxed focus:ring-2 focus:ring-[#780817]"
+            />
+            <div className="flex gap-4">
+              <button
+                onClick={() => handleSaveEdit('main')}
+                className="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors"
+              >
+                ✓ Save Changes
+              </button>
+              <button
+                onClick={() => handleCancelEdit('main')}
+                className="px-6 py-2 bg-gray-400 text-white font-semibold rounded-md hover:bg-gray-500 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
-          ) : (
-            <pre className="whitespace-pre-wrap font-sans text-[#4b0f0d] leading-relaxed">
-              {editedContent['main'] || content.content}
-            </pre>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div>
+            {/* Render formatted content based on type */}
+            {content.type === 'blog' && parsedContent ? (
+              <div className="space-y-6">
+                {/* Blog Title */}
+                <div className="border-b-2 border-[#f4f0f0] pb-4">
+                  <h1 className="text-4xl font-bold text-[#4b0f0d] mb-3">{parsedContent.headline}</h1>
+                  {parsedContent.metaDescription && (
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                      <p className="text-xs text-[#9b9b9b] font-semibold mb-1">SEO META DESCRIPTION</p>
+                      <p className="text-sm text-[#4b0f0d]">{parsedContent.metaDescription}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Keywords */}
+                {parsedContent.keywords && parsedContent.keywords.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs text-[#9b9b9b] font-semibold mr-2">KEYWORDS:</span>
+                    {parsedContent.keywords.map((keyword: string, i: number) => (
+                      <span key={i} className="text-xs bg-[#780817]/10 text-[#780817] px-3 py-1 rounded-full font-medium">
+                        {keyword}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Blog Content */}
+                <div className="prose prose-lg max-w-none blog-content">
+                  <style>{`
+                    .blog-content h1 {
+                      font-size: 2rem;
+                      font-weight: 700;
+                      margin-top: 2rem;
+                      margin-bottom: 1rem;
+                      color: #4b0f0d;
+                    }
+                    .blog-content h2 {
+                      font-size: 1.5rem;
+                      font-weight: 700;
+                      margin-top: 1.5rem;
+                      margin-bottom: 0.75rem;
+                      color: #780817;
+                    }
+                    .blog-content h3 {
+                      font-size: 1.25rem;
+                      font-weight: 700;
+                      margin-top: 1rem;
+                      margin-bottom: 0.5rem;
+                      color: #04114a;
+                    }
+                    .blog-content p {
+                      margin-bottom: 1rem;
+                      line-height: 1.75;
+                      color: #4b0f0d;
+                    }
+                    .blog-content a {
+                      color: #780817;
+                      text-decoration: underline;
+                    }
+                    .blog-content a:hover {
+                      color: #4b0f0d;
+                    }
+                    .blog-content strong {
+                      font-weight: 600;
+                      color: #4b0f0d;
+                    }
+                    .blog-content ul, .blog-content ol {
+                      margin-left: 1.5rem;
+                      margin-bottom: 1rem;
+                    }
+                    .blog-content li {
+                      margin-bottom: 0.5rem;
+                    }
+                  `}</style>
+                  <div
+                    className="text-[#4b0f0d] leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: marked(parsedContent.content)
+                    }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <pre className="whitespace-pre-wrap font-sans text-[#4b0f0d] leading-relaxed">
+                {editedContent['main'] || content.content}
+              </pre>
+            )}
+          </div>
+        )}
 
         {/* Feedback & Edit Section */}
         {editingId !== 'main' && (
