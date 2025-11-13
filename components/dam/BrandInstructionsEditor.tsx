@@ -448,7 +448,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                 </button>
               </div>
 
-              {instructions.personas.map((persona, index) => (
+              {instructions.personas?.map((persona, index) => (
                 <div key={index} className="mb-6 p-4 bg-[#f4f0f0] rounded-lg">
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="font-semibold text-[#4b0f0d]">Persona {index + 1}</h4>
@@ -487,7 +487,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                           + Add Pain Point
                         </button>
                       </div>
-                      {persona.painPoints.map((painPoint, ppIndex) => (
+                      {persona.painPoints?.map((painPoint, ppIndex) => (
                         <div key={ppIndex} className="flex gap-2 mb-2">
                           <input
                             type="text"
