@@ -47,20 +47,61 @@ function buildSystemPrompt(
   dynamicPatterns?: PatternKnowledgeBase
 ): string {
   let typeInstructions: TypeSpecificInstructions;
+  let usingFallback = false;
 
   switch (contentType) {
     case 'ad-copy':
-      typeInstructions = brandInstructions.adCopyInstructions;
+      if (!brandInstructions.adCopyInstructions?.systemPrompt) {
+        console.warn('⚠️ Brand instructions missing adCopyInstructions - using generic fallback. Please configure brand instructions in DAM.');
+        usingFallback = true;
+        typeInstructions = {
+          systemPrompt: 'You are an expert ad copywriter. Create compelling, conversion-focused ad copy for social media and search platforms.',
+          requirements: 'Generate both short and long versions with diverse personas and angles.',
+          examples: [],
+          dos: ['Use emotional hooks', 'Create varied opening hooks', 'Target different personas', 'Keep mobile-optimized'],
+          donts: ['Never fabricate statistics', 'Never use exclamation marks', 'Never make all ads sound the same'],
+        };
+      } else {
+        typeInstructions = brandInstructions.adCopyInstructions;
+      }
       break;
     case 'blog':
-      typeInstructions = brandInstructions.blogInstructions;
+      if (!brandInstructions.blogInstructions?.systemPrompt) {
+        console.warn('⚠️ Brand instructions missing blogInstructions - using generic fallback. Please configure brand instructions in DAM.');
+        usingFallback = true;
+        typeInstructions = {
+          systemPrompt: 'You are an expert SEO and content writer. Create comprehensive, well-structured blog posts optimized for search and readability.',
+          requirements: 'Create 2,000-3,000 word posts with clear structure, SEO optimization, and actionable insights.',
+          examples: [],
+          dos: ['Use clear H2/H3 structure', 'Include 7+ image placeholders', 'Optimize for featured snippets', 'Provide actionable insights'],
+          donts: ['Never write short posts for important topics', 'Never keyword stuff', 'Never fabricate statistics'],
+        };
+      } else {
+        typeInstructions = brandInstructions.blogInstructions;
+      }
       break;
     case 'landing-page':
-      typeInstructions = brandInstructions.landingPageInstructions;
+      if (!brandInstructions.landingPageInstructions?.systemPrompt) {
+        console.warn('⚠️ Brand instructions missing landingPageInstructions - using generic fallback. Please configure brand instructions in DAM.');
+        usingFallback = true;
+        typeInstructions = {
+          systemPrompt: 'You are an expert conversion copywriter. Create high-performing landing page copy that drives action.',
+          requirements: 'Include hero section, value proposition, benefits, social proof, and clear CTA.',
+          examples: [],
+          dos: ['Put strongest benefit in hero headline', 'Use single primary CTA', 'Include social proof', 'Address objections'],
+          donts: ['Never fabricate testimonials', 'Never bury value proposition', 'Never use multiple competing CTAs'],
+        };
+      } else {
+        typeInstructions = brandInstructions.landingPageInstructions;
+      }
       break;
     case 'email':
       // Use optional chaining with fallback to prevent errors for old documents
       if (emailType === 'invitation') {
+        if (!brandInstructions.emailInstructions?.invitation?.systemPrompt) {
+          console.warn('⚠️ Brand instructions missing email invitation instructions - using generic fallback. Please configure brand instructions in DAM.');
+          usingFallback = true;
+        }
         typeInstructions = brandInstructions.emailInstructions?.invitation || {
           systemPrompt: 'Create a compelling invitation email that drives event attendance.',
           requirements: 'Include event details, clear value proposition, and single CTA.',
@@ -69,6 +110,10 @@ function buildSystemPrompt(
           donts: ['Never use generic invitations', 'Never bury event details', 'Never use multiple CTAs'],
         };
       } else if (emailType === 'nurturing-drip') {
+        if (!brandInstructions.emailInstructions?.nurturingDrip?.systemPrompt) {
+          console.warn('⚠️ Brand instructions missing email nurturing-drip instructions - using generic fallback. Please configure brand instructions in DAM.');
+          usingFallback = true;
+        }
         typeInstructions = brandInstructions.emailInstructions?.nurturingDrip || {
           systemPrompt: 'Create an educational nurturing email that builds trust and moves leads through the funnel.',
           requirements: 'Provide value first, build relationship, use appropriate CTA for stage.',
@@ -77,6 +122,10 @@ function buildSystemPrompt(
           donts: ['Never hard sell early', 'Never overwhelm with emails', 'Never use multiple CTAs'],
         };
       } else {
+        if (!brandInstructions.emailInstructions?.emailBlast?.systemPrompt) {
+          console.warn('⚠️ Brand instructions missing email blast instructions - using generic fallback. Please configure brand instructions in DAM.');
+          usingFallback = true;
+        }
         typeInstructions = brandInstructions.emailInstructions?.emailBlast || {
           systemPrompt: 'Create a newsworthy email blast with a single clear message and strong CTA.',
           requirements: 'Lead with news, create appropriate urgency, single focus message.',
@@ -88,6 +137,10 @@ function buildSystemPrompt(
       break;
     default:
       throw new Error(`Unknown content type: ${contentType}`);
+  }
+
+  if (usingFallback) {
+    console.warn(`⚠️ USING GENERIC ${contentType.toUpperCase()} INSTRUCTIONS. Output quality will improve once brand-specific instructions are configured in the DAM.`);
   }
 
   let systemPrompt = `${typeInstructions.systemPrompt}

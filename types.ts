@@ -228,14 +228,14 @@ export interface BrandInstructions {
     bofu: string;
   };
 
-  // Type-specific instructions
-  adCopyInstructions: TypeSpecificInstructions;
-  blogInstructions: TypeSpecificInstructions;
-  landingPageInstructions: TypeSpecificInstructions;
+  // Type-specific instructions (all optional for graceful fallback handling)
+  adCopyInstructions?: TypeSpecificInstructions;
+  blogInstructions?: TypeSpecificInstructions;
+  landingPageInstructions?: TypeSpecificInstructions;
   emailInstructions?: {
-    invitation: TypeSpecificInstructions;
-    nurturingDrip: TypeSpecificInstructions;
-    emailBlast: TypeSpecificInstructions;
+    invitation?: TypeSpecificInstructions;
+    nurturingDrip?: TypeSpecificInstructions;
+    emailBlast?: TypeSpecificInstructions;
   };
 
   // Reference materials (e.g., zoom interview transcripts)

@@ -124,12 +124,15 @@ export function replaceTemplateVariables(
 
 /**
  * Validate instructions (basic validation)
+ * Note: Type-specific instructions are optional - generic fallbacks will be used if missing
  */
 export function validateInstructions(
   instructions: Partial<BrandInstructions>
-): { valid: boolean; errors: string[] } {
+): { valid: boolean; errors: string[]; warnings: string[] } {
   const errors: string[] = [];
+  const warnings: string[] = [];
 
+  // Required fields (errors if missing)
   if (!instructions.brandIntroduction || instructions.brandIntroduction.trim().length === 0) {
     errors.push('Brand introduction is required');
   }
@@ -142,26 +145,34 @@ export function validateInstructions(
     errors.push('Tone of voice is required');
   }
 
+  // Optional fields (warnings if missing - fallbacks will be used)
   if (!instructions.adCopyInstructions?.systemPrompt) {
-    errors.push('Ad copy instructions are required');
+    warnings.push('Ad copy instructions not configured - generic fallback will be used');
   }
 
   if (!instructions.blogInstructions?.systemPrompt) {
-    errors.push('Blog instructions are required');
+    warnings.push('Blog instructions not configured - generic fallback will be used');
   }
 
   if (!instructions.landingPageInstructions?.systemPrompt) {
-    errors.push('Landing page instructions are required');
+    warnings.push('Landing page instructions not configured - generic fallback will be used');
   }
 
-  if (!instructions.emailInstructions?.invitation?.systemPrompt ||
-      !instructions.emailInstructions?.nurturingDrip?.systemPrompt ||
-      !instructions.emailInstructions?.emailBlast?.systemPrompt) {
-    errors.push('All email type instructions are required');
+  if (!instructions.emailInstructions?.invitation?.systemPrompt) {
+    warnings.push('Email invitation instructions not configured - generic fallback will be used');
+  }
+
+  if (!instructions.emailInstructions?.nurturingDrip?.systemPrompt) {
+    warnings.push('Email nurturing drip instructions not configured - generic fallback will be used');
+  }
+
+  if (!instructions.emailInstructions?.emailBlast?.systemPrompt) {
+    warnings.push('Email blast instructions not configured - generic fallback will be used');
   }
 
   return {
     valid: errors.length === 0,
     errors,
+    warnings,
   };
 }
