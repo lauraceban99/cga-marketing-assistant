@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { doc, getDoc, updateDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../services/firebaseService';
+import { getDefaultInstructions } from '../../constants/damConfig';
 import type { CampaignExample } from '../../types';
 
 interface AddExamplesButtonProps {
@@ -1061,9 +1062,15 @@ Tone: Reassuring, detailed, parent-focused`,
       if (!brandDoc.exists()) {
         // Create brand instructions document if it doesn't exist
         setStatus('Creating brand instructions structure...');
-        const minimalInstructions = {
-          brandId,
+
+        // Get default instructions structure
+        const defaultInstructions = getDefaultInstructions(brandId);
+
+        // Merge default instructions with landing page examples
+        const fullInstructions = {
+          ...defaultInstructions,
           landingPageInstructions: {
+            ...defaultInstructions.landingPageInstructions,
             examples: landingPageExamples
           },
           createdAt: Timestamp.now(),
@@ -1071,7 +1078,7 @@ Tone: Reassuring, detailed, parent-focused`,
           version: 1
         };
 
-        await setDoc(brandDocRef, minimalInstructions);
+        await setDoc(brandDocRef, fullInstructions);
         setStatus(`✅ Success! Created brand instructions and added ${landingPageExamples.length} landing page examples.`);
       } else {
         const instructions = brandDoc.data();
