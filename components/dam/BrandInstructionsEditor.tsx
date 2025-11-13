@@ -407,7 +407,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               </label>
               <input
                 type="text"
-                value={instructions.coreValues.join(', ')}
+                value={instructions.coreValues?.join(', ') || ''}
                 onChange={(e) => setInstructions({
                   ...instructions,
                   coreValues: e.target.value.split(',').map(v => v.trim()).filter(v => v)
@@ -423,7 +423,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                 Key Messaging Points (comma-separated)
               </label>
               <textarea
-                value={instructions.keyMessaging.join(', ')}
+                value={instructions.keyMessaging?.join(', ') || ''}
                 onChange={(e) => setInstructions({
                   ...instructions,
                   keyMessaging: e.target.value.split(',').map(v => v.trim()).filter(v => v)
