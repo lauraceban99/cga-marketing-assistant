@@ -152,7 +152,7 @@ ${ex.whatWorks ? `\n💡 WHY THIS WORKS (Marketer Insights):\n${ex.whatWorks}\n`
 ${ex.notes ? `Notes: ${ex.notes}` : ''}
 `).join('\n')}
 
-${brandInstructions.referenceMaterials.interviews ? `
+${brandInstructions.referenceMaterials?.interviews ? `
 INTERVIEW TRANSCRIPTS (Use for authentic voice, don't fabricate):
 ${brandInstructions.referenceMaterials.interviews}
 ` : ''}

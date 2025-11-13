@@ -239,7 +239,7 @@ export interface BrandInstructions {
   };
 
   // Reference materials (e.g., zoom interview transcripts)
-  referenceMaterials: {
+  referenceMaterials?: {
     interviews?: string;
     testimonials?: string;
     otherNotes?: string;

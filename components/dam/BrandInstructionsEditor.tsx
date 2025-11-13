@@ -527,10 +527,10 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                 </span>
               </label>
               <textarea
-                value={instructions.referenceMaterials.interviews || ''}
+                value={instructions.referenceMaterials?.interviews || ''}
                 onChange={(e) => setInstructions({
                   ...instructions,
-                  referenceMaterials: { ...instructions.referenceMaterials, interviews: e.target.value }
+                  referenceMaterials: { ...(instructions.referenceMaterials || {}), interviews: e.target.value }
                 })}
                 rows={10}
                 className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817] font-mono text-sm"
@@ -544,10 +544,10 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                 Real Testimonials
               </label>
               <textarea
-                value={instructions.referenceMaterials.testimonials || ''}
+                value={instructions.referenceMaterials?.testimonials || ''}
                 onChange={(e) => setInstructions({
                   ...instructions,
-                  referenceMaterials: { ...instructions.referenceMaterials, testimonials: e.target.value }
+                  referenceMaterials: { ...(instructions.referenceMaterials || {}), testimonials: e.target.value }
                 })}
                 rows={6}
                 className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
