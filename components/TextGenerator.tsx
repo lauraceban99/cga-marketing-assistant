@@ -83,6 +83,70 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
     }
   };
 
+  const getSuggestedLength = (): { value: number; unit: 'words' | 'characters'; explanation: string } => {
+    switch (taskType) {
+      case 'ad-copy':
+        if (platform === 'META') {
+          return {
+            value: 125,
+            unit: 'characters',
+            explanation: 'META primary text: 125 chars (mobile-optimized, hook + value prop)'
+          };
+        } else {
+          return {
+            value: 90,
+            unit: 'characters',
+            explanation: 'GOOGLE RSA headline: 30 chars each (3 headlines = 90 total)'
+          };
+        }
+      case 'blog':
+        return {
+          value: 1500,
+          unit: 'words',
+          explanation: 'SEO-optimized blog: 1500-2000 words (ranks well, comprehensive)'
+        };
+      case 'landing-page':
+        return {
+          value: 800,
+          unit: 'words',
+          explanation: 'Landing page: 600-1000 words (enough detail without overwhelming)'
+        };
+      case 'email':
+        if (emailType === 'invitation') {
+          return {
+            value: 200,
+            unit: 'words',
+            explanation: 'Invitation email: 150-250 words (clear event details + CTA)'
+          };
+        } else if (emailType === 'nurturing-drip') {
+          return {
+            value: 300,
+            unit: 'words',
+            explanation: 'Nurturing email: 250-400 words (educational value + soft CTA)'
+          };
+        } else {
+          return {
+            value: 150,
+            unit: 'words',
+            explanation: 'Email blast: 100-200 words (news + urgency + strong CTA)'
+          };
+        }
+      default:
+        return {
+          value: 150,
+          unit: 'words',
+          explanation: 'Standard content length'
+        };
+    }
+  };
+
+  // Update length when task type or email type changes
+  useEffect(() => {
+    const suggested = getSuggestedLength();
+    setLengthValue(suggested.value);
+    setLengthUnit(suggested.unit);
+  }, [taskType, emailType, platform]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -297,10 +361,13 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
                 <option value="characters">Characters</option>
               </select>
             </div>
-            <p className="text-xs text-[#9b9b9b] mt-2">
+            <p className="text-xs text-[#4b0f0d] font-medium mt-2">
+              💡 Suggested: {getSuggestedLength().explanation}
+            </p>
+            <p className="text-xs text-[#9b9b9b] mt-1">
               {taskType === 'ad-copy'
-                ? 'This is a guideline; short and long versions will be generated for each variation.'
-                : 'Approximate target length for the content.'}
+                ? 'Short and long versions will be generated for each variation.'
+                : 'You can adjust this based on your specific needs.'}
             </p>
           </div>
         </div>

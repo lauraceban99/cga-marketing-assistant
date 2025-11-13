@@ -59,12 +59,22 @@ function buildSystemPrompt(
       typeInstructions = brandInstructions.landingPageInstructions;
       break;
     case 'email':
+      // Use optional chaining with fallback to prevent errors for old documents
       if (emailType === 'invitation') {
-        typeInstructions = brandInstructions.emailInstructions.invitation;
+        typeInstructions = brandInstructions.emailInstructions?.invitation || {
+          systemPrompt: 'Create a compelling invitation email that drives event attendance.',
+          examples: [],
+        };
       } else if (emailType === 'nurturing-drip') {
-        typeInstructions = brandInstructions.emailInstructions.nurturingDrip;
+        typeInstructions = brandInstructions.emailInstructions?.nurturingDrip || {
+          systemPrompt: 'Create an educational nurturing email that builds trust and moves leads through the funnel.',
+          examples: [],
+        };
       } else {
-        typeInstructions = brandInstructions.emailInstructions.emailBlast;
+        typeInstructions = brandInstructions.emailInstructions?.emailBlast || {
+          systemPrompt: 'Create a newsworthy email blast with a single clear message and strong CTA.',
+          examples: [],
+        };
       }
       break;
     default:
