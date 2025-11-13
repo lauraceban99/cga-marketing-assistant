@@ -222,7 +222,7 @@ export interface BrandInstructions {
   keyMessaging: string[];
 
   // Campaign-specific CTAs and messaging
-  campaignInstructions: {
+  campaignInstructions?: {
     tofu: string;
     mofu: string;
     bofu: string;

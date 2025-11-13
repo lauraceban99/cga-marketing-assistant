@@ -63,17 +63,26 @@ function buildSystemPrompt(
       if (emailType === 'invitation') {
         typeInstructions = brandInstructions.emailInstructions?.invitation || {
           systemPrompt: 'Create a compelling invitation email that drives event attendance.',
+          requirements: 'Include event details, clear value proposition, and single CTA.',
           examples: [],
+          dos: ['Personalize subject line', 'Include clear event details', 'Use single CTA'],
+          donts: ['Never use generic invitations', 'Never bury event details', 'Never use multiple CTAs'],
         };
       } else if (emailType === 'nurturing-drip') {
         typeInstructions = brandInstructions.emailInstructions?.nurturingDrip || {
           systemPrompt: 'Create an educational nurturing email that builds trust and moves leads through the funnel.',
+          requirements: 'Provide value first, build relationship, use appropriate CTA for stage.',
           examples: [],
+          dos: ['Provide educational value', 'Build relationship progressively', 'Use single clear CTA'],
+          donts: ['Never hard sell early', 'Never overwhelm with emails', 'Never use multiple CTAs'],
         };
       } else {
         typeInstructions = brandInstructions.emailInstructions?.emailBlast || {
           systemPrompt: 'Create a newsworthy email blast with a single clear message and strong CTA.',
+          requirements: 'Lead with news, create appropriate urgency, single focus message.',
           examples: [],
+          dos: ['Lead with the news', 'Create genuine urgency', 'Use single clear CTA'],
+          donts: ['Never bury the lead', 'Never create false urgency', 'Never use multiple CTAs'],
         };
       }
       break;
@@ -223,12 +232,14 @@ ${userRequest}
 `;
 
   // Add campaign stage context
-  if (campaignStage) {
+  if (campaignStage && brandInstructions.campaignInstructions) {
     const stageInstructions = brandInstructions.campaignInstructions[campaignStage];
-    userPrompt += `CAMPAIGN STAGE: ${campaignStage.toUpperCase()}
+    if (stageInstructions) {
+      userPrompt += `CAMPAIGN STAGE: ${campaignStage.toUpperCase()}
 ${stageInstructions}
 
 `;
+    }
   }
 
   // Add length specification
