@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { doc, getDoc, updateDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../services/firebaseService';
 import { getDefaultInstructions } from '../../constants/damConfig';
-import type { CampaignExample } from '../../types';
+import { updatePatternKnowledge } from '../../services/patternKnowledgeService';
+import type { CampaignExample, Market, Platform } from '../../types';
 
 interface AddExamplesButtonProps {
   brandId: string;
@@ -12,6 +13,54 @@ interface AddExamplesButtonProps {
 const AddExamplesButton: React.FC<AddExamplesButtonProps> = ({ brandId, onComplete }) => {
   const [adding, setAdding] = useState(false);
   const [status, setStatus] = useState('');
+
+  /**
+   * Extract patterns from landing page examples
+   * Groups examples by market + platform and calls pattern extraction
+   */
+  const extractPatternsFromLandingPages = async () => {
+    console.log('🤖 Extracting patterns from landing page examples...');
+
+    // Group examples by market + platform
+    const groupedExamples = new Map<string, { market: Market; platform: Platform; examples: CampaignExample[] }>();
+
+    landingPageExamples.forEach((example) => {
+      if (example.market && example.platform) {
+        const key = `${example.market}-${example.platform}`;
+
+        if (!groupedExamples.has(key)) {
+          groupedExamples.set(key, {
+            market: example.market,
+            platform: example.platform,
+            examples: [],
+          });
+        }
+
+        groupedExamples.get(key)!.examples.push(example);
+      }
+    });
+
+    // Extract patterns for each group
+    let extractedCount = 0;
+    for (const [key, group] of groupedExamples) {
+      try {
+        console.log(`📊 Extracting patterns for ${key} (${group.examples.length} examples)`);
+        await updatePatternKnowledge(
+          brandId,
+          group.market,
+          group.platform,
+          'landing-page',
+          group.examples
+        );
+        extractedCount++;
+      } catch (error) {
+        console.error(`Error extracting patterns for ${key}:`, error);
+      }
+    }
+
+    console.log(`✅ Extracted patterns for ${extractedCount} market+platform combinations`);
+    setStatus(`✅ Success! Added ${landingPageExamples.length} examples and extracted ${extractedCount} pattern groups.`);
+  };
 
   const landingPageExamples: CampaignExample[] = [
     // EMEA META Examples
@@ -1079,7 +1128,10 @@ Tone: Reassuring, detailed, parent-focused`,
         };
 
         await setDoc(brandDocRef, fullInstructions);
-        setStatus(`✅ Success! Created brand instructions and added ${landingPageExamples.length} landing page examples.`);
+        setStatus(`✅ Success! Created brand instructions and added ${landingPageExamples.length} landing page examples. Extracting patterns...`);
+
+        // Extract patterns from the newly added examples
+        await extractPatternsFromLandingPages();
       } else {
         const instructions = brandDoc.data();
         currentExamples = instructions.landingPageInstructions?.examples || [];
@@ -1098,7 +1150,10 @@ Tone: Reassuring, detailed, parent-focused`,
           'landingPageInstructions.examples': updatedExamples
         });
 
-        setStatus(`✅ Success! Added ${landingPageExamples.length} landing page examples.`);
+        setStatus(`✅ Success! Added ${landingPageExamples.length} landing page examples. Extracting patterns...`);
+
+        // Extract patterns from the newly added examples
+        await extractPatternsFromLandingPages();
       }
 
       setTimeout(() => {
