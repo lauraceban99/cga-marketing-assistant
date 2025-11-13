@@ -11,7 +11,9 @@ import type {
 } from '../types';
 import { getBrandInstructions } from '../services/instructionsService';
 import { generateTextContent, type AdCopyVariation, type GeneratedContent } from '../services/textGenerationService';
+import { checkMissingInstructions, shouldShowWarning, type MissingInstruction } from '../utils/instructionsValidator';
 import LoadingSpinner from './LoadingSpinner';
+import InstructionsWarningModal from './InstructionsWarningModal';
 
 interface TextGeneratorProps {
   brand: Brand;
@@ -35,6 +37,10 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
   const [lengthUnit, setLengthUnit] = useState<'words' | 'characters'>('words');
   const [market, setMarket] = useState<Market>('EMEA');
   const [platform, setPlatform] = useState<Platform>('META');
+
+  // Warning modal state
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [missingInstructions, setMissingInstructions] = useState<MissingInstruction[]>([]);
 
   useEffect(() => {
     const loadInstructions = async () => {
@@ -147,9 +153,10 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
     setLengthUnit(suggested.unit);
   }, [taskType, emailType, platform]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  /**
+   * Execute the actual generation (called either directly or after modal confirmation)
+   */
+  const executeGeneration = async () => {
     if (!brandInstructions) {
       setError('Brand instructions not loaded. Please try again.');
       return;
@@ -157,6 +164,7 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
 
     setIsLoading(true);
     setError('');
+    setShowWarningModal(false); // Close modal if open
 
     try {
       const lengthSpec: LengthSpecification = {
@@ -184,6 +192,34 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /**
+   * Handle form submission - check for missing instructions first
+   */
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!brandInstructions) {
+      setError('Brand instructions not loaded. Please try again.');
+      return;
+    }
+
+    // Check if there are missing instructions
+    const missing = checkMissingInstructions(
+      brandInstructions,
+      taskType,
+      taskType === 'email' ? emailType : undefined
+    );
+
+    if (missing.length > 0) {
+      // Show warning modal
+      setMissingInstructions(missing);
+      setShowWarningModal(true);
+    } else {
+      // No missing instructions, proceed directly
+      executeGeneration();
     }
   };
 
@@ -387,6 +423,17 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
           </button>
         </div>
       </form>
+
+      {/* Warning Modal */}
+      <InstructionsWarningModal
+        isOpen={showWarningModal}
+        onClose={() => setShowWarningModal(false)}
+        onProceed={executeGeneration}
+        contentType={taskType}
+        emailType={taskType === 'email' ? emailType : undefined}
+        missingInstructions={missingInstructions}
+        brandId={brand.id}
+      />
     </div>
   );
 };
