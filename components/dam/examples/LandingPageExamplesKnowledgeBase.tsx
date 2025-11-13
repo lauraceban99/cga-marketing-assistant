@@ -95,8 +95,8 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
         <p className="text-sm text-[#9b9b9b] mt-1">{description}</p>
       </div>
 
-      {/* Quick Setup Button - Show when fewer than 14 examples (template has 14) */}
-      {examples.length < 14 && (
+      {/* Quick Setup Button - Show only for CGA brand when fewer than 14 examples */}
+      {brandId === 'cga' && examples.length < 14 && (
         <AddExamplesButton
           brandId={brandId}
           onComplete={onComplete}
@@ -114,87 +114,78 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
             <button
               key={platform}
               onClick={() => setActivePlatform(platform)}
-              className={`flex-1 px-6 py-4 rounded-lg border-2 transition-all ${
+              className={`flex-1 px-4 py-3 rounded-lg border-2 transition-all text-left ${
                 isActive
-                  ? `${config.bgColor} ${config.borderColor} shadow-md`
+                  ? `${config.bgColor} ${config.borderColor} shadow-sm`
                   : 'bg-white border-[#f4f0f0] hover:border-[#9b9b9b]'
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl">{config.icon}</span>
-                {count > 0 && (
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      isActive ? `${config.bgColor} ${config.textColor}` : 'bg-[#f4f0f0] text-[#9b9b9b]'
-                    }`}
-                  >
-                    {count} examples
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{config.icon}</span>
+                  <span className={`font-bold text-sm ${isActive ? config.textColor : 'text-[#4b0f0d]'}`}>
+                    {config.label}
                   </span>
-                )}
-              </div>
-              <div className={`font-bold ${isActive ? config.textColor : 'text-[#4b0f0d]'}`}>
-                {config.label}
-              </div>
-              <div className={`text-xs mt-1 ${isActive ? config.textColor : 'text-[#9b9b9b]'}`}>
-                {config.fullName}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Platform description */}
-      <div className={`mb-4 p-4 rounded-md ${platformConfig[activePlatform].bgColor} ${platformConfig[activePlatform].borderColor} border-2`}>
-        <p className={`text-sm font-semibold mb-1 ${platformConfig[activePlatform].textColor}`}>
-          {platformConfig[activePlatform].icon} {platformConfig[activePlatform].fullName}
-        </p>
-        <p className="text-xs text-[#4b0f0d]">
-          {platformConfig[activePlatform].description}
-        </p>
-      </div>
-
-      {/* Market Tabs - SECONDARY */}
-      <div className="flex gap-2 mb-6 border-b-2 border-[#f4f0f0]">
-        {(['ASIA', 'EMEA', 'ANZ', 'Japan'] as Market[]).map((market) => {
-          const config = marketConfig[market];
-          const count = examples.filter((ex) => ex.platform === activePlatform && ex.market === market).length;
-          const isActive = activeMarket === market;
-
-          return (
-            <button
-              key={market}
-              onClick={() => setActiveMarket(market)}
-              className={`px-4 py-2 font-medium text-sm transition-all relative ${
-                isActive
-                  ? 'text-[#780817] border-b-2 border-[#780817] -mb-0.5'
-                  : 'text-[#9b9b9b] hover:text-[#4b0f0d]'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span>{config.label}</span>
+                </div>
                 {count > 0 && (
                   <span
-                    className={`px-1.5 py-0.5 rounded-full text-xs ${
-                      isActive ? 'bg-[#780817] text-white' : 'bg-[#f4f0f0] text-[#9b9b9b]'
+                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      isActive ? `${config.bgColor} ${config.textColor}` : 'bg-[#f4f0f0] text-[#9b9b9b]'
                     }`}
                   >
                     {count}
                   </span>
                 )}
               </div>
+              <div className={`text-xs ${isActive ? config.textColor : 'text-[#9b9b9b]'}`}>
+                {config.description}
+              </div>
             </button>
           );
         })}
       </div>
 
-      {/* Market description */}
-      <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
-        <p className="text-sm text-[#4b0f0d] font-semibold mb-1">
-          {marketConfig[activeMarket].fullName}
-        </p>
-        <p className="text-xs text-[#9b9b9b]">
-          {marketConfig[activeMarket].description}
-        </p>
+      {/* Market Tabs - SECONDARY */}
+      <div className="mb-6">
+        <div className="flex gap-2 mb-3 pb-2 border-b-2 border-[#f4f0f0]">
+          {(['ASIA', 'EMEA', 'ANZ', 'Japan'] as Market[]).map((market) => {
+            const config = marketConfig[market];
+            const count = examples.filter((ex) => ex.platform === activePlatform && ex.market === market).length;
+            const isActive = activeMarket === market;
+
+            return (
+              <button
+                key={market}
+                onClick={() => setActiveMarket(market)}
+                className={`px-3 py-1.5 font-medium text-sm transition-all rounded-t-md ${
+                  isActive
+                    ? 'text-[#780817] bg-amber-50 border-2 border-b-0 border-amber-200 -mb-0.5'
+                    : 'text-[#9b9b9b] hover:text-[#4b0f0d]'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span>{config.label}</span>
+                  {count > 0 && (
+                    <span
+                      className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${
+                        isActive ? 'bg-[#780817] text-white' : 'bg-[#f4f0f0] text-[#9b9b9b]'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Market description */}
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+          <p className="text-xs text-[#4b0f0d]">
+            <span className="font-semibold">{marketConfig[activeMarket].fullName}:</span> {marketConfig[activeMarket].description}
+          </p>
+        </div>
       </div>
 
       {/* Examples Grid */}

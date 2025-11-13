@@ -232,7 +232,7 @@ export interface BrandInstructions {
   adCopyInstructions: TypeSpecificInstructions;
   blogInstructions: TypeSpecificInstructions;
   landingPageInstructions: TypeSpecificInstructions;
-  emailInstructions: {
+  emailInstructions?: {
     invitation: TypeSpecificInstructions;
     nurturingDrip: TypeSpecificInstructions;
     emailBlast: TypeSpecificInstructions;

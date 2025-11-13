@@ -74,9 +74,9 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
       ...instructions.adCopyInstructions.examples,
       ...instructions.blogInstructions.examples,
       ...instructions.landingPageInstructions.examples,
-      ...instructions.emailInstructions.invitation.examples,
-      ...instructions.emailInstructions.nurturingDrip.examples,
-      ...instructions.emailInstructions.emailBlast.examples,
+      ...(instructions.emailInstructions?.invitation?.examples || []),
+      ...(instructions.emailInstructions?.nurturingDrip?.examples || []),
+      ...(instructions.emailInstructions?.emailBlast?.examples || []),
     ];
 
     // Group examples by market + platform + type
@@ -266,10 +266,10 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     setInstructions({
       ...instructions,
       emailInstructions: {
-        ...instructions.emailInstructions,
+        ...(instructions.emailInstructions || {}),
         invitation: {
-          ...instructions.emailInstructions.invitation,
-          examples: [...instructions.emailInstructions.invitation.examples, newExample]
+          ...(instructions.emailInstructions?.invitation || {}),
+          examples: [...(instructions.emailInstructions?.invitation?.examples || []), newExample]
         }
       }
     });
@@ -277,14 +277,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
 
   const updateEmailExample = (index: number, field: keyof CampaignExample, value: any) => {
     if (!instructions) return;
-    const updatedExamples = [...instructions.emailInstructions.invitation.examples];
+    const updatedExamples = [...(instructions.emailInstructions?.invitation?.examples || [])];
     updatedExamples[index] = { ...updatedExamples[index], [field]: value };
     setInstructions({
       ...instructions,
       emailInstructions: {
-        ...instructions.emailInstructions,
+        ...(instructions.emailInstructions || {}),
         invitation: {
-          ...instructions.emailInstructions.invitation,
+          ...(instructions.emailInstructions?.invitation || {}),
           examples: updatedExamples
         }
       }
@@ -293,13 +293,13 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
 
   const removeEmailExample = (index: number) => {
     if (!instructions) return;
-    const updatedExamples = instructions.emailInstructions.invitation.examples.filter((_, i) => i !== index);
+    const updatedExamples = (instructions.emailInstructions?.invitation?.examples || []).filter((_, i) => i !== index);
     setInstructions({
       ...instructions,
       emailInstructions: {
-        ...instructions.emailInstructions,
+        ...(instructions.emailInstructions || {}),
         invitation: {
-          ...instructions.emailInstructions.invitation,
+          ...(instructions.emailInstructions?.invitation || {}),
           examples: updatedExamples
         }
       }
@@ -940,12 +940,12 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     Psychology & Structure
                   </label>
                   <textarea
-                    value={instructions.emailInstructions.invitation.systemPrompt}
+                    value={instructions.emailInstructions?.invitation?.systemPrompt || ''}
                     onChange={(e) => setInstructions({
                       ...instructions,
                       emailInstructions: {
-                        ...instructions.emailInstructions,
-                        invitation: { ...instructions.emailInstructions.invitation, systemPrompt: e.target.value }
+                        ...(instructions.emailInstructions || {}),
+                        invitation: { ...(instructions.emailInstructions?.invitation || {}), systemPrompt: e.target.value }
                       }
                     })}
                     rows={8}
@@ -974,12 +974,12 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     Psychology & Structure
                   </label>
                   <textarea
-                    value={instructions.emailInstructions.nurturingDrip.systemPrompt}
+                    value={instructions.emailInstructions?.nurturingDrip?.systemPrompt || ''}
                     onChange={(e) => setInstructions({
                       ...instructions,
                       emailInstructions: {
-                        ...instructions.emailInstructions,
-                        nurturingDrip: { ...instructions.emailInstructions.nurturingDrip, systemPrompt: e.target.value }
+                        ...(instructions.emailInstructions || {}),
+                        nurturingDrip: { ...(instructions.emailInstructions?.nurturingDrip || {}), systemPrompt: e.target.value }
                       }
                     })}
                     rows={8}
@@ -1008,12 +1008,12 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     Psychology & Structure
                   </label>
                   <textarea
-                    value={instructions.emailInstructions.emailBlast.systemPrompt}
+                    value={instructions.emailInstructions?.emailBlast?.systemPrompt || ''}
                     onChange={(e) => setInstructions({
                       ...instructions,
                       emailInstructions: {
-                        ...instructions.emailInstructions,
-                        emailBlast: { ...instructions.emailInstructions.emailBlast, systemPrompt: e.target.value }
+                        ...(instructions.emailInstructions || {}),
+                        emailBlast: { ...(instructions.emailInstructions?.emailBlast || {}), systemPrompt: e.target.value }
                       }
                     })}
                     rows={8}
@@ -1035,7 +1035,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             <UnifiedExamplesKnowledgeBase
               title="Email Examples Knowledge Base"
               description="Add examples of emails you like across all types. Organized by email type, not funnel stage."
-              examples={instructions.emailInstructions.invitation.examples}
+              examples={instructions.emailInstructions?.invitation?.examples || []}
               onAddExample={addEmailExample}
               onUpdateExample={updateEmailExample}
               onDeleteExample={removeEmailExample}
