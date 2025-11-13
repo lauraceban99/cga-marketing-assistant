@@ -93,13 +93,13 @@ Our Solution: ${p.solution}
 `).join('\n')}
 
 REQUIREMENTS:
-${typeInstructions.requirements}
+${typeInstructions.requirements || 'Follow brand guidelines and best practices'}
 
 DO's:
-${typeInstructions.dos.map(d => `- ${d}`).join('\n')}
+${(typeInstructions.dos || []).map(d => `- ${d}`).join('\n') || '- Follow brand tone and voice\n- Be authentic and specific'}
 
 DON'Ts:
-${typeInstructions.donts.map(d => `- ${d}`).join('\n')}
+${(typeInstructions.donts || []).map(d => `- ${d}`).join('\n') || '- Avoid generic claims\n- Don\'t fabricate facts'}
 
 ${dynamicPatterns ? `
 🎯 DYNAMIC PATTERN KNOWLEDGE (${dynamicPatterns.market} Market - ${dynamicPatterns.platform} Platform):

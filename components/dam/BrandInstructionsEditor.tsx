@@ -573,7 +573,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <input
                     type="text"
-                    value={instructions.adCopyInstructions.requirements}
+                    value={instructions.adCopyInstructions.requirements || ''}
                     onChange={(e) => setInstructions({
                       ...instructions,
                       adCopyInstructions: { ...instructions.adCopyInstructions, requirements: e.target.value }
@@ -718,7 +718,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     <span className="text-xs text-[#9b9b9b] ml-2">Length, structure, SEO requirements</span>
                   </label>
                   <textarea
-                    value={instructions.blogInstructions.requirements}
+                    value={instructions.blogInstructions.requirements || ''}
                     onChange={(e) => setInstructions({
                       ...instructions,
                       blogInstructions: { ...instructions.blogInstructions, requirements: e.target.value }
@@ -808,7 +808,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     <span className="text-xs text-[#9b9b9b] ml-2">Structure: Hero → Value → How it works → Social Proof → FAQ → Final CTA</span>
                   </label>
                   <textarea
-                    value={instructions.landingPageInstructions.requirements}
+                    value={instructions.landingPageInstructions.requirements || ''}
                     onChange={(e) => setInstructions({
                       ...instructions,
                       landingPageInstructions: { ...instructions.landingPageInstructions, requirements: e.target.value }

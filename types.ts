@@ -205,10 +205,10 @@ export interface CampaignExample {
 
 export interface TypeSpecificInstructions {
   systemPrompt: string;
-  requirements: string;
+  requirements?: string;
   examples: CampaignExample[];
-  dos: string[];
-  donts: string[];
+  dos?: string[];
+  donts?: string[];
 }
 
 export interface BrandInstructions {
