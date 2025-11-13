@@ -87,20 +87,20 @@ BRAND CONTEXT:
 ${brandInstructions.brandIntroduction}
 
 CORE VALUES:
-${brandInstructions.coreValues.join(', ')}
+${(brandInstructions.coreValues || []).join(', ') || 'Not specified'}
 
 TONE OF VOICE:
 ${brandInstructions.toneOfVoice}
 
 KEY MESSAGING:
-${brandInstructions.keyMessaging.map((msg, i) => `${i + 1}. ${msg}`).join('\n')}
+${(brandInstructions.keyMessaging || []).map((msg, i) => `${i + 1}. ${msg}`).join('\n') || 'Not specified'}
 
 TARGET PERSONAS:
-${brandInstructions.personas.map(p => `
+${(brandInstructions.personas || []).map(p => `
 **${p.name}**: ${p.description}
-Pain Points: ${p.painPoints.join(', ')}
+Pain Points: ${(p.painPoints || []).join(', ')}
 Our Solution: ${p.solution}
-`).join('\n')}
+`).join('\n') || 'Not specified'}
 
 REQUIREMENTS:
 ${typeInstructions.requirements || 'Follow brand guidelines and best practices'}
@@ -118,22 +118,22 @@ This section contains patterns automatically extracted from high-performing ${co
 Apply these patterns to maximize conversion rates for this specific market and platform.
 
 HEADLINE STYLES THAT WORK:
-${dynamicPatterns.patterns.headlineStyles.map(s => `- ${s}`).join('\n')}
+${(dynamicPatterns.patterns?.headlineStyles || []).map(s => `- ${s}`).join('\n') || '- Not yet extracted'}
 
 STRUCTURE PATTERNS:
-${dynamicPatterns.patterns.structurePatterns.map(s => `- ${s}`).join('\n')}
+${(dynamicPatterns.patterns?.structurePatterns || []).map(s => `- ${s}`).join('\n') || '- Not yet extracted'}
 
 TONE CHARACTERISTICS:
-${dynamicPatterns.patterns.toneCharacteristics.map(s => `- ${s}`).join('\n')}
+${(dynamicPatterns.patterns?.toneCharacteristics || []).map(s => `- ${s}`).join('\n') || '- Not yet extracted'}
 
 CTA STRATEGIES:
-${dynamicPatterns.patterns.ctaStrategies.map(s => `- ${s}`).join('\n')}
+${(dynamicPatterns.patterns?.ctaStrategies || []).map(s => `- ${s}`).join('\n') || '- Not yet extracted'}
 
 CONVERSION TECHNIQUES:
-${dynamicPatterns.patterns.conversionTechniques.map(s => `- ${s}`).join('\n')}
+${(dynamicPatterns.patterns?.conversionTechniques || []).map(s => `- ${s}`).join('\n') || '- Not yet extracted'}
 
 SOCIAL PROOF APPROACHES:
-${dynamicPatterns.patterns.socialProofApproaches.map(s => `- ${s}`).join('\n')}
+${(dynamicPatterns.patterns?.socialProofApproaches || []).map(s => `- ${s}`).join('\n') || '- Not yet extracted'}
 
 AI-EXTRACTED INSIGHTS:
 ${dynamicPatterns.autoExtractedInsights}
