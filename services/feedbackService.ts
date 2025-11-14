@@ -170,7 +170,7 @@ export function formatApprovedContentAsInspiration(approvedContent: ApprovedCont
     inspiration += `Headline: ${item.variation.headline}\n`;
     inspiration += `Primary Text: ${item.variation.primaryText}\n`;
     inspiration += `CTA: ${item.variation.cta}\n`;
-    inspiration += `Keywords: ${item.variation.keywords.join(', ')}\n`;
+    inspiration += `Keywords: ${(item.variation.keywords || []).join(', ')}\n`;
     inspiration += `\n---\n\n`;
   });
 
