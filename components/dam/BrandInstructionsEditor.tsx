@@ -71,9 +71,9 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
 
     // Collect all examples from all content types
     const allExamples: CampaignExample[] = [
-      ...instructions.adCopyInstructions.examples,
-      ...instructions.blogInstructions.examples,
-      ...instructions.landingPageInstructions.examples,
+      ...(instructions.adCopyInstructions?.examples || []),
+      ...(instructions.blogInstructions?.examples || []),
+      ...(instructions.landingPageInstructions?.examples || []),
       ...(instructions.emailInstructions?.invitation?.examples || []),
       ...(instructions.emailInstructions?.nurturingDrip?.examples || []),
       ...(instructions.emailInstructions?.emailBlast?.examples || []),
@@ -573,7 +573,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <input
                     type="text"
-                    value={instructions.adCopyInstructions.requirements || ''}
+                    value={instructions.adCopyInstructions?.requirements || ''}
                     onChange={(e) => setInstructions({
                       ...instructions,
                       adCopyInstructions: { ...instructions.adCopyInstructions, requirements: e.target.value }
@@ -677,7 +677,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             <ExamplesKnowledgeBase
               title="Ad Copy Examples Knowledge Base"
               description="Add examples AI will learn from"
-              examples={instructions.adCopyInstructions.examples}
+              examples={instructions.adCopyInstructions?.examples || []}
               onAddExample={(stage) => addExample('adCopy', stage)}
               onUpdateExample={(index, field, value) => updateExample('adCopy', index, field, value)}
               onDeleteExample={(index) => removeExample('adCopy', index)}
@@ -701,7 +701,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     System Prompt for Blog Generation
                   </label>
                   <textarea
-                    value={instructions.blogInstructions.systemPrompt}
+                    value={instructions.blogInstructions?.systemPrompt || ''}
                     onChange={(e) => setInstructions({
                       ...instructions,
                       blogInstructions: { ...instructions.blogInstructions, systemPrompt: e.target.value }
@@ -718,7 +718,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     <span className="text-xs text-[#9b9b9b] ml-2">Length, structure, SEO requirements</span>
                   </label>
                   <textarea
-                    value={instructions.blogInstructions.requirements || ''}
+                    value={instructions.blogInstructions?.requirements || ''}
                     onChange={(e) => setInstructions({
                       ...instructions,
                       blogInstructions: { ...instructions.blogInstructions, requirements: e.target.value }
@@ -767,7 +767,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             <UnifiedExamplesKnowledgeBase
               title="Blog Examples Knowledge Base"
               description="Add examples AI will learn from. Stage categorization removed - blogs are organized by topic and quality, not funnel stage."
-              examples={instructions.blogInstructions.examples}
+              examples={instructions.blogInstructions?.examples || []}
               onAddExample={() => addExample('blog')}
               onUpdateExample={(index, field, value) => updateExample('blog', index, field, value)}
               onDeleteExample={(index) => removeExample('blog', index)}
@@ -791,7 +791,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     System Prompt for Landing Page Generation
                   </label>
                   <textarea
-                    value={instructions.landingPageInstructions.systemPrompt}
+                    value={instructions.landingPageInstructions?.systemPrompt || ''}
                     onChange={(e) => setInstructions({
                       ...instructions,
                       landingPageInstructions: { ...instructions.landingPageInstructions, systemPrompt: e.target.value }
@@ -808,7 +808,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     <span className="text-xs text-[#9b9b9b] ml-2">Structure: Hero → Value → How it works → Social Proof → FAQ → Final CTA</span>
                   </label>
                   <textarea
-                    value={instructions.landingPageInstructions.requirements || ''}
+                    value={instructions.landingPageInstructions?.requirements || ''}
                     onChange={(e) => setInstructions({
                       ...instructions,
                       landingPageInstructions: { ...instructions.landingPageInstructions, requirements: e.target.value }
@@ -868,7 +868,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             <LandingPageExamplesKnowledgeBase
               title="Landing Page Examples Knowledge Base"
               description="Add examples organized by market. AI will learn market-specific patterns."
-              examples={instructions.landingPageInstructions.examples}
+              examples={instructions.landingPageInstructions?.examples || []}
               onAddExample={(market, platform) => addExample('landingPage', 'mofu', market, platform)}
               onUpdateExample={(index, field, value) => updateExample('landingPage', index, field, value)}
               onDeleteExample={(index) => removeExample('landingPage', index)}
