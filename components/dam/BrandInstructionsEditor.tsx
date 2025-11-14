@@ -617,7 +617,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                       </label>
                       <input
                         type="text"
-                        value={instructions.campaignInstructions.tofu}
+                        value={instructions.campaignInstructions?.tofu || ''}
                         onChange={(e) => setInstructions({
                           ...instructions,
                           campaignInstructions: { ...instructions.campaignInstructions, tofu: e.target.value }
@@ -633,7 +633,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                       </label>
                       <input
                         type="text"
-                        value={instructions.campaignInstructions.mofu}
+                        value={instructions.campaignInstructions?.mofu || ''}
                         onChange={(e) => setInstructions({
                           ...instructions,
                           campaignInstructions: { ...instructions.campaignInstructions, mofu: e.target.value }
@@ -649,7 +649,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                       </label>
                       <input
                         type="text"
-                        value={instructions.campaignInstructions.bofu}
+                        value={instructions.campaignInstructions?.bofu || ''}
                         onChange={(e) => setInstructions({
                           ...instructions,
                           campaignInstructions: { ...instructions.campaignInstructions, bofu: e.target.value }
