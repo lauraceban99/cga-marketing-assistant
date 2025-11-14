@@ -1,85 +1,303 @@
-// This script shows what fields are likely missing from CGA brand instructions
-// Based on the errors you've been experiencing
+/**
+ * Check Brand Instructions for Missing Fields
+ *
+ * This script analyzes Firebase brand instructions and reports:
+ * - Missing required fields
+ * - Missing optional fields that would improve output quality
+ * - Placeholder values that need to be filled
+ */
 
-console.log('🔍 CGA BRAND INSTRUCTIONS - MISSING FIELDS ANALYSIS');
-console.log('═══════════════════════════════════════════════════\n');
+import { initializeApp } from 'firebase/app';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import dotenv from 'dotenv';
+import { existsSync } from 'fs';
 
-console.log('Based on the errors you encountered, these fields are MISSING or EMPTY:\n');
+// Load environment variables
+dotenv.config();
 
-const likelyMissing = [
-  { field: 'coreValues', reason: 'Caused .join() error', impact: 'HIGH' },
-  { field: 'keyMessaging', reason: 'Caused .join() error', impact: 'HIGH' },
-  { field: 'personas[].painPoints', reason: 'Caused .join() error in personas', impact: 'HIGH' },
-  { field: 'emailInstructions', reason: 'Caused .nurturingDrip error', impact: 'CRITICAL' },
-  { field: 'adCopyInstructions.requirements', reason: 'Caused .requirements error', impact: 'MEDIUM' },
-  { field: 'adCopyInstructions.dos', reason: 'Likely empty', impact: 'MEDIUM' },
-  { field: 'adCopyInstructions.donts', reason: 'Likely empty', impact: 'MEDIUM' },
-  { field: 'blogInstructions.requirements', reason: 'Caused .requirements error', impact: 'MEDIUM' },
-  { field: 'blogInstructions.dos', reason: 'Likely empty', impact: 'MEDIUM' },
-  { field: 'blogInstructions.donts', reason: 'Likely empty', impact: 'MEDIUM' },
-  { field: 'landingPageInstructions.requirements', reason: 'Caused .requirements error', impact: 'MEDIUM' },
-  { field: 'landingPageInstructions.dos', reason: 'Likely empty', impact: 'MEDIUM' },
-  { field: 'landingPageInstructions.donts', reason: 'Likely empty', impact: 'MEDIUM' },
-  { field: 'referenceMaterials', reason: 'Caused .interviews error', impact: 'MEDIUM' },
-];
+// Check if .env file exists
+if (!existsSync('.env')) {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('❌ ERROR: .env file not found!');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+  console.log('🔧 SETUP REQUIRED:\n');
+  console.log('   1. Copy the example file:');
+  console.log('      cp .env.example .env\n');
+  console.log('   2. Edit .env and fill in your Firebase credentials');
+  console.log('      (Get them from Firebase Console → Project Settings)\n');
+  console.log('   3. Run this script again\n');
+  process.exit(1);
+}
 
-console.log('❌ CRITICAL ISSUES (Will cause errors):');
-likelyMissing.filter(f => f.impact === 'CRITICAL').forEach(({ field, reason }) => {
-  console.log(`   🔴 ${field}`);
-  console.log(`      → ${reason}`);
-});
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: process.env.VITE_FIREBASE_API_KEY,
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.VITE_FIREBASE_APP_ID,
+};
 
-console.log('\n⚠️  HIGH PRIORITY (Degrades AI quality):');
-likelyMissing.filter(f => f.impact === 'HIGH').forEach(({ field, reason }) => {
-  console.log(`   🟠 ${field}`);
-  console.log(`      → ${reason}`);
-});
+// Validate Firebase config
+const missingVars = Object.entries(firebaseConfig)
+  .filter(([key, value]) => !value)
+  .map(([key]) => key);
 
-console.log('\n⚡ MEDIUM PRIORITY (Nice to have):');
-likelyMissing.filter(f => f.impact === 'MEDIUM').forEach(({ field, reason }) => {
-  console.log(`   🟡 ${field}`);
-  console.log(`      → ${reason}`);
-});
+if (missingVars.length > 0) {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('❌ ERROR: Missing Firebase configuration!');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+  console.log('Missing values in .env file:\n');
+  missingVars.forEach(v => console.log(`   - VITE_${v.toUpperCase()}`));
+  console.log('\n🔧 Edit your .env file and add these values.\n');
+  process.exit(1);
+}
 
-console.log('\n\n📋 HOW TO VIEW YOUR ACTUAL DATA:');
-console.log('─────────────────────────────────────────────────\n');
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-console.log('Option 1: Firebase Console (Easiest)');
-console.log('→ https://console.firebase.google.com/project/ai-marketing-assistant-3ec42/firestore');
-console.log('→ Navigate to: brandInstructions → cga\n');
+/**
+ * Expected structure for brand instructions
+ */
+const expectedStructure = {
+  // General brand fields
+  brandIntroduction: { type: 'string', required: true },
+  personas: { type: 'array', required: true },
+  coreValues: { type: 'array', required: true },
+  toneOfVoice: { type: 'string', required: true },
+  keyMessaging: { type: 'array', required: true },
 
-console.log('Option 2: In Your App');
-console.log('→ Go to Brand Assets → CGA → Brand Instructions tab');
-console.log('→ You\'ll see empty text fields for missing data\n');
+  // Campaign instructions
+  campaignInstructions: {
+    type: 'object',
+    required: false,
+    fields: {
+      tofu: { type: 'string', required: true },
+      mofu: { type: 'string', required: true },
+      bofu: { type: 'string', required: true },
+    }
+  },
 
-console.log('\n💡 HOW TO FIX:');
-console.log('─────────────────────────────────────────────────\n');
-console.log('1. Open your app (Railway URL)');
-console.log('2. Navigate to: Brand Assets → CGA');
-console.log('3. Click "Brand Instructions" tab');
-console.log('4. Fill in the empty sections:');
-console.log('   • General Brand Info → Core Values (add 3-5 values)');
-console.log('   • General Brand Info → Key Messaging (add 3-5 messages)');
-console.log('   • General Brand Info → Personas (add 2-3 personas with pain points)');
-console.log('   • Email Tab → All three email types (system prompts, dos, donts)');
-console.log('   • Ad Copy/Blog/Landing Page tabs → Requirements, dos, donts');
-console.log('   • Reference Materials → Add interview transcripts if you have them');
-console.log('5. Click "Save All Changes"\n');
+  // Content type instructions
+  adCopyInstructions: {
+    type: 'object',
+    required: false,
+    fields: {
+      systemPrompt: { type: 'string', required: true },
+      requirements: { type: 'string', required: false },
+      examples: { type: 'array', required: true },
+      dos: { type: 'array', required: false },
+      donts: { type: 'array', required: false },
+    }
+  },
 
-console.log('✅ BENEFITS OF FILLING THESE IN:');
-console.log('─────────────────────────────────────────────────\n');
-console.log('• No more "Cannot read properties of undefined" errors');
-console.log('• AI generates much better, on-brand content');
-console.log('• Pattern extraction works properly');
-console.log('• Consistent messaging across all content types');
-console.log('• Personas are used to create targeted variations\n');
+  blogInstructions: {
+    type: 'object',
+    required: false,
+    fields: {
+      systemPrompt: { type: 'string', required: true },
+      requirements: { type: 'string', required: false },
+      examples: { type: 'array', required: true },
+      dos: { type: 'array', required: false },
+      donts: { type: 'array', required: false },
+    }
+  },
 
-console.log('\n🎯 WHAT YOU HAVE SO FAR:');
-console.log('─────────────────────────────────────────────────\n');
-console.log('✅ brandIntroduction - EXISTS (used for context)');
-console.log('✅ toneOfVoice - EXISTS (used for style)');
-console.log('✅ landingPageInstructions.examples - 14 examples added!');
-console.log('✅ landingPageInstructions.systemPrompt - EXISTS');
-console.log('✅ campaignInstructions (tofu/mofu/bofu) - EXISTS\n');
+  landingPageInstructions: {
+    type: 'object',
+    required: false,
+    fields: {
+      systemPrompt: { type: 'string', required: true },
+      requirements: { type: 'string', required: false },
+      examples: { type: 'array', required: true },
+      dos: { type: 'array', required: false },
+      donts: { type: 'array', required: false },
+    }
+  },
 
-console.log('These are working well! The errors only happen with the missing fields above.\n');
+  emailInstructions: {
+    type: 'object',
+    required: false,
+    fields: {
+      invitation: {
+        type: 'object',
+        required: false,
+        fields: {
+          systemPrompt: { type: 'string', required: true },
+          requirements: { type: 'string', required: false },
+          examples: { type: 'array', required: true },
+          dos: { type: 'array', required: false },
+          donts: { type: 'array', required: false },
+        }
+      },
+      nurturingDrip: {
+        type: 'object',
+        required: false,
+        fields: {
+          systemPrompt: { type: 'string', required: true },
+          requirements: { type: 'string', required: false },
+          examples: { type: 'array', required: true },
+          dos: { type: 'array', required: false },
+          donts: { type: 'array', required: false },
+        }
+      },
+      emailBlast: {
+        type: 'object',
+        required: false,
+        fields: {
+          systemPrompt: { type: 'string', required: true },
+          requirements: { type: 'string', required: false },
+          examples: { type: 'array', required: true },
+          dos: { type: 'array', required: false },
+          donts: { type: 'array', required: false },
+        }
+      }
+    }
+  }
+};
+
+/**
+ * Check if a value is a placeholder
+ */
+function isPlaceholder(value) {
+  if (typeof value === 'string') {
+    return value.includes('[PLACEHOLDER');
+  }
+  if (Array.isArray(value)) {
+    return value.some(item => typeof item === 'string' && item.includes('[PLACEHOLDER'));
+  }
+  return false;
+}
+
+/**
+ * Check if value is empty/missing
+ */
+function isEmpty(value) {
+  if (value === undefined || value === null) return true;
+  if (typeof value === 'string') return value.trim() === '';
+  if (Array.isArray(value)) return value.length === 0;
+  return false;
+}
+
+/**
+ * Recursively check structure
+ */
+function checkStructure(data, structure, path = '', issues = { critical: [], warnings: [], placeholders: [] }) {
+  for (const [key, spec] of Object.entries(structure)) {
+    const fullPath = path ? `${path}.${key}` : key;
+    const value = data?.[key];
+
+    // Check if field exists
+    if (isEmpty(value)) {
+      if (spec.required) {
+        issues.critical.push(`❌ MISSING CRITICAL FIELD: ${fullPath}`);
+      } else {
+        issues.warnings.push(`⚠️  Missing optional field: ${fullPath} (will use generic fallback)`);
+      }
+      continue;
+    }
+
+    // Check for placeholder values
+    if (isPlaceholder(value)) {
+      issues.placeholders.push(`📝 Has placeholder: ${fullPath} (needs real content)`);
+    }
+
+    // Check nested fields
+    if (spec.type === 'object' && spec.fields) {
+      checkStructure(value, spec.fields, fullPath, issues);
+    }
+
+    // Check array contents
+    if (spec.type === 'array' && Array.isArray(value)) {
+      if (value.length === 0) {
+        issues.warnings.push(`⚠️  Empty array: ${fullPath} (consider adding examples)`);
+      }
+    }
+  }
+
+  return issues;
+}
+
+/**
+ * Main function
+ */
+async function checkBrandInstructions(brandId = 'cga') {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`🔍 Checking Brand Instructions for: ${brandId}`);
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+  try {
+    // Fetch brand instructions from Firestore
+    const docRef = doc(db, 'brandInstructions', brandId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      console.log('❌ ERROR: Brand instructions document does not exist!');
+      console.log(`\nTo fix: Create a document in Firestore at: brandInstructions/${brandId}`);
+      process.exit(1);
+    }
+
+    const data = docSnap.data();
+    console.log('✅ Brand instructions document found\n');
+
+    // Check structure
+    const issues = checkStructure(data, expectedStructure);
+
+    // Display results
+    if (issues.critical.length > 0) {
+      console.log('🚨 CRITICAL ISSUES (Will cause crashes):\n');
+      issues.critical.forEach(issue => console.log(`   ${issue}`));
+      console.log('');
+    }
+
+    if (issues.warnings.length > 0) {
+      console.log('⚠️  WARNINGS (Will use generic fallbacks):\n');
+      issues.warnings.forEach(issue => console.log(`   ${issue}`));
+      console.log('');
+    }
+
+    if (issues.placeholders.length > 0) {
+      console.log('📝 PLACEHOLDER VALUES (Need real content):\n');
+      issues.placeholders.forEach(issue => console.log(`   ${issue}`));
+      console.log('');
+    }
+
+    if (issues.critical.length === 0 && issues.warnings.length === 0 && issues.placeholders.length === 0) {
+      console.log('🎉 Perfect! All brand instructions are complete.\n');
+    } else {
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('📋 SUMMARY\n');
+      console.log(`   Critical Issues: ${issues.critical.length}`);
+      console.log(`   Warnings: ${issues.warnings.length}`);
+      console.log(`   Placeholders: ${issues.placeholders.length}`);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+      if (issues.critical.length > 0) {
+        console.log('🔧 NEXT STEPS:\n');
+        console.log('   1. Go to Firebase Console:');
+        console.log('      https://console.firebase.google.com/project/ai-marketing-assistant-3ec42/firestore/data\n');
+        console.log('   2. Navigate to: brandInstructions → cga\n');
+        console.log('   3. Add the missing critical fields listed above\n');
+      } else if (issues.warnings.length > 0) {
+        console.log('💡 RECOMMENDATIONS:\n');
+        console.log('   The app will work with generic fallbacks, but output quality');
+        console.log('   will improve significantly if you configure missing fields.\n');
+        console.log('   Configure instructions through the DAM UI:\n');
+        console.log('   App → DAM → Brand Instructions → Fill missing sections\n');
+      }
+    }
+
+  } catch (error) {
+    console.error('❌ ERROR:', error.message);
+    console.error('\nFull error:', error);
+    process.exit(1);
+  }
+
+  process.exit(0);
+}
+
+// Run the check
+const brandId = process.argv[2] || 'cga';
+checkBrandInstructions(brandId);
