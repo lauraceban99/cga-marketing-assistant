@@ -70,11 +70,106 @@ function buildSystemPrompt(
         console.warn('⚠️ Brand instructions missing blogInstructions - using generic fallback. Please configure brand instructions in DAM.');
         usingFallback = true;
         typeInstructions = {
-          systemPrompt: 'You are an expert SEO and content writer. Create comprehensive, well-structured blog posts optimized for search and readability.',
-          requirements: 'Create 2,000-3,000 word posts with clear structure, SEO optimization, and actionable insights.',
+          systemPrompt: `You are an expert SEO and content strategist specializing in both traditional search and AI search engines (Perplexity, SearchGPT, Claude, Gemini).
+
+**GOOGLE E-E-A-T PRINCIPLES:**
+- Experience: Include real examples, case studies, first-hand insights
+- Expertise: Demonstrate deep subject knowledge with data, research citations
+- Authoritativeness: Use confident, authoritative language; cite credible sources
+- Trustworthiness: Be accurate, balanced, and transparent; acknowledge limitations
+
+**TRADITIONAL SEO BEST PRACTICES:**
+- Target primary keyword in: H1, first paragraph, URL slug, meta description
+- Use semantic keywords (LSI keywords) naturally throughout
+- Structure: H1 → H2s (main topics) → H3s (subtopics)
+- Include 7-10 relevant images with descriptive alt text
+- Optimal length: 1,500-2,500 words for comprehensive coverage
+- Internal linking opportunities: Suggest related topics to link to
+- External links: Reference 2-3 high-authority sources (research, stats, industry leaders)
+
+**AI SEARCH OPTIMIZATION:**
+- Direct answer format: Start with clear, concise answer to main query
+- Conversational tone: Write like you're explaining to a smart friend
+- Question-answer structure: Use H2s as questions readers ask
+- Entity optimization: Clearly define key concepts and entities
+- Context-rich: Explain "why" and "how," not just "what"
+- Structured data: Use tables, lists, step-by-step formats for scannability
+- Source attribution: Credit data/stats with credible sources
+
+**FEATURED SNIPPET OPTIMIZATION:**
+- For "What is X": Start with 40-60 word definition paragraph
+- For "How to X": Use numbered steps (1. Action verb → result)
+- For "Best X": Use bulleted list with brief explanations
+- For comparisons: Use table format (Feature | Option A | Option B)
+- For "Why X": Start with concise answer, then elaborate
+
+**CONTENT STRUCTURE:**
+1. **Compelling headline**: Include target keyword + benefit/intrigue
+2. **Hook intro (100-150 words)**: Answer the main question immediately, then expand
+3. **Main sections (H2s)**: Each addresses a key subtopic or question
+4. **Actionable subsections (H3s)**: Practical, specific guidance
+5. **Conclusion**: Summarize key takeaways, provide clear next step/CTA
+6. **Meta description (150-160 chars)**: Include keyword + compelling benefit
+
+**READABILITY:**
+- Average sentence length: 15-20 words
+- Paragraph length: 2-4 sentences
+- Use transition words: "However," "Therefore," "Additionally"
+- Mix sentence structures: Short punchy sentences + detailed explanations
+- Scan-friendly: Bold key points, use bullet lists, include tables
+
+**ENGAGEMENT SIGNALS:**
+- Start with surprising statistic or provocative question
+- Include expert quotes or case study examples
+- Add practical examples readers can apply immediately
+- End sections with thought-provoking questions
+- Use "you" language to speak directly to reader`,
+          requirements: `**SEO Requirements:**
+- Primary keyword in H1, first paragraph, meta description
+- 2-3 semantic/LSI keywords naturally integrated
+- 1,500-2,500 words for comprehensive coverage
+- Featured snippet-optimized intro (40-60 word direct answer)
+- Internal linking opportunities (2-3 suggestions)
+- External authority links (2-3 credible sources)
+- 7-10 images with descriptive alt text
+
+**Structure:**
+- H1 (keyword + benefit)
+- Introduction (hook + direct answer)
+- H2s as questions (how readers search)
+- H3s for actionable subtopics
+- Conclusion with clear next step
+- Meta description (150-160 chars)
+
+**AI Search Optimization:**
+- Conversational, natural language
+- Direct answers AI can quote
+- Structured data: tables, lists, steps
+- Context-rich explanations (why/how)
+- Entity definitions clearly explained`,
           examples: [],
-          dos: ['Use clear H2/H3 structure', 'Include 7+ image placeholders', 'Optimize for featured snippets', 'Provide actionable insights'],
-          donts: ['Never write short posts for important topics', 'Never keyword stuff', 'Never fabricate statistics'],
+          dos: [
+            'Start with direct answer to main question (AI-quotable)',
+            'Use question-format H2s matching search intent',
+            'Include data, statistics, and credible sources',
+            'Add practical examples and case studies (E-E-A-T)',
+            'Structure content for featured snippets',
+            'Optimize for both traditional and AI search',
+            'Use conversational tone for AI search engines',
+            'Include tables/lists for scannability',
+            'Suggest internal linking opportunities',
+            'Write descriptive image alt text (7-10 images)'
+          ],
+          donts: [
+            'Never keyword stuff or force unnatural phrasing',
+            'Never sacrifice readability for SEO',
+            'Never use generic introductions - start with value',
+            'Never ignore search intent (informational vs transactional)',
+            'Never skip external authority links',
+            'Never use long paragraphs (max 4 sentences)',
+            'Never forget featured snippet optimization',
+            'Never overlook E-E-A-T principles (expertise, trust)'
+          ],
         };
       } else {
         typeInstructions = brandInstructions.blogInstructions;
@@ -340,25 +435,84 @@ Return ONLY valid JSON in this format:
   ]
 }`;
   } else if (contentType === 'blog') {
-    userPrompt += `BLOG POST REQUIREMENTS:
-- Create a complete, SEO-optimized blog post
-- Include:
-  * Compelling headline (H1)
-  * Meta description
-  * Introduction
-  * 3-5 main sections with H2 headings
-  * Conclusion
-  * Call to action
-- Optimize for both traditional SEO and AI search
-- Use natural keyword integration
-${lengthSpec ? `- Target length: ${lengthSpec.value} ${lengthSpec.unit}` : ''}
+    userPrompt += `
+
+**PRIMARY KEYWORD**: [Extract from user request or use most relevant topic keyword]
+
+**SEARCH INTENT**: [Informational / How-to / Comparison / Best-of-list]
+- Match content structure to intent type
+
+**TARGET AUDIENCE SPECIFICS**:
+${brandInstructions.personas?.map(p => `
+  - ${p.name}: Pain points: ${(p.painPoints || []).join(', ')}
+    → Address these pain points with specific solutions
+`).join('') || '- General audience: Provide comprehensive, accessible information'}
+
+**SEO CHECKLIST TO INCLUDE:**
+1. ✅ Primary keyword in H1 (naturally)
+2. ✅ Primary keyword in first 100 words
+3. ✅ 2-3 related semantic keywords throughout
+4. ✅ Featured snippet-optimized intro (40-60 words)
+5. ✅ Internal linking suggestions (mention 2-3 related topics)
+6. ✅ External links to authority sources (studies, stats, research)
+7. ✅ Descriptive image alt text for 7-10 images
+8. ✅ Meta description with keyword + benefit
+
+**AI SEARCH OPTIMIZATION:**
+1. ✅ Direct answer in first paragraph (what AI will quote)
+2. ✅ Question-format H2s (match how people ask AI)
+3. ✅ Conversational, natural language (AI-friendly)
+4. ✅ Structured data: Tables, lists, step-by-step instructions
+5. ✅ Context-rich explanations (why/how, not just what)
+
+**OUTPUT FORMAT:**
+
+# [Compelling H1 with Target Keyword]
+
+## Meta Description
+[150-160 characters with keyword + benefit]
+
+## Introduction (100-150 words)
+[Direct answer to main question, then expand with context]
+
+## [Question-Format H2]
+[Content with semantic keywords, examples, data]
+
+### [Actionable H3]
+[Specific, practical guidance]
+
+[Continue structure...]
+
+## Key Takeaways
+- Bullet point summary of main insights
+
+## Conclusion & Next Steps
+[Summary + clear CTA aligned with campaign stage]
+
+---
+
+**INTERNAL LINKING SUGGESTIONS:**
+[List 2-3 related topics that should be linked to this post]
+
+**IMAGE PLACEHOLDERS (7-10):**
+[Description of what each image should show]
+- Image 1: [Alt text] - [Visual description]
+- Image 2: [Alt text] - [Visual description]
+...
+
+${lengthSpec ? `Target length: ${lengthSpec.value} ${lengthSpec.unit}` : '1,500-2,500 words for comprehensive SEO coverage'}
 
 Return ONLY valid JSON in this format:
 {
-  "headline": "Blog post title",
-  "metaDescription": "SEO meta description",
+  "headline": "Blog post title (H1 with keyword)",
+  "metaDescription": "SEO meta description (150-160 chars)",
   "content": "Full blog post with markdown formatting for headings",
-  "keywords": ["primary", "secondary", "tertiary"]
+  "keywords": ["primary", "secondary", "tertiary"],
+  "internalLinks": ["Suggested related topic 1", "Suggested related topic 2"],
+  "imagePlaceholders": [
+    {"altText": "Descriptive alt text", "description": "What the image shows"},
+    {"altText": "Descriptive alt text", "description": "What the image shows"}
+  ]
 }`;
   } else if (contentType === 'landing-page') {
     userPrompt += `LANDING PAGE REQUIREMENTS:

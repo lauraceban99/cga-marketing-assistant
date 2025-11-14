@@ -107,9 +107,9 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
         }
       case 'blog':
         return {
-          value: 1500,
+          value: 1800,
           unit: 'words',
-          explanation: 'SEO-optimized blog: 1500-2000 words (ranks well, comprehensive)'
+          explanation: 'SEO-optimized blog: 1,500-2,500 words (comprehensive coverage ranks best)'
         };
       case 'landing-page':
         return {
