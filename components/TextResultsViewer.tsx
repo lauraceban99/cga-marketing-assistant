@@ -10,10 +10,11 @@ interface TextResultsViewerProps {
   brand: Brand;
   userPrompt: string;
   onBack: () => void;
+  onEditPrompt: () => void;
   onRegenerate?: (feedback?: string) => void;
 }
 
-const TextResultsViewer: React.FC<TextResultsViewerProps> = ({ content, brand, userPrompt, onBack, onRegenerate }) => {
+const TextResultsViewer: React.FC<TextResultsViewerProps> = ({ content, brand, userPrompt, onBack, onEditPrompt, onRegenerate }) => {
   const [selectedVariationId, setSelectedVariationId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -104,25 +105,49 @@ const TextResultsViewer: React.FC<TextResultsViewerProps> = ({ content, brand, u
 
     return (
       <div className="max-w-7xl mx-auto py-8">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-sm text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors mb-4"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        {/* Top navigation buttons */}
+        <div className="flex items-center gap-4 mb-4">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-sm text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors"
           >
-            <path d="m15 18-6-6 6-6"></path>
-          </svg>
-          Start Over
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+            Back to Tasks
+          </button>
+
+          <button
+            onClick={onEditPrompt}
+            className="flex items-center gap-2 px-4 py-2 bg-[#04114a] text-white rounded-md hover:bg-[#780817] transition-colors text-sm font-medium"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+              <path d="m15 5 4 4"></path>
+            </svg>
+            Edit Prompt
+          </button>
+        </div>
 
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-[#4b0f0d] mb-2">Your Ad Copy Variations</h2>
@@ -481,25 +506,49 @@ const TextResultsViewer: React.FC<TextResultsViewerProps> = ({ content, brand, u
   // Render other content types (blog, landing page, email)
   return (
     <div className="max-w-4xl mx-auto py-8">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-sm text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors mb-4"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      {/* Top navigation buttons */}
+      <div className="flex items-center gap-4 mb-4">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-sm text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors"
         >
-          <path d="m15 18-6-6 6-6"></path>
-        </svg>
-        Start Over
-      </button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+          Back to Tasks
+        </button>
+
+        <button
+          onClick={onEditPrompt}
+          className="flex items-center gap-2 px-4 py-2 bg-[#04114a] text-white rounded-md hover:bg-[#780817] transition-colors text-sm font-medium"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+            <path d="m15 5 4 4"></path>
+          </svg>
+          Edit Prompt
+        </button>
+      </div>
 
       <div className="bg-white rounded-lg border-2 border-[#f4f0f0] shadow-lg p-8">
         <div className="flex items-center justify-between mb-6">

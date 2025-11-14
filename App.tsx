@@ -58,6 +58,12 @@ const App: React.FC = () => {
     setRegenerationFeedback(feedback);
     setAppState('generator');
   };
+
+  const handleEditPrompt = () => {
+    // Go back to generator while preserving the prompt
+    setRegenerationFeedback(''); // Clear any regeneration feedback
+    setAppState('generator');
+  };
   
   const renderContent = () => {
     switch (appState) {
@@ -80,6 +86,7 @@ const App: React.FC = () => {
                   brand={selectedBrand!}
                   userPrompt={lastPrompt}
                   onBack={() => handleBackTo('task_selection')}
+                  onEditPrompt={handleEditPrompt}
                   onRegenerate={handleRegenerateWithFeedback}
                 />;
       case 'dam':
