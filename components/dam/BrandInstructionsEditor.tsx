@@ -28,6 +28,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
   const [instructions, setInstructions] = useState<BrandInstructions | null>(null);
   const [activeTab, setActiveTab] = useState<'general' | 'ad-copy' | 'blog' | 'landing-page' | 'email' | 'ai-learning'>('general');
   const [successMessage, setSuccessMessage] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
     loadInstructions();
@@ -37,7 +38,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     setLoading(true);
     const data = await getBrandInstructions(brand.id);
     setInstructions(data);
+    setHasUnsavedChanges(false);
     setLoading(false);
+  };
+
+  // Wrapper to track changes
+  const updateInstructions = (newInstructions: BrandInstructions) => {
+    setInstructions(newInstructions);
+    setHasUnsavedChanges(true);
   };
 
   const handleSave = async () => {
@@ -52,8 +60,9 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
       console.log('🤖 Extracting patterns from examples...');
       await extractPatternsFromExamples();
 
-      setSuccessMessage('Instructions saved and patterns extracted successfully!');
-      setTimeout(() => setSuccessMessage(''), 3000);
+      setHasUnsavedChanges(false);
+      setSuccessMessage('✅ All changes saved successfully!');
+      setTimeout(() => setSuccessMessage(''), 5000);
     } catch (error) {
       console.error('Error saving instructions:', error);
       alert('Error saving instructions');
@@ -132,7 +141,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
       painPoints: [''],
       solution: ''
     };
-    setInstructions({
+    updateInstructions({
       ...instructions,
       personas: [...(instructions.personas || []), newPersona]
     });
@@ -142,34 +151,34 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     if (!instructions) return;
     const updatedPersonas = [...(instructions.personas || [])];
     updatedPersonas[index] = { ...updatedPersonas[index], [field]: value };
-    setInstructions({ ...instructions, personas: updatedPersonas });
+    updateInstructions({ ...instructions, personas: updatedPersonas });
   };
 
   const removePersona = (index: number) => {
     if (!instructions) return;
     const updatedPersonas = (instructions.personas || []).filter((_, i) => i !== index);
-    setInstructions({ ...instructions, personas: updatedPersonas });
+    updateInstructions({ ...instructions, personas: updatedPersonas });
   };
 
   const addPainPoint = (personaIndex: number) => {
     if (!instructions) return;
     const updatedPersonas = [...(instructions.personas || [])];
     updatedPersonas[personaIndex].painPoints.push('');
-    setInstructions({ ...instructions, personas: updatedPersonas });
+    updateInstructions({ ...instructions, personas: updatedPersonas });
   };
 
   const updatePainPoint = (personaIndex: number, painPointIndex: number, value: string) => {
     if (!instructions) return;
     const updatedPersonas = [...(instructions.personas || [])];
     updatedPersonas[personaIndex].painPoints[painPointIndex] = value;
-    setInstructions({ ...instructions, personas: updatedPersonas });
+    updateInstructions({ ...instructions, personas: updatedPersonas });
   };
 
   const removePainPoint = (personaIndex: number, painPointIndex: number) => {
     if (!instructions) return;
     const updatedPersonas = [...(instructions.personas || [])];
     updatedPersonas[personaIndex].painPoints = updatedPersonas[personaIndex].painPoints.filter((_, i) => i !== painPointIndex);
-    setInstructions({ ...instructions, personas: updatedPersonas });
+    updateInstructions({ ...instructions, personas: updatedPersonas });
   };
 
   const addExample = (
@@ -197,7 +206,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     } as const;
 
     const field = fieldMap[type];
-    setInstructions({
+    updateInstructions({
       ...instructions,
       [field]: {
         ...instructions[field],
@@ -223,7 +232,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     const updatedExamples = [...instructions[instructionField].examples];
     updatedExamples[index] = { ...updatedExamples[index], [field]: value };
 
-    setInstructions({
+    updateInstructions({
       ...instructions,
       [instructionField]: {
         ...instructions[instructionField],
@@ -243,7 +252,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     const field = fieldMap[type];
     const updatedExamples = instructions[field].examples.filter((_, i) => i !== index);
 
-    setInstructions({
+    updateInstructions({
       ...instructions,
       [field]: {
         ...instructions[field],
@@ -263,7 +272,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
       cta: '',
       notes: ''
     };
-    setInstructions({
+    updateInstructions({
       ...instructions,
       emailInstructions: {
         ...(instructions.emailInstructions || {}),
@@ -279,7 +288,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     if (!instructions) return;
     const updatedExamples = [...(instructions.emailInstructions?.invitation?.examples || [])];
     updatedExamples[index] = { ...updatedExamples[index], [field]: value };
-    setInstructions({
+    updateInstructions({
       ...instructions,
       emailInstructions: {
         ...(instructions.emailInstructions || {}),
@@ -294,7 +303,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
   const removeEmailExample = (index: number) => {
     if (!instructions) return;
     const updatedExamples = (instructions.emailInstructions?.invitation?.examples || []).filter((_, i) => i !== index);
-    setInstructions({
+    updateInstructions({
       ...instructions,
       emailInstructions: {
         ...(instructions.emailInstructions || {}),
@@ -340,6 +349,58 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
         </p>
       </div>
 
+      {/* Sticky Save Bar */}
+      <div className={`sticky top-0 z-50 mb-6 p-4 rounded-lg border-2 transition-all ${
+        hasUnsavedChanges
+          ? 'bg-yellow-50 border-yellow-400'
+          : successMessage
+            ? 'bg-green-50 border-green-400'
+            : 'bg-[#f4f0f0] border-[#780817]'
+      }`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {hasUnsavedChanges && (
+              <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            )}
+            <div>
+              {hasUnsavedChanges ? (
+                <div>
+                  <p className="font-semibold text-yellow-800">You have unsaved changes</p>
+                  <p className="text-sm text-yellow-700">Click "Save Changes" to save your work</p>
+                </div>
+              ) : successMessage ? (
+                <p className="font-semibold text-green-800">{successMessage}</p>
+              ) : (
+                <p className="font-semibold text-[#4b0f0d]">All changes saved</p>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={saving || !hasUnsavedChanges}
+            className={`px-8 py-3 font-bold rounded-lg transition-all text-lg ${
+              hasUnsavedChanges
+                ? 'bg-[#780817] text-white hover:bg-[#4b0f0d] shadow-lg hover:shadow-xl transform hover:scale-105'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            } disabled:opacity-50`}
+          >
+            {saving ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving...
+              </span>
+            ) : (
+              '💾 Save Changes'
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* Tabs */}
       <div className="flex gap-2 mb-6 border-b border-[#f4f0f0] overflow-x-auto">
         {[
@@ -379,7 +440,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               </label>
               <textarea
                 value={instructions.brandIntroduction}
-                onChange={(e) => setInstructions({ ...instructions, brandIntroduction: e.target.value })}
+                onChange={(e) => updateInstructions({ ...instructions, brandIntroduction: e.target.value })}
                 rows={6}
                 className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
                 placeholder="Who you are, what you do, your mission and vision..."
@@ -394,7 +455,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               <input
                 type="text"
                 value={instructions.toneOfVoice}
-                onChange={(e) => setInstructions({ ...instructions, toneOfVoice: e.target.value })}
+                onChange={(e) => updateInstructions({ ...instructions, toneOfVoice: e.target.value })}
                 className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
                 placeholder="e.g., Warm, professional, conversational, aspirational"
               />
@@ -408,7 +469,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               <input
                 type="text"
                 value={instructions.coreValues?.join(', ') || ''}
-                onChange={(e) => setInstructions({
+                onChange={(e) => updateInstructions({
                   ...instructions,
                   coreValues: e.target.value.split(',').map(v => v.trim()).filter(v => v)
                 })}
@@ -424,7 +485,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               </label>
               <textarea
                 value={instructions.keyMessaging?.join(', ') || ''}
-                onChange={(e) => setInstructions({
+                onChange={(e) => updateInstructions({
                   ...instructions,
                   keyMessaging: e.target.value.split(',').map(v => v.trim()).filter(v => v)
                 })}
@@ -528,7 +589,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               </label>
               <textarea
                 value={instructions.referenceMaterials?.interviews || ''}
-                onChange={(e) => setInstructions({
+                onChange={(e) => updateInstructions({
                   ...instructions,
                   referenceMaterials: { ...(instructions.referenceMaterials || {}), interviews: e.target.value }
                 })}
@@ -545,7 +606,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               </label>
               <textarea
                 value={instructions.referenceMaterials?.testimonials || ''}
-                onChange={(e) => setInstructions({
+                onChange={(e) => updateInstructions({
                   ...instructions,
                   referenceMaterials: { ...(instructions.referenceMaterials || {}), testimonials: e.target.value }
                 })}
@@ -574,7 +635,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   <input
                     type="text"
                     value={instructions.adCopyInstructions?.requirements || ''}
-                    onChange={(e) => setInstructions({
+                    onChange={(e) => updateInstructions({
                       ...instructions,
                       adCopyInstructions: { ...instructions.adCopyInstructions, requirements: e.target.value }
                     })}
@@ -618,7 +679,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                       <input
                         type="text"
                         value={instructions.campaignInstructions?.tofu || ''}
-                        onChange={(e) => setInstructions({
+                        onChange={(e) => updateInstructions({
                           ...instructions,
                           campaignInstructions: { ...instructions.campaignInstructions, tofu: e.target.value }
                         })}
@@ -634,7 +695,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                       <input
                         type="text"
                         value={instructions.campaignInstructions?.mofu || ''}
-                        onChange={(e) => setInstructions({
+                        onChange={(e) => updateInstructions({
                           ...instructions,
                           campaignInstructions: { ...instructions.campaignInstructions, mofu: e.target.value }
                         })}
@@ -650,7 +711,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                       <input
                         type="text"
                         value={instructions.campaignInstructions?.bofu || ''}
-                        onChange={(e) => setInstructions({
+                        onChange={(e) => updateInstructions({
                           ...instructions,
                           campaignInstructions: { ...instructions.campaignInstructions, bofu: e.target.value }
                         })}
@@ -661,15 +722,6 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </div>
                 </div>
 
-                <div className="pt-4">
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
-                  >
-                    {saving ? 'Saving...' : 'Save Instructions'}
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -702,7 +754,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     value={instructions.blogInstructions?.systemPrompt || ''}
-                    onChange={(e) => setInstructions({
+                    onChange={(e) => updateInstructions({
                       ...instructions,
                       blogInstructions: { ...instructions.blogInstructions, systemPrompt: e.target.value }
                     })}
@@ -719,7 +771,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     value={instructions.blogInstructions?.requirements || ''}
-                    onChange={(e) => setInstructions({
+                    onChange={(e) => updateInstructions({
                       ...instructions,
                       blogInstructions: { ...instructions.blogInstructions, requirements: e.target.value }
                     })}
@@ -751,15 +803,6 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   />
                 </div>
 
-                <div className="pt-4">
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
-                  >
-                    {saving ? 'Saving...' : 'Save Blog Instructions'}
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -792,7 +835,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     value={instructions.landingPageInstructions?.systemPrompt || ''}
-                    onChange={(e) => setInstructions({
+                    onChange={(e) => updateInstructions({
                       ...instructions,
                       landingPageInstructions: { ...instructions.landingPageInstructions, systemPrompt: e.target.value }
                     })}
@@ -809,7 +852,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     value={instructions.landingPageInstructions?.requirements || ''}
-                    onChange={(e) => setInstructions({
+                    onChange={(e) => updateInstructions({
                       ...instructions,
                       landingPageInstructions: { ...instructions.landingPageInstructions, requirements: e.target.value }
                     })}
@@ -852,15 +895,6 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   />
                 </div>
 
-                <div className="pt-4">
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
-                  >
-                    {saving ? 'Saving...' : 'Save Landing Page Instructions'}
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -916,16 +950,6 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     placeholder="e.g., First name, Parent name, Student name, Location, Program interest"
                   />
                 </div>
-
-                <div className="pt-4">
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
-                  >
-                    {saving ? 'Saving...' : 'Save Shared Rules'}
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -941,7 +965,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     value={instructions.emailInstructions?.invitation?.systemPrompt || ''}
-                    onChange={(e) => setInstructions({
+                    onChange={(e) => updateInstructions({
                       ...instructions,
                       emailInstructions: {
                         ...(instructions.emailInstructions || {}),
@@ -953,13 +977,6 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     placeholder="Psychology:&#10;• Create exclusivity (limited seating, you're invited)&#10;• Make it personal (address by name, reference interests)&#10;• Remove friction (easy RSVP, calendar link, clear logistics)&#10;• Social proof (testimonials, past success)&#10;&#10;Required Elements:&#10;• Clear event details (date, time, format)&#10;• What attendees will learn/gain&#10;• Easy registration CTA&#10;• Optional: Can't attend alternative"
                   />
                 </div>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save Invitation Instructions'}
-                </button>
               </div>
             </div>
 
@@ -975,7 +992,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     value={instructions.emailInstructions?.nurturingDrip?.systemPrompt || ''}
-                    onChange={(e) => setInstructions({
+                    onChange={(e) => updateInstructions({
                       ...instructions,
                       emailInstructions: {
                         ...(instructions.emailInstructions || {}),
@@ -987,13 +1004,6 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     placeholder="Psychology:&#10;• Provide value before asking for commitment&#10;• Use AIDA model (Attention, Interest, Desire, Action)&#10;• Educational content builds trust&#10;• Progress from awareness → consideration → decision&#10;&#10;Required Elements:&#10;• One key insight or value point&#10;• Connection to previous emails (if part of sequence)&#10;• Soft CTA (educational resources, not sales)&#10;• Next step preview (optional)"
                   />
                 </div>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save Nurture Instructions'}
-                </button>
               </div>
             </div>
 
@@ -1009,7 +1019,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     value={instructions.emailInstructions?.emailBlast?.systemPrompt || ''}
-                    onChange={(e) => setInstructions({
+                    onChange={(e) => updateInstructions({
                       ...instructions,
                       emailInstructions: {
                         ...(instructions.emailInstructions || {}),
@@ -1021,13 +1031,6 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                     placeholder="Psychology:&#10;• Lead with the news (don't bury the lede)&#10;• Create appropriate urgency (deadline, limited availability)&#10;• Single focus (one message per email)&#10;• Newsworthy subject lines outperform clever ones&#10;&#10;Required Elements:&#10;• Clear announcement in first paragraph&#10;• Why it matters (benefit/impact)&#10;• Strong CTA aligned with announcement&#10;• Deadline or urgency element (if applicable)"
                   />
                 </div>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="px-6 py-2 bg-[#780817] text-white font-semibold rounded-md hover:bg-[#4b0f0d] transition-colors disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save Blast Instructions'}
-                </button>
               </div>
             </div>
 
