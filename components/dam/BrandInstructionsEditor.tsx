@@ -134,40 +134,40 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     };
     setInstructions({
       ...instructions,
-      personas: [...instructions.personas, newPersona]
+      personas: [...(instructions.personas || []), newPersona]
     });
   };
 
   const updatePersona = (index: number, field: keyof PersonaDefinition, value: any) => {
     if (!instructions) return;
-    const updatedPersonas = [...instructions.personas];
+    const updatedPersonas = [...(instructions.personas || [])];
     updatedPersonas[index] = { ...updatedPersonas[index], [field]: value };
     setInstructions({ ...instructions, personas: updatedPersonas });
   };
 
   const removePersona = (index: number) => {
     if (!instructions) return;
-    const updatedPersonas = instructions.personas.filter((_, i) => i !== index);
+    const updatedPersonas = (instructions.personas || []).filter((_, i) => i !== index);
     setInstructions({ ...instructions, personas: updatedPersonas });
   };
 
   const addPainPoint = (personaIndex: number) => {
     if (!instructions) return;
-    const updatedPersonas = [...instructions.personas];
+    const updatedPersonas = [...(instructions.personas || [])];
     updatedPersonas[personaIndex].painPoints.push('');
     setInstructions({ ...instructions, personas: updatedPersonas });
   };
 
   const updatePainPoint = (personaIndex: number, painPointIndex: number, value: string) => {
     if (!instructions) return;
-    const updatedPersonas = [...instructions.personas];
+    const updatedPersonas = [...(instructions.personas || [])];
     updatedPersonas[personaIndex].painPoints[painPointIndex] = value;
     setInstructions({ ...instructions, personas: updatedPersonas });
   };
 
   const removePainPoint = (personaIndex: number, painPointIndex: number) => {
     if (!instructions) return;
-    const updatedPersonas = [...instructions.personas];
+    const updatedPersonas = [...(instructions.personas || [])];
     updatedPersonas[personaIndex].painPoints = updatedPersonas[personaIndex].painPoints.filter((_, i) => i !== painPointIndex);
     setInstructions({ ...instructions, personas: updatedPersonas });
   };

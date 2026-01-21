@@ -27,6 +27,9 @@ export const getBrandInstructions = async (
       return {
         ...data,
         lastUpdated: data.lastUpdated?.toDate(),
+        // Ensure personas is always an array (fix for legacy data)
+        personas: data.personas || [],
+        coreValues: data.coreValues || [],
       } as BrandInstructions;
     }
 
