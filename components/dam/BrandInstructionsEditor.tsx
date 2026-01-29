@@ -18,6 +18,8 @@ import UnifiedExamplesKnowledgeBase from './examples/UnifiedExamplesKnowledgeBas
 import PatternKnowledgeViewer from './PatternKnowledgeViewer';
 import { useAutoSave } from '../../hooks/useAutoSave';
 import { useDraftRecovery, formatDraftAge } from '../../hooks/useDraftRecovery';
+import { useRealtimeSync } from '../../hooks/useRealtimeSync';
+import ConflictResolutionModal from '../ConflictResolutionModal';
 
 interface BrandInstructionsEditorProps {
   brand: Brand;
@@ -33,16 +35,51 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showDraftRecoveryModal, setShowDraftRecoveryModal] = useState(false);
 
-  // Auto-save hook (30 second intervals)
-  const { lastSaved, isSaving: isAutoSaving, triggerSave } = useAutoSave({
+  // Version tracking for conflict detection
+  const [localVersion, setLocalVersion] = useState<number>(1);
+  const [remoteData, setRemoteData] = useState<BrandInstructions | null>(null);
+  const [remoteVersion, setRemoteVersion] = useState<number>(1);
+  const [showConflictModal, setShowConflictModal] = useState(false);
+
+  // Auto-save hook (30 second intervals) - DISABLED, will use manual save with conflict detection
+  const { lastSaved, isSaving: isAutoSaving, triggerSave} = useAutoSave({
     data: instructions,
     onSave: async (data) => {
       if (!data) return;
-      await saveBrandInstructions(brand.id, data, 'admin');
+      const result = await saveBrandInstructions(brand.id, data, 'admin', 'Admin', localVersion);
+      if (result.conflict) {
+        // Auto-save detected conflict - disable auto-save and show warning
+        console.warn('⚠️ Auto-save paused due to conflict');
+        return;
+      }
+      if (result.success && result.newVersion) {
+        setLocalVersion(result.newVersion);
+      }
       await extractPatternsFromExamples(data);
     },
-    enabled: hasUnsavedChanges && !saving,
-    interval: 30000 // 30 seconds
+    enabled: false, // Disabled for now - manual save only for safety
+    interval: 30000
+  });
+
+  // Real-time sync hook
+  const { isListening } = useRealtimeSync({
+    brandId: brand.id,
+    enabled: !loading,
+    localVersion,
+    onRemoteUpdate: (updatedData, updatedVersion) => {
+      if (hasUnsavedChanges) {
+        // User has unsaved changes - show conflict modal
+        setRemoteData(updatedData);
+        setRemoteVersion(updatedVersion);
+        setShowConflictModal(true);
+      } else {
+        // No local changes - auto-update to latest
+        setInstructions(updatedData);
+        setLocalVersion(updatedVersion);
+        setSuccessMessage('✅ Updated to latest version');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      }
+    }
   });
 
   // Draft recovery hook (localStorage backup)
@@ -96,6 +133,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     setLoading(true);
     const data = await getBrandInstructions(brand.id);
     setInstructions(data);
+    setLocalVersion(data?.version || 1);
     setHasUnsavedChanges(false);
     setLoading(false);
   };
@@ -112,21 +150,86 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     setSaving(true);
     setSuccessMessage('');
     try {
-      await saveBrandInstructions(brand.id, instructions, 'admin');
+      const result = await saveBrandInstructions(
+        brand.id,
+        instructions,
+        'admin',
+        'Admin',
+        localVersion
+      );
 
-      // Auto-extract patterns from examples
-      console.log('🤖 Extracting patterns from examples...');
-      await extractPatternsFromExamples();
+      if (result.conflict) {
+        // Conflict detected - reload remote data and show modal
+        const remoteInstructions = await getBrandInstructions(brand.id);
+        setRemoteData(remoteInstructions);
+        setRemoteVersion(result.remoteVersion!);
+        setShowConflictModal(true);
+        setSuccessMessage('');
+      } else if (result.success) {
+        // Success - update local version
+        setLocalVersion(result.newVersion!);
+        setHasUnsavedChanges(false);
 
-      setHasUnsavedChanges(false);
-      setSuccessMessage('✅ All changes saved successfully!');
-      setTimeout(() => setSuccessMessage(''), 5000);
+        // Auto-extract patterns from examples
+        console.log('🤖 Extracting patterns from examples...');
+        await extractPatternsFromExamples();
+
+        setSuccessMessage('✅ All changes saved successfully!');
+        setTimeout(() => setSuccessMessage(''), 5000);
+      }
     } catch (error) {
       console.error('Error saving instructions:', error);
-      alert('Error saving instructions');
+      alert('Error saving instructions. Please try again.');
     } finally {
       setSaving(false);
     }
+  };
+
+  // Conflict resolution handlers
+  const handleKeepLocal = async () => {
+    // Force overwrite with local version
+    if (!instructions) return;
+
+    setSaving(true);
+    try {
+      // Save without version check (force overwrite)
+      const result = await saveBrandInstructions(
+        brand.id,
+        instructions,
+        'admin',
+        'Admin',
+        remoteVersion // Use remote version to pass the check
+      );
+
+      if (result.success) {
+        setLocalVersion(result.newVersion!);
+        setHasUnsavedChanges(false);
+        setShowConflictModal(false);
+        setSuccessMessage('✅ Your changes saved (other changes overwritten)');
+        setTimeout(() => setSuccessMessage(''), 5000);
+      }
+    } catch (error) {
+      console.error('Error resolving conflict:', error);
+      alert('Error saving. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleKeepRemote = () => {
+    // Discard local changes and use remote version
+    if (!remoteData) return;
+
+    setInstructions(remoteData);
+    setLocalVersion(remoteVersion);
+    setHasUnsavedChanges(false);
+    setShowConflictModal(false);
+    setSuccessMessage('✅ Loaded latest version (your changes discarded)');
+    setTimeout(() => setSuccessMessage(''), 5000);
+  };
+
+  const handleCancelConflict = () => {
+    setShowConflictModal(false);
   };
 
   /**
@@ -388,6 +491,20 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
 
   return (
     <div className="max-w-6xl mx-auto py-8">
+      {/* Conflict Resolution Modal */}
+      {showConflictModal && instructions && remoteData && (
+        <ConflictResolutionModal
+          localData={instructions}
+          remoteData={remoteData}
+          localVersion={localVersion}
+          remoteVersion={remoteVersion}
+          lastUpdatedBy={remoteData.lastUpdatedByName || remoteData.lastUpdatedBy}
+          onKeepLocal={handleKeepLocal}
+          onKeepRemote={handleKeepRemote}
+          onCancel={handleCancelConflict}
+        />
+      )}
+
       {/* Draft Recovery Modal */}
       {showDraftRecoveryModal && draftAge !== null && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
@@ -487,7 +604,12 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                 <p className="font-semibold text-green-800">{successMessage}</p>
               ) : (
                 <div>
-                  <p className="font-semibold text-[#4b0f0d]">All changes saved</p>
+                  <p className="font-semibold text-[#4b0f0d]">All changes saved (v{localVersion})</p>
+                  {isListening && (
+                    <p className="text-xs text-green-600">
+                      🔄 Real-time sync active
+                    </p>
+                  )}
                   {lastSaved && (
                     <p className="text-xs text-[#9b9b9b]">
                       Last saved {formatDraftAge(Date.now() - lastSaved.getTime())}

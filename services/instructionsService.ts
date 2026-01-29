@@ -5,10 +5,13 @@ import {
   setDoc,
   updateDoc,
   Timestamp,
+  runTransaction,
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { BrandInstructions } from '../types';
 import { getDefaultInstructions } from '../constants/damConfig';
+import { saveVersionToHistory } from './versionHistoryService';
 
 const COLLECTION_NAME = 'brandInstructions';
 
@@ -43,29 +46,106 @@ export const getBrandInstructions = async (
 };
 
 /**
- * Save brand instructions to Firestore
+ * Save brand instructions to Firestore with optimistic locking
+ * Returns conflict state if version mismatch detected
  */
 export const saveBrandInstructions = async (
   brandId: string,
   instructions: Partial<BrandInstructions>,
-  updatedBy: string = 'admin'
-): Promise<void> => {
+  updatedBy: string = 'admin',
+  updatedByName: string = 'Admin',
+  clientVersion?: number
+): Promise<{ success: boolean; conflict?: boolean; remoteVersion?: number; newVersion?: number }> => {
   const docRef = doc(db, COLLECTION_NAME, brandId);
-  const existingDoc = await getDoc(docRef);
 
-  const currentVersion = existingDoc.exists()
-    ? (existingDoc.data().version || 1)
-    : 0;
+  try {
+    const result = await runTransaction(db, async (transaction) => {
+      const currentDoc = await transaction.get(docRef);
 
-  const now = Timestamp.now();
+      if (currentDoc.exists()) {
+        const currentData = currentDoc.data();
+        const currentVersion = currentData.version || 1;
 
-  await setDoc(docRef, {
-    ...instructions,
-    brandId,
-    lastUpdatedBy: updatedBy,
-    lastUpdated: now,
-    version: currentVersion + 1,
-  });
+        // Check for conflicts if clientVersion provided
+        if (clientVersion !== undefined && currentVersion !== clientVersion) {
+          console.warn(`⚠️ Conflict detected: client v${clientVersion}, server v${currentVersion}`);
+          return {
+            success: false,
+            conflict: true,
+            remoteVersion: currentVersion
+          };
+        }
+
+        // No conflict - proceed with save
+        const newVersion = currentVersion + 1;
+        const previousSnapshot = currentData as BrandInstructions;
+
+        const updatedData = {
+          ...instructions,
+          brandId,
+          lastUpdatedBy: updatedBy,
+          lastUpdatedByName: updatedByName,
+          lastUpdated: serverTimestamp(),
+          version: newVersion
+        };
+
+        transaction.set(docRef, updatedData);
+
+        // Save to version history (outside transaction)
+        setTimeout(async () => {
+          try {
+            await saveVersionToHistory(
+              brandId,
+              newVersion,
+              instructions as BrandInstructions,
+              updatedBy,
+              updatedByName,
+              previousSnapshot
+            );
+          } catch (error) {
+            console.error('Failed to save version history:', error);
+            // Don't throw - main save succeeded
+          }
+        }, 0);
+
+        return { success: true, conflict: false, newVersion };
+      } else {
+        // New document - no conflict possible
+        const updatedData = {
+          ...instructions,
+          brandId,
+          lastUpdatedBy: updatedBy,
+          lastUpdatedByName: updatedByName,
+          lastUpdated: serverTimestamp(),
+          version: 1
+        };
+
+        transaction.set(docRef, updatedData);
+
+        // Save initial version to history
+        setTimeout(async () => {
+          try {
+            await saveVersionToHistory(
+              brandId,
+              1,
+              instructions as BrandInstructions,
+              updatedBy,
+              updatedByName
+            );
+          } catch (error) {
+            console.error('Failed to save version history:', error);
+          }
+        }, 0);
+
+        return { success: true, conflict: false, newVersion: 1 };
+      }
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Transaction failed:', error);
+    throw new Error('Failed to save brand instructions. Please try again.');
+  }
 };
 
 /**
