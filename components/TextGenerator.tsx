@@ -14,6 +14,7 @@ import { generateTextContent, type AdCopyVariation, type GeneratedContent } from
 import { checkMissingInstructions, shouldShowWarning, type MissingInstruction } from '../utils/instructionsValidator';
 import LoadingSpinner from './LoadingSpinner';
 import InstructionsWarningModal from './InstructionsWarningModal';
+import { useDraftRecovery, formatDraftAge } from '../hooks/useDraftRecovery';
 
 interface TextGeneratorProps {
   brand: Brand;
@@ -41,6 +42,35 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
   // Warning modal state
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [missingInstructions, setMissingInstructions] = useState<MissingInstruction[]>([]);
+  const [showDraftRecoveryModal, setShowDraftRecoveryModal] = useState(false);
+
+  // Draft recovery for form inputs
+  const formData = {
+    prompt,
+    emailType,
+    campaignStage,
+    lengthValue,
+    lengthUnit,
+    market,
+    platform,
+    taskType
+  };
+
+  const { hasDraft, draftAge, restoreDraft, clearDraft } = useDraftRecovery({
+    key: `text-generator-${brand.id}-${taskType}`,
+    data: formData,
+    enabled: true,
+    onRestore: (restoredData: typeof formData) => {
+      setPrompt(restoredData.prompt);
+      setEmailType(restoredData.emailType);
+      setCampaignStage(restoredData.campaignStage);
+      setLengthValue(restoredData.lengthValue);
+      setLengthUnit(restoredData.lengthUnit);
+      setMarket(restoredData.market);
+      setPlatform(restoredData.platform);
+      setShowDraftRecoveryModal(false);
+    }
+  });
 
   useEffect(() => {
     const loadInstructions = async () => {
@@ -49,6 +79,13 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
     };
     loadInstructions();
   }, [brand.id]);
+
+  // Check for draft on mount (only if no initialPrompt was provided)
+  useEffect(() => {
+    if (hasDraft && !initialPrompt && !isLoading) {
+      setShowDraftRecoveryModal(true);
+    }
+  }, [hasDraft, initialPrompt, isLoading]);
 
   const getTaskDetails = () => {
     switch (taskType) {
@@ -187,6 +224,9 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
         regenerationFeedback
       );
 
+      // Clear draft on successful generation
+      clearDraft();
+
       onGenerated(generatedContent, prompt);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
@@ -237,6 +277,48 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
 
   return (
     <div className="max-w-4xl mx-auto py-8">
+      {/* Draft Recovery Modal */}
+      {showDraftRecoveryModal && draftAge !== null && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+          <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full mx-4">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="bg-blue-100 rounded-full p-3">
+                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-[#4b0f0d] mb-2">
+                  Restore Draft?
+                </h3>
+                <p className="text-sm text-[#9b9b9b]">
+                  We found a draft from <strong>{formatDraftAge(draftAge)}</strong>.
+                  Would you like to restore it?
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={restoreDraft}
+                className="w-full px-6 py-3 bg-[#780817] text-white font-bold rounded-lg hover:bg-[#4b0f0d] transition-colors"
+              >
+                ♻️ Restore Draft
+              </button>
+              <button
+                onClick={() => {
+                  clearDraft();
+                  setShowDraftRecoveryModal(false);
+                }}
+                className="w-full px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Start Fresh
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-sm text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors mb-4"

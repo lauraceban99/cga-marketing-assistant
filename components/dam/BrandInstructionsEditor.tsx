@@ -16,6 +16,8 @@ import ExamplesKnowledgeBase from './examples/ExamplesKnowledgeBase';
 import LandingPageExamplesKnowledgeBase from './examples/LandingPageExamplesKnowledgeBase';
 import UnifiedExamplesKnowledgeBase from './examples/UnifiedExamplesKnowledgeBase';
 import PatternKnowledgeViewer from './PatternKnowledgeViewer';
+import { useAutoSave } from '../../hooks/useAutoSave';
+import { useDraftRecovery, formatDraftAge } from '../../hooks/useDraftRecovery';
 
 interface BrandInstructionsEditorProps {
   brand: Brand;
@@ -29,10 +31,66 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
   const [activeTab, setActiveTab] = useState<'general' | 'ad-copy' | 'blog' | 'landing-page' | 'email' | 'ai-learning'>('general');
   const [successMessage, setSuccessMessage] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showDraftRecoveryModal, setShowDraftRecoveryModal] = useState(false);
+
+  // Auto-save hook (30 second intervals)
+  const { lastSaved, isSaving: isAutoSaving, triggerSave } = useAutoSave({
+    data: instructions,
+    onSave: async (data) => {
+      if (!data) return;
+      await saveBrandInstructions(brand.id, data, 'admin');
+      await extractPatternsFromExamples(data);
+    },
+    enabled: hasUnsavedChanges && !saving,
+    interval: 30000 // 30 seconds
+  });
+
+  // Draft recovery hook (localStorage backup)
+  const { hasDraft, draftAge, restoreDraft, clearDraft } = useDraftRecovery({
+    key: `brand-instructions-${brand.id}`,
+    data: instructions,
+    enabled: true,
+    maxVersions: 3,
+    onRestore: (restoredData) => {
+      setInstructions(restoredData);
+      setHasUnsavedChanges(true);
+      setShowDraftRecoveryModal(false);
+    }
+  });
 
   useEffect(() => {
     loadInstructions();
   }, [brand.id]);
+
+  // Check for draft on mount
+  useEffect(() => {
+    if (hasDraft && !loading && instructions) {
+      setShowDraftRecoveryModal(true);
+    }
+  }, [hasDraft, loading]);
+
+  // beforeunload warning
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  // Clear success message when auto-save completes
+  useEffect(() => {
+    if (lastSaved && !isAutoSaving) {
+      setHasUnsavedChanges(false);
+      setSuccessMessage('✅ Changes auto-saved');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    }
+  }, [lastSaved, isAutoSaving]);
 
   const loadInstructions = async () => {
     setLoading(true);
@@ -75,17 +133,17 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
    * Extract patterns from examples after saving
    * Groups examples by market + platform + type and calls pattern extraction
    */
-  const extractPatternsFromExamples = async () => {
-    if (!instructions) return;
+  const extractPatternsFromExamples = async (instructionsData: BrandInstructions = instructions!) => {
+    if (!instructionsData) return;
 
     // Collect all examples from all content types
     const allExamples: CampaignExample[] = [
-      ...(instructions.adCopyInstructions?.examples || []),
-      ...(instructions.blogInstructions?.examples || []),
-      ...(instructions.landingPageInstructions?.examples || []),
-      ...(instructions.emailInstructions?.invitation?.examples || []),
-      ...(instructions.emailInstructions?.nurturingDrip?.examples || []),
-      ...(instructions.emailInstructions?.emailBlast?.examples || []),
+      ...(instructionsData.adCopyInstructions?.examples || []),
+      ...(instructionsData.blogInstructions?.examples || []),
+      ...(instructionsData.landingPageInstructions?.examples || []),
+      ...(instructionsData.emailInstructions?.invitation?.examples || []),
+      ...(instructionsData.emailInstructions?.nurturingDrip?.examples || []),
+      ...(instructionsData.emailInstructions?.emailBlast?.examples || []),
     ];
 
     // Group examples by market + platform + type
@@ -330,6 +388,55 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
 
   return (
     <div className="max-w-6xl mx-auto py-8">
+      {/* Draft Recovery Modal */}
+      {showDraftRecoveryModal && draftAge !== null && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+          <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full mx-4">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="bg-blue-100 rounded-full p-3">
+                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-[#4b0f0d] mb-2">
+                  Unsaved Changes Found
+                </h3>
+                <p className="text-sm text-[#9b9b9b]">
+                  We found unsaved changes from <strong>{formatDraftAge(draftAge)}</strong>.
+                  Would you like to restore them?
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  restoreDraft();
+                  setShowDraftRecoveryModal(false);
+                }}
+                className="w-full px-6 py-3 bg-[#780817] text-white font-bold rounded-lg hover:bg-[#4b0f0d] transition-colors"
+              >
+                ♻️ Restore Unsaved Changes
+              </button>
+              <button
+                onClick={() => {
+                  clearDraft();
+                  setShowDraftRecoveryModal(false);
+                }}
+                className="w-full px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Discard and Start Fresh
+              </button>
+            </div>
+
+            <p className="text-xs text-[#9b9b9b] mt-4 text-center">
+              💡 Changes are automatically backed up to prevent data loss
+            </p>
+          </div>
+        </div>
+      )}
+
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-sm text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors mb-4"
@@ -367,13 +474,26 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
             <div>
               {hasUnsavedChanges ? (
                 <div>
-                  <p className="font-semibold text-yellow-800">You have unsaved changes</p>
-                  <p className="text-sm text-yellow-700">Click "Save Changes" to save your work</p>
+                  <p className="font-semibold text-yellow-800">
+                    {isAutoSaving ? '💾 Auto-saving...' : 'You have unsaved changes'}
+                  </p>
+                  <p className="text-sm text-yellow-700">
+                    {isAutoSaving
+                      ? 'Saving to cloud...'
+                      : 'Auto-save in progress every 30 seconds'}
+                  </p>
                 </div>
               ) : successMessage ? (
                 <p className="font-semibold text-green-800">{successMessage}</p>
               ) : (
-                <p className="font-semibold text-[#4b0f0d]">All changes saved</p>
+                <div>
+                  <p className="font-semibold text-[#4b0f0d]">All changes saved</p>
+                  {lastSaved && (
+                    <p className="text-xs text-[#9b9b9b]">
+                      Last saved {formatDraftAge(Date.now() - lastSaved.getTime())}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           </div>
