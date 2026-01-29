@@ -328,3 +328,55 @@ export interface GenerationContext {
   // Dynamic pattern knowledge (loaded based on market + platform + content type)
   dynamicPatterns?: PatternKnowledgeBase;
 }
+
+// ============================================================================
+// USER & AUTHENTICATION TYPES
+// ============================================================================
+
+export interface AppUser {
+  uid: string;
+  email: string;
+  displayName: string;
+  role: 'admin' | 'editor' | 'viewer';
+  createdAt: Date;
+  lastLogin: Date;
+}
+
+// ============================================================================
+// VERSION HISTORY & CHANGE TRACKING TYPES
+// ============================================================================
+
+export interface VersionHistoryEntry {
+  versionId: string; // Unique ID for this version
+  brandId: string;
+  version: number; // Version number
+  snapshot: BrandInstructions; // Full snapshot of data at this version
+  changes: FieldChange[]; // What changed from previous version
+  changedBy: string; // User ID who made the change
+  changedByName: string; // User display name
+  timestamp: Date;
+}
+
+export interface FieldChange {
+  field: string; // e.g., "brandIntroduction", "personas[0].name"
+  oldValue: any;
+  newValue: any;
+  changeType: 'added' | 'modified' | 'deleted';
+}
+
+export interface ConflictState {
+  hasConflict: boolean;
+  localVersion: number;
+  remoteVersion: number;
+  localData: BrandInstructions | null;
+  remoteData: BrandInstructions | null;
+  conflictingFields: string[]; // Fields that differ between local and remote
+}
+
+export interface CollaborativePresence {
+  userId: string;
+  userName: string;
+  brandId: string;
+  lastSeen: Date;
+  isActive: boolean; // Active in last 2 minutes
+}
