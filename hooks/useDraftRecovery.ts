@@ -76,6 +76,12 @@ export function useDraftRecovery<T>({
   useEffect(() => {
     if (!enabled || !data) return;
 
+    // Basic validation: don't save if data is empty object or null
+    if (typeof data === 'object' && Object.keys(data).length === 0) {
+      console.log('⚠️ Skipping draft save: empty data object');
+      return;
+    }
+
     try {
       const draft: DraftData<T> = {
         data,

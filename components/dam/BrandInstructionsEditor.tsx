@@ -342,6 +342,17 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     updateInstructions({ ...instructions, personas: updatedPersonas });
   };
 
+  // Helper to ensure instruction field exists with proper structure
+  const getOrInitializeField = (fieldName: string) => {
+    return instructions[fieldName] || {
+      systemPrompt: '',
+      requirements: '',
+      examples: [],
+      dos: [],
+      donts: []
+    };
+  };
+
   const addExample = (
     type: 'adCopy' | 'blog' | 'landingPage',
     stage?: CampaignStage,
@@ -367,11 +378,13 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     } as const;
 
     const field = fieldMap[type];
+    const currentFieldData = getOrInitializeField(field);
+
     updateInstructions({
       ...instructions,
       [field]: {
-        ...instructions[field],
-        examples: [...instructions[field].examples, newExample]
+        ...currentFieldData,
+        examples: [...(currentFieldData.examples || []), newExample]
       }
     });
   };
@@ -390,13 +403,15 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     } as const;
 
     const instructionField = fieldMap[type];
-    const updatedExamples = [...instructions[instructionField].examples];
+    const currentFieldData = getOrInitializeField(instructionField);
+
+    const updatedExamples = [...(currentFieldData.examples || [])];
     updatedExamples[index] = { ...updatedExamples[index], [field]: value };
 
     updateInstructions({
       ...instructions,
       [instructionField]: {
-        ...instructions[instructionField],
+        ...currentFieldData,
         examples: updatedExamples
       }
     });
@@ -411,12 +426,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
     } as const;
 
     const field = fieldMap[type];
-    const updatedExamples = instructions[field].examples.filter((_, i) => i !== index);
+    const currentFieldData = getOrInitializeField(field);
+
+    const updatedExamples = (currentFieldData.examples || []).filter((_, i) => i !== index);
 
     updateInstructions({
       ...instructions,
       [field]: {
-        ...instructions[field],
+        ...currentFieldData,
         examples: updatedExamples
       }
     });
