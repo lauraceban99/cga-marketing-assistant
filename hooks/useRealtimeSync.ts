@@ -109,7 +109,7 @@ export function useRealtimeSync({
       setIsListening(false);
       isInitialLoad.current = true;
     };
-  }, [brandId, enabled, localVersion, onRemoteUpdate, onConflict]);
+  }, [brandId, enabled, localVersion]); // Removed onRemoteUpdate, onConflict to prevent infinite loop
 
   return {
     isListening,

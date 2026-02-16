@@ -81,7 +81,7 @@ export async function extractPatternsFromExamples(
   patterns: PatternKnowledgeBase['patterns'];
   insights: string;
 }> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' }); // Changed from pro to flash (faster, more stable API)
 
   const prompt = `You are an expert marketing analyst. Analyze these ${contentType} examples from the ${market} market with ${platform} traffic source and extract key patterns that make them successful.
 
