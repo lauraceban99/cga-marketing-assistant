@@ -20,6 +20,7 @@ import { useAutoSave } from '../../hooks/useAutoSave';
 import { useDraftRecovery, formatDraftAge } from '../../hooks/useDraftRecovery';
 import { useRealtimeSync } from '../../hooks/useRealtimeSync';
 import ConflictResolutionModal from '../ConflictResolutionModal';
+import { VersionHistoryModal } from './VersionHistoryModal';
 
 interface BrandInstructionsEditorProps {
   brand: Brand;
@@ -40,8 +41,9 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
   const [remoteData, setRemoteData] = useState<BrandInstructions | null>(null);
   const [remoteVersion, setRemoteVersion] = useState<number>(1);
   const [showConflictModal, setShowConflictModal] = useState(false);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
 
-  // Auto-save hook (30 second intervals) - DISABLED, will use manual save with conflict detection
+  // Auto-save hook (30 second intervals)
   const { lastSaved, isSaving: isAutoSaving, triggerSave} = useAutoSave({
     data: instructions,
     onSave: async (data) => {
@@ -54,10 +56,12 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
       }
       if (result.success && result.newVersion) {
         setLocalVersion(result.newVersion);
+        setHasUnsavedChanges(false); // Mark as saved after auto-save
+        clearDraft(); // Clear draft after successful auto-save
       }
       await extractPatternsFromExamples(data);
     },
-    enabled: false, // Disabled for now - manual save only for safety
+    enabled: true, // Auto-save every 30 seconds
     interval: 30000
   });
 
@@ -571,6 +575,20 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
         </div>
       )}
 
+      {/* Version History Modal */}
+      <VersionHistoryModal
+        isOpen={showVersionHistory}
+        onClose={() => setShowVersionHistory(false)}
+        brandId={brand.id}
+        currentVersion={localVersion}
+        onRestore={(version, snapshot) => {
+          setInstructions(snapshot);
+          setLocalVersion(version);
+          setHasUnsavedChanges(true);
+          setSuccessMessage(`Restored version ${version}. Click Save to confirm.`);
+        }}
+      />
+
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-sm text-[#9b9b9b] hover:text-[#4b0f0d] transition-colors mb-4"
@@ -622,41 +640,51 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               ) : (
                 <div>
                   <p className="font-semibold text-[#4b0f0d]">All changes saved (v{localVersion})</p>
-                  {isListening && (
-                    <p className="text-xs text-green-600">
-                      🔄 Real-time sync active
-                    </p>
-                  )}
-                  {lastSaved && (
-                    <p className="text-xs text-[#9b9b9b]">
-                      Last saved {formatDraftAge(Date.now() - lastSaved.getTime())}
-                    </p>
-                  )}
+                  <div className="flex items-center gap-3 mt-1">
+                    {isListening && (
+                      <p className="text-xs text-green-600">
+                        🔄 Real-time sync active
+                      </p>
+                    )}
+                    {lastSaved && (
+                      <p className="text-xs font-medium text-gray-600">
+                        💾 Last saved {formatDraftAge(Date.now() - lastSaved.getTime())}
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           </div>
-          <button
-            onClick={handleSave}
-            disabled={saving || !hasUnsavedChanges}
-            className={`px-8 py-3 font-bold rounded-lg transition-all text-lg ${
-              hasUnsavedChanges
-                ? 'bg-[#780817] text-white hover:bg-[#4b0f0d] shadow-lg hover:shadow-xl transform hover:scale-105'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            } disabled:opacity-50`}
-          >
-            {saving ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Saving...
-              </span>
-            ) : (
-              '💾 Save Changes'
-            )}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowVersionHistory(true)}
+              className="px-4 py-2 font-medium rounded-lg border-2 border-[#780817] text-[#780817] hover:bg-[#780817] hover:text-white transition-all"
+            >
+              📜 View History (v{localVersion})
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving || !hasUnsavedChanges}
+              className={`px-8 py-3 font-bold rounded-lg transition-all text-lg ${
+                hasUnsavedChanges
+                  ? 'bg-[#780817] text-white hover:bg-[#4b0f0d] shadow-lg hover:shadow-xl transform hover:scale-105'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              } disabled:opacity-50`}
+            >
+              {saving ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </span>
+              ) : (
+                '💾 Save Changes'
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
