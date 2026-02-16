@@ -577,7 +577,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                 <p className="font-semibold text-green-800">{successMessage}</p>
               ) : (
                 <div>
-                  <p className="font-semibold text-[#4b0f0d]">All changes saved (v{localVersion})</p>
+                  <p className="font-semibold text-[#4b0f0d]">All changes saved</p>
                   <div className="flex items-center gap-3 mt-1">
                     {isListening && (
                       <p className="text-xs text-green-600">
@@ -599,7 +599,7 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
               onClick={() => setShowVersionHistory(true)}
               className="px-4 py-2 font-medium rounded-lg border-2 border-[#780817] text-[#780817] hover:bg-[#780817] hover:text-white transition-all"
             >
-              📜 View History (v{localVersion})
+              📜 Version History
             </button>
             <button
               onClick={handleSave}
@@ -875,7 +875,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <input
                     type="text"
-                    defaultValue="5 variations minimum"
+                    value={instructions.adCopyInstructions?.numberOfVariations || '5 variations minimum'}
+                    onChange={(e) => updateInstructions({
+                      ...instructions,
+                      adCopyInstructions: {
+                        ...instructions.adCopyInstructions,
+                        numberOfVariations: e.target.value
+                      }
+                    })}
                     className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
                     placeholder="How many ad variations to generate per request"
                   />
@@ -887,6 +894,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     rows={3}
+                    value={instructions.adCopyInstructions?.variationStrategy || ''}
+                    onChange={(e) => updateInstructions({
+                      ...instructions,
+                      adCopyInstructions: {
+                        ...instructions.adCopyInstructions,
+                        variationStrategy: e.target.value
+                      }
+                    })}
                     className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
                     placeholder="e.g., Each variation should target a different persona, use different emotional angles (aspiration, urgency, social proof), and vary opening hooks"
                   />
@@ -1012,6 +1027,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     rows={2}
+                    value={instructions.blogInstructions?.targetSEOKeywords || ''}
+                    onChange={(e) => updateInstructions({
+                      ...instructions,
+                      blogInstructions: {
+                        ...instructions.blogInstructions,
+                        targetSEOKeywords: e.target.value
+                      }
+                    })}
                     className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
                     placeholder="List your primary keywords and topics you want to rank for. E.g., online high school, flexible education, homeschooling alternatives"
                   />
@@ -1023,6 +1046,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     rows={2}
+                    value={instructions.blogInstructions?.internalLinkingStrategy || ''}
+                    onChange={(e) => updateInstructions({
+                      ...instructions,
+                      blogInstructions: {
+                        ...instructions.blogInstructions,
+                        internalLinkingStrategy: e.target.value
+                      }
+                    })}
                     className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
                     placeholder="Which pages should blog posts link to? E.g., 3 internal + 2 external links minimum"
                   />
@@ -1093,6 +1124,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     rows={2}
+                    value={instructions.landingPageInstructions?.primaryValuePropositions || ''}
+                    onChange={(e) => updateInstructions({
+                      ...instructions,
+                      landingPageInstructions: {
+                        ...instructions.landingPageInstructions,
+                        primaryValuePropositions: e.target.value
+                      }
+                    })}
                     className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
                     placeholder="What are your strongest value propositions? E.g., Study on your schedule, Expert 1-on-1 support, Global community"
                   />
@@ -1104,6 +1143,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     rows={3}
+                    value={instructions.landingPageInstructions?.commonObjections || ''}
+                    onChange={(e) => updateInstructions({
+                      ...instructions,
+                      landingPageInstructions: {
+                        ...instructions.landingPageInstructions,
+                        commonObjections: e.target.value
+                      }
+                    })}
                     className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
                     placeholder="What concerns do prospects have? E.g., Is it accredited?, Will my teen be lonely?, How much does it cost?"
                   />
@@ -1115,6 +1162,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     rows={2}
+                    value={instructions.landingPageInstructions?.socialProofAvailable || ''}
+                    onChange={(e) => updateInstructions({
+                      ...instructions,
+                      landingPageInstructions: {
+                        ...instructions.landingPageInstructions,
+                        socialProofAvailable: e.target.value
+                      }
+                    })}
                     className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
                     placeholder="What proof points can you use? E.g., Number of students, graduation rates, accreditation badges"
                   />
@@ -1160,6 +1215,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <textarea
                     rows={6}
+                    value={instructions.emailInstructions?.sharedRules || ''}
+                    onChange={(e) => updateInstructions({
+                      ...instructions,
+                      emailInstructions: {
+                        ...instructions.emailInstructions,
+                        sharedRules: e.target.value
+                      }
+                    })}
                     className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] font-mono text-sm"
                     placeholder="• One CTA only (+371% click improvement)&#10;• Personalization tokens required (+50% open rate)&#10;• Mobile-optimized (60%+ opens on mobile)&#10;• Use [PLACEHOLDER] for unknown information&#10;• Power words: exclusive, limited, you, free, new&#10;• Subject line emojis (test for audience)&#10;• Clear value proposition&#10;• Conversational tone"
                   />
@@ -1171,6 +1234,14 @@ const BrandInstructionsEditor: React.FC<BrandInstructionsEditorProps> = ({ brand
                   </label>
                   <input
                     type="text"
+                    value={instructions.emailInstructions?.personalizationTokens || ''}
+                    onChange={(e) => updateInstructions({
+                      ...instructions,
+                      emailInstructions: {
+                        ...instructions.emailInstructions,
+                        personalizationTokens: e.target.value
+                      }
+                    })}
                     className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817]"
                     placeholder="e.g., First name, Parent name, Student name, Location, Program interest"
                   />
