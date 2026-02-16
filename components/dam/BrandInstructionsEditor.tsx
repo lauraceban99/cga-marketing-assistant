@@ -17,7 +17,7 @@ import LandingPageExamplesKnowledgeBase from './examples/LandingPageExamplesKnow
 import UnifiedExamplesKnowledgeBase from './examples/UnifiedExamplesKnowledgeBase';
 import PatternKnowledgeViewer from './PatternKnowledgeViewer';
 import { useAutoSave } from '../../hooks/useAutoSave';
-import { useDraftRecovery } from '../../hooks/useDraftRecovery';
+import { useDraftRecovery, formatDraftAge } from '../../hooks/useDraftRecovery';
 import { useRealtimeSync } from '../../hooks/useRealtimeSync';
 import ConflictResolutionModal from '../ConflictResolutionModal';
 import { VersionHistoryModal } from './VersionHistoryModal';
