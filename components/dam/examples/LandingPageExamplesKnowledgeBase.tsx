@@ -82,6 +82,11 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
       fullName: 'Japan',
       description: 'Both/and reassurance, process-oriented, authentic testimonials',
     },
+    USA: {
+      label: 'USA',
+      fullName: 'USA (United States)',
+      description: 'Direct value proposition, outcome-focused, testimonials and case studies',
+    },
   };
 
 

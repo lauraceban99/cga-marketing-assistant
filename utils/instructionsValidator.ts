@@ -87,12 +87,21 @@ export function checkMissingInstructions(
           label: 'Blog Post Instructions',
           description: 'Brand-specific guidelines, examples, dos/donts for blog writing',
         });
-      } else if (brandInstructions.blogInstructions.examples.length === 0) {
-        missing.push({
-          field: 'blogExamples',
-          label: 'Blog Post Examples',
-          description: 'Real examples of successful blog posts to use as templates',
-        });
+      } else {
+        if (brandInstructions.blogInstructions.examples.length === 0) {
+          missing.push({
+            field: 'blogExamples',
+            label: 'Blog Post Examples',
+            description: 'Real examples of successful blog posts to use as templates',
+          });
+        }
+        if (!brandInstructions.blogInstructions?.targetSEOKeywords?.length) {
+          missing.push({
+            field: 'blogTargetSEOKeywords',
+            label: 'Target SEO Keywords',
+            description: 'Primary and secondary keywords to optimize the blog post for search',
+          });
+        }
       }
       break;
 
@@ -103,12 +112,28 @@ export function checkMissingInstructions(
           label: 'Landing Page Instructions',
           description: 'Brand-specific guidelines, examples, dos/donts for landing page copy',
         });
-      } else if (brandInstructions.landingPageInstructions.examples.length === 0) {
-        missing.push({
-          field: 'landingPageExamples',
-          label: 'Landing Page Examples',
-          description: 'Real examples of high-converting landing pages to use as templates',
-        });
+      } else {
+        if (brandInstructions.landingPageInstructions.examples.length === 0) {
+          missing.push({
+            field: 'landingPageExamples',
+            label: 'Landing Page Examples',
+            description: 'Real examples of high-converting landing pages to use as templates',
+          });
+        }
+        if (!brandInstructions.landingPageInstructions?.primaryValuePropositions?.length) {
+          missing.push({
+            field: 'landingPageValuePropositions',
+            label: 'Primary Value Propositions',
+            description: 'The core value propositions this landing page should lead with',
+          });
+        }
+        if (!brandInstructions.landingPageInstructions?.commonObjections?.length) {
+          missing.push({
+            field: 'landingPageObjections',
+            label: 'Common Objections',
+            description: 'Objections the landing page copy must address to drive conversions',
+          });
+        }
       }
       break;
 

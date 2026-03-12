@@ -187,7 +187,7 @@ export interface PersonaDefinition {
   solution: string;
 }
 
-export type Market = 'ASIA' | 'EMEA' | 'ANZ' | 'Japan';
+export type Market = 'ASIA' | 'EMEA' | 'ANZ' | 'Japan' | 'USA';
 
 export type Platform = 'META' | 'GOOGLE' | 'ORGANIC' | 'EMAIL';
 
@@ -209,6 +209,19 @@ export interface TypeSpecificInstructions {
   examples: CampaignExample[];
   dos?: string[];
   donts?: string[];
+
+  // Ad copy specific
+  numberOfVariations?: number;
+  variationStrategy?: string;
+
+  // Blog specific
+  targetSEOKeywords?: string[];
+  internalLinkingStrategy?: string;
+
+  // Landing page specific
+  primaryValuePropositions?: string[];
+  commonObjections?: string[];
+  socialProofAvailable?: string;
 }
 
 export interface BrandInstructions {
@@ -236,6 +249,8 @@ export interface BrandInstructions {
     invitation?: TypeSpecificInstructions;
     nurturingDrip?: TypeSpecificInstructions;
     emailBlast?: TypeSpecificInstructions;
+    sharedRules?: string;
+    personalizationTokens?: string;
   };
 
   // Reference materials (e.g., zoom interview transcripts)

@@ -50,7 +50,7 @@ function buildSystemPrompt(
   let usingFallback = false;
 
   switch (contentType) {
-    case 'ad-copy':
+    case 'ad-copy': {
       if (!brandInstructions.adCopyInstructions?.systemPrompt) {
         console.warn('⚠️ Brand instructions missing adCopyInstructions - using generic fallback. Please configure brand instructions in DAM.');
         usingFallback = true;
@@ -65,6 +65,7 @@ function buildSystemPrompt(
         typeInstructions = brandInstructions.adCopyInstructions;
       }
       break;
+    }
     case 'blog':
       if (!brandInstructions.blogInstructions?.systemPrompt) {
         console.warn('⚠️ Brand instructions missing blogInstructions - using generic fallback. Please configure brand instructions in DAM.');
@@ -324,6 +325,45 @@ INTERVIEW TRANSCRIPTS (Use for authentic voice, don't fabricate):
 ${brandInstructions.referenceMaterials.interviews}
 ` : ''}
 
+${brandInstructions.referenceMaterials?.testimonials ? `
+CUSTOMER TESTIMONIALS (Use these real quotes and social proof - do not fabricate):
+${brandInstructions.referenceMaterials.testimonials}
+` : ''}
+
+${brandInstructions.referenceMaterials?.otherNotes ? `
+ADDITIONAL BRAND NOTES:
+${brandInstructions.referenceMaterials.otherNotes}
+` : ''}
+
+${contentType === 'ad-copy' && !usingFallback ? `
+${brandInstructions.adCopyInstructions?.variationStrategy ? `AD VARIATION STRATEGY:
+${brandInstructions.adCopyInstructions.variationStrategy}
+` : ''}${brandInstructions.adCopyInstructions?.numberOfVariations ? `TARGET NUMBER OF VARIATIONS: ${brandInstructions.adCopyInstructions.numberOfVariations} variations (short + long each)
+` : ''}` : ''}
+
+${contentType === 'blog' && !usingFallback ? `
+${(brandInstructions.blogInstructions?.targetSEOKeywords || []).length > 0 ? `TARGET SEO KEYWORDS:
+${(brandInstructions.blogInstructions?.targetSEOKeywords || []).map(k => `- ${k}`).join('\n')}
+` : ''}${brandInstructions.blogInstructions?.internalLinkingStrategy ? `INTERNAL LINKING STRATEGY:
+${brandInstructions.blogInstructions.internalLinkingStrategy}
+` : ''}` : ''}
+
+${contentType === 'landing-page' && !usingFallback ? `
+${(brandInstructions.landingPageInstructions?.primaryValuePropositions || []).length > 0 ? `PRIMARY VALUE PROPOSITIONS (Lead with these):
+${(brandInstructions.landingPageInstructions?.primaryValuePropositions || []).map((v, i) => `${i + 1}. ${v}`).join('\n')}
+` : ''}${(brandInstructions.landingPageInstructions?.commonObjections || []).length > 0 ? `COMMON OBJECTIONS TO ADDRESS (The page must handle each of these):
+${(brandInstructions.landingPageInstructions?.commonObjections || []).map(o => `- ${o}`).join('\n')}
+` : ''}${brandInstructions.landingPageInstructions?.socialProofAvailable ? `AVAILABLE SOCIAL PROOF (Use this, do not fabricate):
+${brandInstructions.landingPageInstructions.socialProofAvailable}
+` : ''}` : ''}
+
+${contentType === 'email' ? `
+${brandInstructions.emailInstructions?.sharedRules ? `EMAIL SHARED RULES (Apply to all email types):
+${brandInstructions.emailInstructions.sharedRules}
+` : ''}${brandInstructions.emailInstructions?.personalizationTokens ? `AVAILABLE PERSONALIZATION TOKENS:
+${brandInstructions.emailInstructions.personalizationTokens}
+` : ''}` : ''}
+
 ═══════════════════════════════════════════════════════════════════
 🎯 CRITICAL GENERATION INSTRUCTIONS - READ CAREFULLY:
 ═══════════════════════════════════════════════════════════════════
@@ -333,7 +373,13 @@ You have been provided with:
 2. ✅ Target personas and their pain points
 3. ✅ ${typeInstructions.examples.length} reference examples with actual content
 ${dynamicPatterns ? `4. ✅ Auto-extracted patterns from ${dynamicPatterns.performanceSummary?.totalExamples || 0} high-performing examples
-5. ✅ Market-specific insights (${dynamicPatterns.market} + ${dynamicPatterns.platform})` : ''}
+5. ✅ Market-specific insights (${dynamicPatterns.market} + ${dynamicPatterns.platform})
+` : ''}${brandInstructions.referenceMaterials?.testimonials ? `✅ Real customer testimonials and social proof
+` : ''}${brandInstructions.referenceMaterials?.interviews ? `✅ Interview transcripts for authentic voice
+` : ''}${contentType === 'landing-page' && (brandInstructions.landingPageInstructions?.primaryValuePropositions?.length || brandInstructions.landingPageInstructions?.commonObjections?.length) ? `✅ Primary value propositions and objection-handling guidance
+` : ''}${contentType === 'blog' && brandInstructions.blogInstructions?.targetSEOKeywords?.length ? `✅ Target SEO keywords to optimize for
+` : ''}${contentType === 'email' && (brandInstructions.emailInstructions?.sharedRules || brandInstructions.emailInstructions?.personalizationTokens) ? `✅ Email shared rules and personalization tokens
+` : ''}
 
 YOUR TASK:
 Generate content that THOROUGHLY applies ALL of the above learnings.
@@ -399,9 +445,10 @@ ${stageInstructions}
 
   // Specific instructions per content type
   if (contentType === 'ad-copy') {
+    const numVariations = brandInstructions.adCopyInstructions?.numberOfVariations || 5;
     userPrompt += `AD COPY REQUIREMENTS:
 - Generate BOTH short and long versions for each variation
-- Create at least 5 distinct variations
+- Create ${numVariations} distinct variations
 - Each variation must use:
   * A different target persona
   * A different angle (emotional, logical, social proof, urgency, etc.)
@@ -435,9 +482,11 @@ Return ONLY valid JSON in this format:
   ]
 }`;
   } else if (contentType === 'blog') {
+    const seoKeywords = brandInstructions.blogInstructions?.targetSEOKeywords || [];
     userPrompt += `
 
 **PRIMARY KEYWORD**: [Extract from user request or use most relevant topic keyword]
+${seoKeywords.length > 0 ? `**BRAND TARGET KEYWORDS** (incorporate these naturally where relevant): ${seoKeywords.join(', ')}` : ''}
 
 **SEARCH INTENT**: [Informational / How-to / Comparison / Best-of-list]
 - Match content structure to intent type
