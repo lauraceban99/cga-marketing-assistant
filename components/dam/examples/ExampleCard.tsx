@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { CampaignExample, CampaignStage, Market, Platform } from '../../../types';
+import { MARKETS, PLATFORMS, PLATFORM_BADGE_STYLES, PLATFORM_ICONS, getMarketsList, getPlatformsList } from '../../../config/markets';
 
 interface ExampleCardProps {
   example: CampaignExample;
@@ -42,20 +43,7 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
     return text.substring(0, maxLength) + '...';
   };
 
-  // Platform and market badge styles
-  const platformBadgeStyles = {
-    META: 'bg-blue-100 text-blue-700 border-blue-300',
-    GOOGLE: 'bg-green-100 text-green-700 border-green-300',
-    ORGANIC: 'bg-purple-100 text-purple-700 border-purple-300',
-    EMAIL: 'bg-orange-100 text-orange-700 border-orange-300',
-  };
-
-  const platformIcons = {
-    META: '📱',
-    GOOGLE: '🔍',
-    ORGANIC: '🌐',
-    EMAIL: '📧',
-  };
+  // Platform and market configs now imported from centralized config/markets.ts
 
   // Locked state (default)
   if (!isEditing) {
@@ -75,8 +63,8 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
         {/* Platform and Market Badges */}
         <div className="flex gap-2 mb-3">
           {example.platform && (
-            <span className={`px-2 py-1 text-xs font-semibold rounded border ${platformBadgeStyles[example.platform]}`}>
-              {platformIcons[example.platform]} {example.platform}
+            <span className={`px-2 py-1 text-xs font-semibold rounded border ${PLATFORM_BADGE_STYLES[example.platform]}`}>
+              {PLATFORM_ICONS[example.platform]} {example.platform}
             </span>
           )}
           {example.market && (
@@ -176,10 +164,11 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
                 onChange={(e) => onUpdate('market', e.target.value as Market)}
                 className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
               >
-                <option value="ASIA">ASIA (Singapore, Hong Kong, Vietnam)</option>
-                <option value="EMEA">EMEA (UAE, Middle East, Europe)</option>
-                <option value="ANZ">ANZ (Australia, New Zealand)</option>
-                <option value="Japan">Japan</option>
+                {getMarketsList().map((market) => (
+                  <option key={market} value={market}>
+                    {MARKETS[market].fullName}
+                  </option>
+                ))}
               </select>
               {example.type === 'email' && (
                 <p className="text-xs text-[#9b9b9b] mt-1">
@@ -198,10 +187,11 @@ const ExampleCard: React.FC<ExampleCardProps> = ({
                 onChange={(e) => onUpdate('platform', e.target.value as Platform)}
                 className="w-full bg-white border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-2 focus:ring-2 focus:ring-[#780817] text-sm"
               >
-                <option value="META">META (Facebook, Instagram)</option>
-                <option value="GOOGLE">GOOGLE (Search, Display)</option>
-                <option value="ORGANIC">ORGANIC (SEO, Direct)</option>
-                <option value="EMAIL">EMAIL (Campaigns)</option>
+                {getPlatformsList().map((platform) => (
+                  <option key={platform} value={platform}>
+                    {PLATFORMS[platform].fullName}
+                  </option>
+                ))}
               </select>
               {example.type === 'email' && (
                 <p className="text-xs text-[#9b9b9b] mt-1">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { CampaignExample, Market, Platform } from '../../../types';
+import { MARKETS, PLATFORMS, getMarketsList, getPlatformsList } from '../../../config/markets';
 import ExampleCard from './ExampleCard';
 import AddExamplesButton from '../AddExamplesButton';
 
@@ -40,54 +41,7 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
     return examples.findIndex((ex) => ex === filteredExample);
   };
 
-  const platformConfig = {
-    META: {
-      label: 'META',
-      fullName: 'META Ads (Facebook, Instagram)',
-      description: 'Social audience, interruption marketing, emotion-driven, storytelling focus',
-      icon: '📱',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-      textColor: 'text-blue-600',
-    },
-    GOOGLE: {
-      label: 'GOOGLE',
-      fullName: 'GOOGLE Ads & Organic (Search, Display)',
-      description: 'High-intent searchers, problem-aware, comparison-shopping, data-driven',
-      icon: '🔍',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-      textColor: 'text-green-600',
-    },
-  };
-
-  const marketConfig = {
-    ASIA: {
-      label: 'ASIA',
-      fullName: 'Asia (Singapore, Hong Kong, Vietnam)',
-      description: 'Contrarian educational positioning, extreme specificity, university prestige focus',
-    },
-    EMEA: {
-      label: 'EMEA',
-      fullName: 'EMEA (UAE, Middle East, Europe)',
-      description: 'Urgency + aspiration, social proof stacking, enrollment focus',
-    },
-    ANZ: {
-      label: 'ANZ',
-      fullName: 'ANZ (Australia, New Zealand)',
-      description: 'Gentle challenge to traditional, flexibility focus, local credibility',
-    },
-    Japan: {
-      label: 'Japan',
-      fullName: 'Japan',
-      description: 'Both/and reassurance, process-oriented, authentic testimonials',
-    },
-    USA: {
-      label: 'USA',
-      fullName: 'USA (United States)',
-      description: 'Direct value proposition, outcome-focused, testimonials and case studies',
-    },
-  };
+  // Platform and market configs now imported from centralized config/markets.ts
 
 
   return (
@@ -111,7 +65,7 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
       {/* Platform Tabs - PRIMARY */}
       <div className="flex gap-3 mb-6">
         {(['META', 'GOOGLE'] as Platform[]).map((platform) => {
-          const config = platformConfig[platform];
+          const config = PLATFORMS[platform];
           const count = examples.filter((ex) => ex.platform === platform).length;
           const isActive = activePlatform === platform;
 
@@ -153,8 +107,8 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
       {/* Market Tabs - SECONDARY */}
       <div className="mb-6">
         <div className="flex gap-2 mb-3 pb-2 border-b-2 border-[#f4f0f0]">
-          {(['ASIA', 'EMEA', 'ANZ', 'Japan'] as Market[]).map((market) => {
-            const config = marketConfig[market];
+          {getMarketsList().map((market) => {
+            const config = MARKETS[market];
             const count = examples.filter((ex) => ex.platform === activePlatform && ex.market === market).length;
             const isActive = activeMarket === market;
 
@@ -188,7 +142,7 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
         {/* Market description */}
         <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
           <p className="text-xs text-[#4b0f0d]">
-            <span className="font-semibold">{marketConfig[activeMarket].fullName}:</span> {marketConfig[activeMarket].description}
+            <span className="font-semibold">{MARKETS[activeMarket].fullName}:</span> {MARKETS[activeMarket].description}
           </p>
         </div>
       </div>

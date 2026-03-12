@@ -9,6 +9,7 @@ import type {
   Market,
   Platform
 } from '../types';
+import { MARKETS, PLATFORMS, getMarketsList, getPlatformsList } from '../config/markets';
 import { getBrandInstructions } from '../services/instructionsService';
 import { generateTextContent, type AdCopyVariation, type GeneratedContent } from '../services/textGenerationService';
 import { checkMissingInstructions, shouldShowWarning, type MissingInstruction } from '../utils/instructionsValidator';
@@ -396,10 +397,11 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
                 onChange={(e) => setMarket(e.target.value as Market)}
                 className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
               >
-                <option value="ASIA">ASIA (Singapore, Hong Kong, Vietnam)</option>
-                <option value="EMEA">EMEA (UAE, Middle East, Europe)</option>
-                <option value="ANZ">ANZ (Australia, New Zealand)</option>
-                <option value="Japan">Japan</option>
+                {getMarketsList().map((mkt) => (
+                  <option key={mkt} value={mkt}>
+                    {MARKETS[mkt].fullName}
+                  </option>
+                ))}
               </select>
               <p className="text-xs text-[#9b9b9b] mt-2">
                 Different markets respond to different messaging strategies.
@@ -419,14 +421,20 @@ const TextGenerator: React.FC<TextGeneratorProps> = ({ brand, taskType, onBack, 
                 onChange={(e) => setPlatform(e.target.value as Platform)}
                 className="w-full bg-[#f4f0f0] border border-[#9b9b9b] text-[#4b0f0d] rounded-md p-3 focus:ring-2 focus:ring-[#780817] focus:border-[#780817]"
               >
-                <option value="META">META (Facebook, Instagram)</option>
-                <option value="GOOGLE">GOOGLE (Search, Display)</option>
-                {taskType === 'landing-page' && (
-                  <>
-                    <option value="ORGANIC">ORGANIC (SEO, Direct)</option>
-                    <option value="EMAIL">EMAIL (Campaigns)</option>
-                  </>
-                )}
+                {getPlatformsList()
+                  .filter((plt) => {
+                    // For ad-copy, only show META and GOOGLE
+                    if (taskType === 'ad-copy') {
+                      return plt === 'META' || plt === 'GOOGLE';
+                    }
+                    // For landing-page, show all platforms
+                    return true;
+                  })
+                  .map((plt) => (
+                    <option key={plt} value={plt}>
+                      {PLATFORMS[plt].fullName}
+                    </option>
+                  ))}
               </select>
               <p className="text-xs text-[#9b9b9b] mt-2">
                 AI will apply platform-specific patterns. META: emotional, long-form. GOOGLE: direct, trust-focused.
