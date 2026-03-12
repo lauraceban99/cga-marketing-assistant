@@ -168,7 +168,7 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
         <div className="text-center py-12 mb-6">
           <div className="text-4xl mb-3">📝</div>
           <p className="text-[#9b9b9b] text-sm mb-2">
-            No {platformConfig[activePlatform].label} examples for {marketConfig[activeMarket].label} yet
+            No {PLATFORMS[activePlatform].label} examples for {MARKETS[activeMarket].label} yet
           </p>
           <p className="text-xs text-[#9b9b9b]">
             Add real landing pages from campaigns to teach the AI what works
@@ -181,7 +181,7 @@ const LandingPageExamplesKnowledgeBase: React.FC<LandingPageExamplesKnowledgeBas
         onClick={() => onAddExample(activeMarket, activePlatform)}
         className="w-full px-4 py-3 bg-[#f4f0f0] text-[#780817] border-2 border-dashed border-[#780817] rounded-lg hover:bg-[#780817] hover:text-white transition-colors font-semibold"
       >
-        + Add {platformConfig[activePlatform].label} Example for {marketConfig[activeMarket].label}
+        + Add {PLATFORMS[activePlatform].label} Example for {MARKETS[activeMarket].label}
       </button>
 
       {/* Save Button */}
